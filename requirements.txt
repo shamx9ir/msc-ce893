@@ -1,0 +1,5 @@
+duckdb==1.5.*      # must match the DuckDB version bundled with Cube's duckdb driver
+pandas>=2.2
+pyyaml>=6.0
+requests>=2.31
+pytest>=8.0

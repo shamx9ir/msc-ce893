@@ -1,0 +1,9 @@
+{
+  "name": "bird-cube",
+  "private": true,
+  "scripts": { "dev": "cubejs-server" },
+  "dependencies": {
+    "@cubejs-backend/server": "1.8.22",
+    "@cubejs-backend/duckdb-driver": "1.8.22"
+  }
+}

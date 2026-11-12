@@ -1,0 +1,9 @@
+data/
+runs/
+cube/node_modules/
+cube/.cubestore/
+__pycache__/
+.pytest_cache/
+.venv/
+*.pyc
+cube/.env
