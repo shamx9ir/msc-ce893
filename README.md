@@ -18,10 +18,14 @@ of BIRD's gold SQL on the original SQLite database (set comparison, column order
 | `scripts/build_duckdb.py` | copies the chosen BIRD SQLite databases into `data/bird.duckdb` (one schema per database) for Cube |
 | `scripts/gen_cube_models.py` | generates Cube models from BIRD's schema and column descriptions (`cube/model/*.yml`) |
 | `cube/` | Cube server (DuckDB driver) |
-| `harness/` | the harness: prompts, Cube client, tool loop, evaluator |
+| `harness/` | the harness: an ADK agent with Cube tools, prompts, evaluator |
 | `tests/` | end-to-end test with a scripted stand-in for the LLM |
 
 ## How the harness works
+
+The agent loop is built on Google's [Agent Development Kit (ADK)](https://google.github.io/adk-docs/).
+ADK calls the model through LiteLLM, so any local server works: Ollama for the base model, and
+Ollama or vLLM with the adapter for the LoRA model. Both setups use exactly the same agent.
 
 The system prompt holds a short guide to Cube's query JSON and a compact listing of every
 cube, dimension (with BIRD's column descriptions) and measure for the question's database.
@@ -55,10 +59,11 @@ In another terminal:
 ```bash
 ollama pull qwen2.5-coder:7b
 python -m pytest tests -q                       # sanity check (needs Cube running)
-python -m harness.evaluate --db student_club --db formula_1 --model qwen2.5-coder:7b \
+python -m harness.evaluate --db student_club --db formula_1 --model ollama_chat/qwen2.5-coder:7b \
     --setup harness --out runs/harness_qwen7b.jsonl
 ```
 
 Each line of the output file records the question, the predicted Cube query, whether it was
 correct, the number of steps, tokens and latency, and the full tool trace. Runs resume if interrupted.
+`--model` is a LiteLLM id (`ollama_chat/...` for Ollama, `openai/<name>` with `--base-url http://localhost:8000/v1` for vLLM).
 Use `--limit 10` for a quick trial and `--mode single` for the no-tools baseline.

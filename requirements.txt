@@ -2,4 +2,6 @@ duckdb==1.5.*      # must match the DuckDB version bundled with Cube's duckdb dr
 pandas>=2.2
 pyyaml>=6.0
 requests>=2.31
+google-adk==2.14.0   # agent loop
+litellm>=1.109     # lets ADK call local models (Ollama, vLLM)
 pytest>=8.0

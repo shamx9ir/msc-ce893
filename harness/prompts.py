@@ -48,22 +48,3 @@ def user_prompt(question: str, evidence: str | None) -> str:
         text += f"\nHint: {evidence}"
     return text
 
-
-TOOLS = [
-    {"type": "function", "function": {
-        "name": "search_values",
-        "description": "List stored values of a dimension that contain the given text (case-insensitive).",
-        "parameters": {"type": "object", "properties": {
-            "dimension": {"type": "string", "description": "e.g. drivers.surname"},
-            "text": {"type": "string"}}, "required": ["dimension", "text"]}}},
-    {"type": "function", "function": {
-        "name": "run_query",
-        "description": "Run a Cube query and return up to 10 rows, the row count, or the error.",
-        "parameters": {"type": "object", "properties": {
-            "query": {"type": "object", "description": "Cube query JSON"}}, "required": ["query"]}}},
-    {"type": "function", "function": {
-        "name": "submit_answer",
-        "description": "Submit the final Cube query.",
-        "parameters": {"type": "object", "properties": {
-            "query": {"type": "object", "description": "Cube query JSON"}}, "required": ["query"]}}},
-]

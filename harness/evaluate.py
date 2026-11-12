@@ -7,7 +7,7 @@ Column order may differ (Cube orders columns its own way), and values are normal
 
 Example:
     python -m harness.evaluate --db student_club --model qwen2.5-coder:7b \
-        --base-url http://localhost:11434/v1 --setup harness --out runs/harness_qwen7b.jsonl
+        --setup harness --out runs/harness_qwen7b.jsonl
 """
 import argparse
 import itertools
@@ -17,9 +17,8 @@ import sqlite3
 import time
 from pathlib import Path
 
-from .agent import Harness
+from .agent import Harness, make_model
 from .cube_client import CubeClient
-from .llm import LLMClient
 
 NUM_RE = re.compile(r"^-?\d+(\.\d+)?([eE][-+]?\d+)?$")
 TS_RE = re.compile(r"^(\d{4}-\d{2}-\d{2})[T ](\d{2}:\d{2}:\d{2})(\.\d+)?Z?$")
@@ -88,9 +87,12 @@ def main() -> None:
     ap.add_argument("--db", action="append", required=True)
     ap.add_argument("--ids-file", type=Path, help="JSON list of question_ids to evaluate (e.g. the test split)")
     ap.add_argument("--limit", type=int)
-    ap.add_argument("--model", required=True)
-    ap.add_argument("--base-url", default="http://localhost:11434/v1")
-    ap.add_argument("--api-key", default="not-needed")
+    ap.add_argument("--model", required=True,
+                    help='LiteLLM model id, e.g. ollama_chat/qwen2.5-coder:7b or openai/<name> for vLLM; '
+                         'a bare name is treated as an Ollama model')
+    ap.add_argument("--base-url", help="model server URL, e.g. http://localhost:11434 (Ollama) "
+                                       "or http://localhost:8000/v1 (vLLM)")
+    ap.add_argument("--api-key")
     ap.add_argument("--cube-url", default="http://localhost:4000/cubejs-api/v1")
     ap.add_argument("--mode", choices=["tools", "single"], default="tools")
     ap.add_argument("--max-steps", type=int, default=8)
@@ -101,7 +103,7 @@ def main() -> None:
 
     ids = set(json.load(open(args.ids_file))) if args.ids_file else None
     questions = load_questions(args.bird_dir, args.db, ids, args.limit)
-    harness = Harness(LLMClient(model=args.model, base_url=args.base_url, api_key=args.api_key),
+    harness = Harness(make_model(args.model, args.base_url, args.api_key),
                       CubeClient(args.cube_url), mode=args.mode, max_steps=args.max_steps)
     args.out.parent.mkdir(parents=True, exist_ok=True)
     done = set()

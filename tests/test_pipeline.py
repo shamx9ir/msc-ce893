@@ -5,27 +5,36 @@ Needs Cube running on localhost:4000 with the generated model. Run: python -m py
 import json
 from pathlib import Path
 
+from google.adk.models.base_llm import BaseLlm
+from google.adk.models.llm_response import LlmResponse
+from google.genai import types
+
 from harness.agent import Harness, extract_json
 from harness.cube_client import CubeClient
 from harness.evaluate import cube_rows, results_match, run_gold
-from harness.llm import LLMResponse
 
 BIRD = Path("data/bird")
 DB = "student_club"
 
 
 def call(name, **args):
-    return {"id": name, "type": "function", "function": {"name": name, "arguments": json.dumps(args)}}
+    return types.Part(function_call=types.FunctionCall(name=name, args=args))
 
 
-class ScriptedLLM:
-    """Replays a fixed list of assistant messages, like a model that follows the tool protocol."""
+class ScriptedLLM(BaseLlm):
+    """An ADK model that replays fixed replies, like a model that follows the tool protocol."""
 
-    def __init__(self, replies):
-        self.replies = list(replies)
+    model: str = "scripted"
+    replies: list = []
+    seen: list = []
 
-    def chat(self, messages, tools=None):
-        return LLMResponse(message=self.replies.pop(0), prompt_tokens=100, completion_tokens=20)
+    async def generate_content_async(self, llm_request, stream=False):
+        self.seen.append(llm_request)
+        part = self.replies.pop(0)
+        part = types.Part(text=part) if isinstance(part, str) else part
+        yield LlmResponse(content=types.Content(role="model", parts=[part]),
+                          usage_metadata=types.GenerateContentResponseUsageMetadata(
+                              prompt_token_count=100, candidates_token_count=20))
 
 
 def gold(qid):
@@ -37,16 +46,19 @@ def test_tool_loop_with_retry_matches_gold():
     bad = {"measures": ["members.count"]}  # typo: harness should reject it with a hint
     good = {"measures": ["member.count"],
             "filters": [{"member": "major.college", "operator": "equals", "values": ["College of Engineering"]}]}
-    llm = ScriptedLLM([
-        {"content": "", "tool_calls": [call("search_values", dimension="major.college", text="engineering")]},
-        {"content": "", "tool_calls": [call("submit_answer", query=bad)]},
-        {"content": "", "tool_calls": [call("submit_answer", query=good)]},
+    llm = ScriptedLLM(replies=[
+        call("search_values", dimension="major.college", text="engineering"),
+        call("submit_answer", query=bad),
+        call("submit_answer", query=good),
     ])
     h = Harness(llm, CubeClient())
     res = h.run(DB, "How many students in the Student_Club are from the College of Engineering?")
-    assert res.error is None and res.steps == 3 and res.query == good
-    assert "College of Engineering" in res.trace[1]["content"]
-    assert "did you mean member.count" in res.trace[3]["content"]
+    assert res.error is None and res.steps == 3 and res.query == good, res
+    assert res.prompt_tokens == 300 and res.completion_tokens == 60
+    tool_out = [t["content"] for t in res.trace if t["role"] == "tool"]
+    assert "College of Engineering" in tool_out[0]
+    assert "did you mean member.count" in tool_out[1]
+    assert "cube member" in llm.seen[0].config.system_instruction  # schema reached the prompt
     assert results_match(cube_rows(h.cube.load(good)), gold(1313))
 
 
@@ -64,3 +76,10 @@ def test_wrong_answer_is_scored_wrong():
 def test_single_mode_parses_fenced_json():
     reply = 'Here you go:\n```json\n{"measures": ["member.count"]}\n```'
     assert extract_json(reply) == {"measures": ["member.count"]}
+
+
+def test_text_answer_fallback_and_retry():
+    """A model that answers in prose with JSON (no tool call) still gets validated and retried."""
+    llm = ScriptedLLM(replies=['Answer: {"measures": ["memb.count"]}', '{"measures": ["member.count"]}'])
+    res = Harness(llm, CubeClient()).run(DB, "How many members are there?")
+    assert res.query == {"measures": ["member.count"]} and res.error is None and res.steps == 2

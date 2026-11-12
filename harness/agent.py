@@ -1,13 +1,28 @@
-"""The harness: prompt + Cube tools + validate/retry loop around any chat model."""
+"""The harness: an ADK agent (prompt + Cube tools) with a validate/retry loop.
+
+The model is any LiteLLM-supported endpoint, e.g. a local Ollama or vLLM server, so the same
+code serves the base model and the LoRA model. The loop itself is ADK's: the model calls tools
+until it submits an accepted query or hits the LLM-call limit.
+"""
+import asyncio
 import difflib
+import functools
 import json
 import re
 import time
+import uuid
 from dataclasses import dataclass, field
 
+from google.adk.agents import LlmAgent
+from google.adk.agents.run_config import RunConfig
+from google.adk.models.base_llm import BaseLlm
+from google.adk.models.lite_llm import LiteLlm
+from google.adk.runners import InMemoryRunner
+from google.adk.tools import ToolContext
+from google.genai import types
+
 from .cube_client import CubeClient, CubeError, dumps
-from .llm import LLMClient
-from .prompts import QUERY_GUIDE, SYSTEM_SINGLE, SYSTEM_TOOLS, TOOLS, user_prompt
+from .prompts import QUERY_GUIDE, SYSTEM_SINGLE, SYSTEM_TOOLS, user_prompt
 
 QUERY_KEYS = {"measures", "dimensions", "filters", "timeDimensions", "order", "limit",
               "segments", "ungrouped", "offset", "total"}
@@ -16,13 +31,27 @@ QUERY_KEYS = {"measures", "dimensions", "filters", "timeDimensions", "order", "l
 @dataclass
 class AgentResult:
     query: dict | None
-    steps: int = 0
+    steps: int = 0                 # LLM calls
     prompt_tokens: int = 0
     completion_tokens: int = 0
-    llm_latency_s: float = 0.0
+    llm_latency_s: float = 0.0     # wall time minus time spent inside tools
     wall_s: float = 0.0
     error: str | None = None
     trace: list = field(default_factory=list)
+
+
+def make_model(model: str, base_url: str | None = None, api_key: str | None = None,
+               temperature: float = 0.0) -> LiteLlm:
+    """`model` is a LiteLLM id, e.g. "ollama_chat/qwen2.5-coder:7b" or "openai/my-lora" (vLLM).
+    A bare name like "qwen2.5-coder:7b" is treated as an Ollama model."""
+    if "/" not in model:
+        model = f"ollama_chat/{model}"
+    kwargs = {"temperature": temperature}
+    if base_url:
+        kwargs["api_base"] = base_url
+    if api_key:
+        kwargs["api_key"] = api_key
+    return LiteLlm(model=model, **kwargs)
 
 
 def extract_json(text: str) -> dict | None:
@@ -42,16 +71,17 @@ def extract_json(text: str) -> dict | None:
                     try:
                         obj = json.loads(text[start:i + 1])
                         if isinstance(obj, dict):
-                            return obj.get("query", obj) if "query" in obj else obj
+                            return obj["query"] if isinstance(obj.get("query"), dict) else obj
                     except json.JSONDecodeError:
-                        break
+                        pass
+                    break
         start = text.find("{", start + 1)
     return None
 
 
 def _members_in(query: dict) -> list[str]:
-    names = list(query.get("measures", [])) + list(query.get("dimensions", []))
-    names += [t.get("dimension") for t in query.get("timeDimensions", []) if isinstance(t, dict)]
+    names = list(query.get("measures") or []) + list(query.get("dimensions") or [])
+    names += [t.get("dimension") for t in query.get("timeDimensions") or [] if isinstance(t, dict)]
     order = query.get("order") or {}
     names += list(order.keys()) if isinstance(order, dict) else [o[0] for o in order if o]
 
@@ -64,14 +94,14 @@ def _members_in(query: dict) -> list[str]:
             walk(f.get("or"))
             walk(f.get("and"))
     walk(query.get("filters"))
-    return [n for n in names if n]
+    return [n for n in names if isinstance(n, str)]
 
 
 class Harness:
-    def __init__(self, llm: LLMClient, cube: CubeClient, mode: str = "tools",
+    def __init__(self, model: BaseLlm, cube: CubeClient, mode: str = "tools",
                  max_steps: int = 8, preview_rows: int = 10):
         assert mode in ("tools", "single")
-        self.llm, self.cube, self.mode = llm, cube, mode
+        self.model, self.cube, self.mode = model, cube, mode
         self.max_steps, self.preview_rows = max_steps, preview_rows
         self._schema_cache: dict[str, str] = {}
 
@@ -81,10 +111,9 @@ class Harness:
             self._schema_cache[db] = self.cube.describe(db)
         return self._schema_cache[db]
 
-    def messages(self, db: str, question: str, evidence: str | None) -> list[dict]:
+    def instruction(self, db: str) -> str:
         tmpl = SYSTEM_TOOLS if self.mode == "tools" else SYSTEM_SINGLE
-        return [{"role": "system", "content": tmpl.format(db=db, guide=QUERY_GUIDE, schema=self.schema(db))},
-                {"role": "user", "content": user_prompt(question, evidence)}]
+        return tmpl.format(db=db, guide=QUERY_GUIDE, schema=self.schema(db))
 
     # ---- validation ----------------------------------------------------
     def validate(self, db: str, query) -> str | None:
@@ -115,85 +144,131 @@ class Harness:
         except Exception as e:  # network etc.
             return None, f"Error: {e}"
 
+    # ---- tools ---------------------------------------------------------
+    def _tools(self, db: str, res: AgentResult, tool_time: list):
+        def timed(fn):
+            @functools.wraps(fn)  # keep the signature: ADK builds the tool schema from it
+            def wrapper(*a, **k):
+                t = time.time()
+                try:
+                    return fn(*a, **k)
+                finally:
+                    tool_time[0] += time.time() - t
+            return wrapper
+
+        @timed
+        def search_values(dimension: str, text: str) -> str:
+            """List stored values of a dimension that contain the text (case-insensitive).
+
+            Args:
+                dimension: a dimension name such as drivers.surname
+                text: part of the value to look for
+            """
+            if dimension not in self.cube.member_names(db):
+                return f"Unknown dimension {dimension}."
+            try:
+                return dumps(self.cube.dimension_values(dimension, text or None))
+            except Exception as e:
+                return f"Error: {e}"
+
+        @timed
+        def run_query(query: dict) -> str:
+            """Run a Cube query and return up to 10 rows and the row count, or the error.
+
+            Args:
+                query: the Cube query JSON object
+            """
+            query = extract_json(query) if isinstance(query, str) else query
+            rows, err = self.try_run(db, query)
+            return err or dumps({"row_count": len(rows), "rows": rows[: self.preview_rows]})
+
+        @timed
+        def submit_answer(query: dict, tool_context: ToolContext) -> str:
+            """Submit the final Cube query. Ends the task if the query runs.
+
+            Args:
+                query: the Cube query JSON object
+            """
+            query = extract_json(query) if isinstance(query, str) else query
+            res.query = query
+            _, err = self.try_run(db, query)
+            if err:
+                res.error = err
+                return f"Not accepted: {err}\nFix the query and call submit_answer again."
+            res.error = None
+            tool_context.actions.skip_summarization = True  # stop here, no extra LLM call
+            return "Accepted."
+
+        return [search_values, run_query, submit_answer]
+
     # ---- main loop -----------------------------------------------------
     def run(self, db: str, question: str, evidence: str | None = None) -> AgentResult:
+        return asyncio.run(self.run_async(db, question, evidence))
+
+    async def run_async(self, db: str, question: str, evidence: str | None = None) -> AgentResult:
         t0 = time.time()
-        res = AgentResult(query=None)
-        msgs = self.messages(db, question, evidence)
-        tools = TOOLS if self.mode == "tools" else None
-        for step in range(1, self.max_steps + 1):
-            res.steps = step
+        res, tool_time = AgentResult(query=None), [0.0]
+        agent = LlmAgent(
+            name="cube_analyst", model=self.model, instruction=self.instruction(db),
+            tools=self._tools(db, res, tool_time) if self.mode == "tools" else [],
+            generate_content_config=types.GenerateContentConfig(temperature=0.0))
+        runner = InMemoryRunner(agent=agent, app_name="bird_cube")
+        session = await runner.session_service.create_session(app_name="bird_cube", user_id="eval")
+        last_text = ""
+        submitted = False
+        prompt = user_prompt(question, evidence)
+        for attempt in range(2):  # second pass only if the model never submitted anything usable
             try:
-                out = self.llm.chat(msgs, tools=tools)
-            except Exception as e:
-                res.error = f"LLM error: {e}"
+                async for ev in runner.run_async(
+                        user_id="eval", session_id=session.id,
+                        new_message=types.Content(role="user", parts=[types.Part(text=prompt)]),
+                        run_config=RunConfig(max_llm_calls=self.max_steps)):
+                    self._record(ev, res)
+                    for p in (ev.content.parts if ev.content else []) or []:
+                        if p.text and ev.author == agent.name:
+                            last_text = p.text
+                        if p.function_response and p.function_response.name == "submit_answer":
+                            submitted = True
+            except Exception as e:  # LLM-call limit, endpoint errors, malformed tool calls
+                res.error = f"{type(e).__name__}: {e}"[:500]
                 break
-            res.prompt_tokens += out.prompt_tokens
-            res.completion_tokens += out.completion_tokens
-            res.llm_latency_s += out.latency_s
-            msg = out.message
-            res.trace.append({"role": "assistant", "content": msg.get("content"),
-                              "tool_calls": msg.get("tool_calls")})
-            calls = msg.get("tool_calls") or []
-
-            if not calls:
-                # No tool call: treat a JSON object in the text as the answer.
-                query = extract_json(msg.get("content") or "")
-                if query is None:
-                    if self.mode == "single":
-                        res.error = "No JSON query in reply"
-                        break
-                    msgs += [{"role": "assistant", "content": msg.get("content") or ""},
-                             {"role": "user", "content": "Call submit_answer with your final Cube query."}]
-                    continue
+            if res.query is not None and res.error is None:
+                break
+            # Fallback: a JSON object in the final text counts as the answer (small models often do this).
+            query = extract_json(last_text)
+            if query is not None:
                 _, err = self.try_run(db, query)
-                res.query = query
-                if err is None or self.mode == "single":
-                    res.error = err
+                res.query, res.error = query, err
+                if err is None or self.mode == "single" or res.steps >= self.max_steps:
                     break
-                msgs += [{"role": "assistant", "content": msg.get("content") or ""},
-                         {"role": "user", "content": f"That query failed: {err}\nFix it and answer again."}]
-                continue
-
-            msgs.append({"role": "assistant", "content": msg.get("content") or "", "tool_calls": calls})
-            done = False
-            for call in calls:
-                name = call["function"]["name"]
-                try:
-                    args = call["function"].get("arguments") or "{}"
-                    args = json.loads(args) if isinstance(args, str) else args
-                except json.JSONDecodeError:
-                    args = {}
-                query = args.get("query")
-                if isinstance(query, str):
-                    query = extract_json(query)
-                if name == "search_values":
-                    dim = args.get("dimension", "")
-                    if dim not in self.cube.member_names(db):
-                        result = f"Unknown dimension {dim}."
-                    else:
-                        try:
-                            result = dumps(self.cube.dimension_values(dim, args.get("text") or None))
-                        except Exception as e:
-                            result = f"Error: {e}"
-                elif name == "run_query":
-                    rows, err = self.try_run(db, query)
-                    result = err or dumps({"row_count": len(rows), "rows": rows[: self.preview_rows]})
-                elif name == "submit_answer":
-                    rows, err = self.try_run(db, query)
-                    res.query = query
-                    if err:
-                        result = f"Not accepted: {err}\nFix the query and call submit_answer again."
-                    else:
-                        result, done = "Accepted.", True
-                else:
-                    result = f"Unknown tool {name}."
-                res.trace.append({"role": "tool", "name": name, "content": result[:2000]})
-                msgs.append({"role": "tool", "tool_call_id": call.get("id", name), "content": result[:4000]})
-            if done:
-                res.error = None
+                prompt = f"That query failed: {err}\nFix it and call submit_answer."
+            elif self.mode == "single" or submitted or res.steps >= self.max_steps:
+                res.error = res.error or "No query submitted"
                 break
-        else:
-            res.error = res.error or "Step limit reached"
+            else:
+                prompt = "Call submit_answer with your final Cube query."
         res.wall_s = time.time() - t0
+        res.llm_latency_s = max(0.0, res.wall_s - tool_time[0])
         return res
+
+    @staticmethod
+    def _record(ev, res: AgentResult) -> None:
+        um = getattr(ev, "usage_metadata", None)
+        if um:
+            res.prompt_tokens += um.prompt_token_count or 0
+            res.completion_tokens += um.candidates_token_count or 0
+        if not ev.content or not ev.content.parts:
+            return
+        for p in ev.content.parts:
+            if p.function_call:
+                res.trace.append({"role": "assistant", "tool": p.function_call.name,
+                                  "args": dict(p.function_call.args or {})})
+            elif p.function_response:
+                out = p.function_response.response or {}
+                res.trace.append({"role": "tool", "name": p.function_response.name,
+                                  "content": str(out.get("result", out))[:2000]})
+            elif p.text:
+                res.trace.append({"role": ev.author, "content": p.text[:2000]})
+        if ev.author != "user" and any(p.function_call or p.text for p in ev.content.parts) \
+                and ev.content.role == "model":
+            res.steps += 1
