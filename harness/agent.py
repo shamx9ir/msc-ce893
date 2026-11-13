@@ -134,6 +134,20 @@ def column_warning(query: dict, question: str) -> str | None:
     return None
 
 
+def trim_columns(query: dict, question: str) -> dict:
+    """What column_warning asks for, done by the harness: used when the model resubmits the same
+    query after the warning. Ordering by a dropped measure still works in Cube."""
+    q = dict(query)
+    single = {f.get("member") for f in q.get("filters") or [] if isinstance(f, dict)
+              and f.get("operator") == "equals" and len(f.get("values") or []) == 1}
+    dims = [d for d in q.get("dimensions") or [] if d not in single]
+    if dims or q.get("measures"):
+        q["dimensions"] = dims
+    if q.get("measures") and q.get("dimensions") and not QUANTITY_WORDS.search(question or ""):
+        q["measures"] = []
+    return {k: v for k, v in q.items() if v not in ([], None)}
+
+
 def _members_in(query: dict) -> list[str]:
     names = list(query.get("measures") or []) + list(query.get("dimensions") or [])
     names += [t.get("dimension") for t in query.get("timeDimensions") or [] if isinstance(t, dict)]
@@ -212,6 +226,12 @@ class Harness:
         wrong = [m for m in query.get("dimensions") or [] if kinds.get(m) == "measure"]
         if wrong:
             return f"{', '.join(wrong)} is a measure, not a dimension: put it under \"measures\"."
+        types_ = self.cube.member_types()
+        for td in query.get("timeDimensions") or []:
+            m = td.get("dimension") if isinstance(td, dict) else None
+            if m and types_.get(m, "time") != "time":
+                return (f"{m} is a {types_[m]} dimension, not a time dimension; \"timeDimensions\" only takes "
+                        f"time dimensions. Filter it under \"filters\" instead, or leave it out.")
         bad_filter = self._check_filters(query.get("filters")) or self._check_filter_types(query.get("filters"))
         if bad_filter:
             return bad_filter
@@ -344,7 +364,12 @@ class Harness:
                 res.error = err
                 return f"Not accepted: {err}\nFix the query and call submit_answer again."
             warning = column_warning(query, question)
-            if warning and dumps(query) not in warned:
+            if warning and dumps(query) in warned:  # resubmitted unchanged: trim it ourselves
+                trimmed = trim_columns(query, question)
+                if trimmed != query and self.try_run(db, trimmed)[1] is None:
+                    res.query = query = trimmed
+                    res.trace.append({"role": "harness", "content": "trimmed columns after warning"})
+            elif warning:
                 warned.add(dumps(query))
                 res.error = "column check"
                 return (f"Check before submitting: {warning} Return only the columns the question asks for. "
@@ -420,11 +445,16 @@ class Harness:
             rows, err = self.try_run(db, query)
             res.query, res.error = query, err
             if err is None and raw.get("name") != "run_query":
-                warn = column_warning(query, question) if not text_warned else None
-                if warn:  # same one-time check submit_answer does
+                warn = column_warning(query, question)
+                if warn and not text_warned:  # same one-time check submit_answer does
                     text_warned = True
+                    res.error = "column check"  # keep the loop going for the model's answer
                     prompt = f"{warn}\nCall submit_answer with your final Cube query."
                     continue
+                if warn:
+                    trimmed = trim_columns(query, question)
+                    if trimmed != query and self.try_run(db, trimmed)[1] is None:
+                        res.query = trimmed
                 break  # a final answer given as text
             if err is None:
                 preview = dumps({"row_count": len(rows), "rows": rows[: self.preview_rows]})

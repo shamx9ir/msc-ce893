@@ -172,10 +172,10 @@ def test_column_check_warns_once_then_accepts():
     res = Harness(llm, CubeClient()).run(DB, "Which event had the highest attendance?")
     assert res.query == good and res.error is None and res.steps == 2
     assert "does not ask for a number" in [t for t in res.trace if t["role"] == "tool"][0]["content"]
-    # a model that insists gets its query accepted on the second identical submit
+    # a model that resubmits the same query gets it trimmed by the harness
     llm = ScriptedLLM(replies=[call("submit_answer", query=q), call("submit_answer", query=q)])
     res = Harness(llm, CubeClient()).run(DB, "Which event had the highest attendance?")
-    assert res.query == q and res.error is None
+    assert res.query == good and res.error is None
 
 
 def test_repeated_calls_and_numeric_search():
@@ -206,3 +206,11 @@ def test_text_answer_gets_column_check():
     llm = ScriptedLLM(replies=[_json.dumps(q), _json.dumps(q)])
     res = Harness(llm, CubeClient()).run(DB, "What is the first name of the president?")
     assert res.error is None and len(llm.seen) == 2
+    assert res.query["dimensions"] == ["member.first_name"]  # unchanged resubmit gets trimmed
+
+
+def test_time_dimension_must_be_time():
+    h = Harness(ScriptedLLM(replies=[]), CubeClient())
+    err = h.validate(DB, {"measures": ["member.count"],
+                          "timeDimensions": [{"dimension": "member.first_name", "dateRange": "2021"}]})
+    assert err and "not a time dimension" in err
