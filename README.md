@@ -123,4 +123,5 @@ python -m harness.evaluate --db superhero --db toxicology --db california_school
 |---|---|---|---|
 | v1 | 0c95b22 | first harness | 13.3% / 26.8% |
 | v2 | bb618ff | measure/dimension and filter checks, text tool calls unwrapped, rules + 4 examples in the prompt | 20.5% / 34.3% |
-| v3 | (this) | value lookup on number/time columns, repeated-call guard, one-time column check at submit | not yet run |
+| v3 | 53c8093 | value lookup on number/time columns, repeated-call guard, one-time column check at submit | tune 23.3% (v2 22.5%) |
+| v4 | (this) | schema linking: the question message lists fields the question/hint name (`--no-link` turns it off); column check also on text answers; text values on number filters caught | not yet run |

@@ -169,9 +169,9 @@ def system_prompt(mode: str, db: str, schema: str) -> str:
 
 class Harness:
     def __init__(self, model: BaseLlm, cube: CubeClient, mode: str = "tools",
-                 max_steps: int = 8, preview_rows: int = 10):
+                 max_steps: int = 8, preview_rows: int = 10, link: bool = True):
         assert mode in ("tools", "single")
-        self.model, self.cube, self.mode = model, cube, mode
+        self.model, self.cube, self.mode, self.link = model, cube, mode, link
         self.max_steps, self.preview_rows = max_steps, preview_rows
         self._schema_cache: dict[str, str] = {}
 
@@ -207,7 +207,7 @@ class Harness:
         wrong = [m for m in query.get("dimensions") or [] if kinds.get(m) == "measure"]
         if wrong:
             return f"{', '.join(wrong)} is a measure, not a dimension: put it under \"measures\"."
-        bad_filter = self._check_filters(query.get("filters"))
+        bad_filter = self._check_filters(query.get("filters")) or self._check_filter_types(query.get("filters"))
         if bad_filter:
             return bad_filter
         if not query.get("measures") and not query.get("dimensions") and not query.get("timeDimensions"):
@@ -233,6 +233,31 @@ class Harness:
                 return f"Bad filter {json.dumps(f)}. " + shape
             if f["operator"] not in ("set", "notSet") and not isinstance(f.get("values"), list):
                 return f"Filter on {f['member']} needs \"values\" as a list of strings. " + shape
+        return None
+
+    def _check_filter_types(self, filters) -> str | None:
+        """Catch values DuckDB cannot cast (e.g. "Ferrari" on a number dimension) before Cube does."""
+        types_ = self.cube.member_types()
+        for f in filters or []:
+            if not isinstance(f, dict):
+                continue
+            if "or" in f or "and" in f:
+                err = self._check_filter_types(f.get("or") or f.get("and"))
+                if err:
+                    return err
+                continue
+            m, op = f.get("member"), f.get("operator")
+            if types_.get(m) != "number" or op in ("set", "notSet"):
+                continue
+            if op in ("contains", "notContains", "startsWith", "endsWith"):
+                return f"{m} is a number, so \"{op}\" does not work on it; use equals, gt, gte, lt or lte."
+            for v in f.get("values") or []:
+                try:
+                    float(str(v))
+                except ValueError:
+                    return (f"{m} is a number but the filter value {json.dumps(v)} is text. Filter a string "
+                            f"dimension that holds names instead (search_values helps find it), or join through "
+                            f"the id.")
         return None
 
     def try_run(self, db: str, query) -> tuple[list | None, str | None]:
@@ -340,7 +365,8 @@ class Harness:
         session = await runner.session_service.create_session(app_name="bird_cube", user_id="eval")
         last_text = ""
         submitted = False
-        prompt = user_prompt(question, evidence)
+        text_warned = False
+        prompt = user_prompt(question, evidence, self.schema(db) if self.link else None)
         for attempt in range(4):  # extra passes only when the model answered in text instead of tools
             try:
                 async for ev in runner.run_async(
@@ -389,6 +415,11 @@ class Harness:
             rows, err = self.try_run(db, query)
             res.query, res.error = query, err
             if err is None and raw.get("name") != "run_query":
+                warn = column_warning(query, question) if not text_warned else None
+                if warn:  # same one-time check submit_answer does
+                    text_warned = True
+                    prompt = f"{warn}\nCall submit_answer with your final Cube query."
+                    continue
                 break  # a final answer given as text
             if err is None:
                 preview = dumps({"row_count": len(rows), "rows": rows[: self.preview_rows]})

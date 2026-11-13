@@ -88,10 +88,14 @@ def test_text_answer_fallback_and_retry():
 def test_training_prompt_matches_what_adk_sends():
     """The LoRA training data must use exactly the system prompt ADK builds at run time."""
     from harness.agent import system_prompt
+    from harness.prompts import user_prompt
     llm = ScriptedLLM(replies=[call("submit_answer", query={"measures": ["member.count"]})])
     h = Harness(llm, CubeClient())
-    h.run(DB, "How many members are there?")
+    q, hint = "How many members live in zip code 28092?", "zip refers to zip"
+    h.run(DB, q, hint)
     assert llm.seen[0].config.system_instruction == system_prompt("tools", DB, h.schema(DB))
+    sent = llm.seen[0].contents[-1].parts[0].text
+    assert sent == user_prompt(q, hint, h.schema(DB)) and "member.zip" in sent
 
 
 def test_tool_schema_matches_litellm_request():
@@ -181,3 +185,24 @@ def test_repeated_calls_and_numeric_search():
     res = Harness(llm, CubeClient()).run(DB, "How many members are there?")
     outs = [t["content"] for t in res.trace if t["role"] == "tool"]
     assert "number dimension" in outs[0] and "already made this exact call" in outs[1]
+
+
+def test_filter_type_check_and_linking():
+    from harness.linking import linked_fields
+    h = Harness(ScriptedLLM(replies=[]), CubeClient())
+    err = h.validate(DB, {"measures": ["member.count"],
+                          "filters": [{"member": "member.zip", "operator": "equals", "values": ["abc"]}]})
+    assert err and "is a number" in err
+    assert h.validate(DB, {"measures": ["member.count"],
+                           "filters": [{"member": "member.zip", "operator": "equals", "values": ["28092"]}]}) is None
+    fields = linked_fields(h.schema(DB), "List the first names of members", "first name refers to first_name")
+    assert fields[0] == "member.first_name"
+
+
+def test_text_answer_gets_column_check():
+    import json as _json
+    q = {"dimensions": ["member.first_name", "member.position"],
+         "filters": [{"member": "member.position", "operator": "equals", "values": ["President"]}]}
+    llm = ScriptedLLM(replies=[_json.dumps(q), _json.dumps(q)])
+    res = Harness(llm, CubeClient()).run(DB, "What is the first name of the president?")
+    assert res.error is None and len(llm.seen) == 2

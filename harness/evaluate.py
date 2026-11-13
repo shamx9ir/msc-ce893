@@ -106,6 +106,7 @@ def main() -> None:
     ap.add_argument("--mode", choices=["tools", "single"], default="tools")
     ap.add_argument("--max-steps", type=int, default=8)
     ap.add_argument("--no-evidence", action="store_true", help="hide BIRD's hint text from the model")
+    ap.add_argument("--no-link", action="store_true", help="do not list question-matched fields (harness v3 prompt)")
     ap.add_argument("--setup", default="harness", help="label stored with each result, e.g. harness or lora")
     ap.add_argument("--out", type=Path, required=True)
     args = ap.parse_args()
@@ -113,7 +114,8 @@ def main() -> None:
     ids = set(json.load(open(args.ids_file, encoding="utf-8"))) if args.ids_file else None
     questions = load_questions(args.bird_dir, args.db, ids, args.limit)
     harness = Harness(make_model(args.model, args.base_url, args.api_key, num_ctx=args.num_ctx),
-                      CubeClient(args.cube_url), mode=args.mode, max_steps=args.max_steps)
+                      CubeClient(args.cube_url), mode=args.mode, max_steps=args.max_steps,
+                      link=not args.no_link)
     args.out.parent.mkdir(parents=True, exist_ok=True)
     done = set()
     if args.out.exists():  # resume

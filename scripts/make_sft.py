@@ -40,7 +40,7 @@ def tool_call(i: int, name: str, args: dict) -> dict:
 def example(rec: dict, schema: str, mode: str, with_evidence: bool = True) -> dict:
     evidence = rec.get("evidence") if with_evidence else None
     msgs = [{"role": "system", "content": system_prompt(mode, rec["db_id"], schema)},
-            {"role": "user", "content": user_prompt(rec["question"], evidence)}]
+            {"role": "user", "content": user_prompt(rec["question"], evidence, schema)}]
     q = rec["cube_query"]
     if mode == "single":
         msgs.append({"role": "assistant", "content": dumps(q)})

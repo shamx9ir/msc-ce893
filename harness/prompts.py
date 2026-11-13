@@ -63,9 +63,16 @@ The semantic layer for "{db}":
 Reply with the Cube query as a single JSON object and nothing else."""
 
 
-def user_prompt(question: str, evidence: str | None) -> str:
+def user_prompt(question: str, evidence: str | None, schema: str | None = None) -> str:
+    """The per-question message. With the schema text, it also lists the fields whose names
+    the question or hint mention (harness v4 schema linking)."""
     text = f"Question: {question}"
     if evidence:
         text += f"\nHint: {evidence}"
+    if schema:
+        from .linking import linked_fields
+        fields = linked_fields(schema, question, evidence)
+        if fields:
+            text += "\nFields that match words in the question or hint: " + ", ".join(fields)
     return text
 
