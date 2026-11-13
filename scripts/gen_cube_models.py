@@ -32,7 +32,7 @@ DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}([ T]\d{2}:\d{2}(:\d{2})?)?$")
 
 def ident(name: str) -> str:
     """Cube member names must be identifiers."""
-    s = re.sub(r"\W+", "_", name.strip()).strip("_")
+    s = re.sub(r"\W+", "_", name.strip()).strip("_") or "col"
     return s if not s[0].isdigit() else f"c_{s}"
 
 
@@ -59,6 +59,7 @@ def read_descriptions(desc_dir: Path, table: str) -> dict:
             vd = re.sub(r"(?i)commonsense evidence:\s*", "", vd)
             parts.append(vd)
         desc = " ".join(p for p in parts if p)
+        desc = desc.replace("{", "(").replace("}", ")")  # Cube treats {..} as a member reference
         out[col.lower()] = re.sub(r"\s+", " ", desc)[:400]
     return out
 
@@ -90,10 +91,11 @@ def build_db(bird_dir: Path, db: str, split: str = "dev") -> dict:
         if ct == pt:
             continue
         fk_cols.add((ct, cc.lower()))
-        cn, pn = tables[ct], tables[pt]
-        on = f'{{{cn}}}."{cc}" = {{{pn}}}."{pc}"'
-        joins[cn].setdefault(pn, (on, "many_to_one"))
-        joins[pn].setdefault(cn, (on, "one_to_many"))
+        cn, pn = ident(tables[ct]), ident(tables[pt])  # cube names must be identifiers
+        # Own side as {CUBE}."col"; other side as a member reference {cube.dim}. A bare
+        # {cube}."col" breaks when the own cube has a dimension named like the other cube.
+        joins[cn].setdefault(pn, (f'{{CUBE}}."{cc}" = {{{pn}.{ident(pc)}}}', "many_to_one"))
+        joins[pn].setdefault(cn, (f'{{{cn}.{ident(cc)}}} = {{CUBE}}."{pc}"', "one_to_many"))
 
     cubes = []
     for ti, table in enumerate(tables):
@@ -133,13 +135,11 @@ def build_db(bird_dir: Path, db: str, split: str = "dev") -> dict:
             dims.insert(0, {"name": "row_key", "sql": concat, "type": "string",
                             "primary_key": True, "public": False})
         # sql_alias avoids clashes such as table zip_code with a column zip_code in DuckDB
-        cube = {"name": table, "sql_table": f'{db}."{table}"', "sql_alias": f"t_{ident(table)}",
+        cube = {"name": ident(table), "sql_table": f'{db}."{table}"', "sql_alias": f"t_{ident(table)}",
                 "meta": {"db": db}, "dimensions": dims, "measures": measures}
-        if joins.get(table):
-            # {CUBE} for the cube's own side: inside cube zip_code, {zip_code} would mean its
-            # zip_code dimension, not the cube.
-            cube["joins"] = [{"name": tgt, "sql": on.replace(f"{{{table}}}", "{CUBE}"), "relationship": rel}
-                             for tgt, (on, rel) in joins[table].items()]
+        if joins.get(ident(table)):
+            cube["joins"] = [{"name": tgt, "sql": on, "relationship": rel}
+                             for tgt, (on, rel) in joins[ident(table)].items()]
         cubes.append(cube)
     return {"cubes": cubes}
 

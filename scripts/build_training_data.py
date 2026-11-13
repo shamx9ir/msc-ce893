@@ -19,6 +19,7 @@ import collections
 import json
 import os
 import shutil
+import signal
 import subprocess
 import sys
 import time
@@ -41,11 +42,14 @@ from harness.sql2cube import Catalog, Translator, Unsupported  # noqa: E402
 
 def start_cube(duck: Path, model_dir: Path, port: int, log: Path) -> subprocess.Popen:
     env = {**os.environ, "CUBEJS_DB_TYPE": "duckdb", "CUBEJS_DB_DUCKDB_DATABASE_PATH": str(duck),
-           "CUBEJS_SCHEMA_PATH": str(model_dir), "PORT": str(port), "CUBEJS_DEV_MODE": "true",
+           # Cube only honours a schema path relative to its working directory
+           "CUBEJS_SCHEMA_PATH": os.path.relpath(model_dir, ROOT / "cube"),
+           "PORT": str(port), "CUBEJS_DEV_MODE": "true",
            "CUBEJS_TELEMETRY": "false", "CUBEJS_CACHE_AND_QUEUE_DRIVER": "memory"}
     npx = shutil.which("npx") or "npx"
     proc = subprocess.Popen([npx, "cubejs-server"], cwd=ROOT / "cube", env=env,
-                            stdout=open(log, "w"), stderr=subprocess.STDOUT)
+                            stdout=open(log, "w"), stderr=subprocess.STDOUT,
+                            start_new_session=True)  # own process group: npx spawns node children
     base = f"http://localhost:{port}"
     for _ in range(90):
         try:
@@ -57,16 +61,19 @@ def start_cube(duck: Path, model_dir: Path, port: int, log: Path) -> subprocess.
         if proc.poll() is not None:
             break
         time.sleep(1)
-    proc.terminate()
+    stop_cube(proc)
     raise RuntimeError(f"Cube did not start; see {log}")
 
 
 def stop_cube(proc: subprocess.Popen) -> None:
-    proc.terminate()
     try:
+        os.killpg(proc.pid, signal.SIGTERM)
         proc.wait(15)
     except subprocess.TimeoutExpired:
-        proc.kill()
+        os.killpg(proc.pid, signal.SIGKILL)
+    except ProcessLookupError:
+        pass
+    time.sleep(1)
 
 
 def process_db(db: str, questions: list, args) -> collections.Counter:
@@ -74,10 +81,13 @@ def process_db(db: str, questions: list, args) -> collections.Counter:
     work = args.out / "work"
     work.mkdir(parents=True, exist_ok=True)
     sqlite_path = args.bird_dir / "train_databases" / db / f"{db}.sqlite"
+    if not sqlite_path.exists():
+        stats["skipped_missing_db"] = len(questions)
+        return stats
     if sqlite_path.stat().st_size > args.max_db_mb * 2**20:
         stats["skipped_large_db"] = len(questions)
         return stats
-    duck = work / f"{db}.duckdb"
+    duck = work / f"duck_{db}.duckdb"  # file name must differ from the schema name
     duck.unlink(missing_ok=True)
     con = duckdb.connect(str(duck))
     copy_db(con, sqlite_path, db, quiet=True)
@@ -103,8 +113,11 @@ def process_db(db: str, questions: list, args) -> collections.Counter:
                     raw = cube.load(cq)
                     pred = cube_rows(raw)
                     gold = run_gold(sqlite_path, q["SQL"], timeout_s=args.timeout)
-                except Exception:
+                except Exception as e:
                     stats["exec_error"] += 1
+                    with open(args.out / "exec_errors.jsonl", "a") as ef:
+                        ef.write(json.dumps({"db_id": db, "sql": q["SQL"], "cube_query": cq,
+                                             "error": str(e)[:300]}, default=str) + "\n")
                     continue
                 strict = results_match(pred, gold)
                 if not (strict or results_match(pred, gold, allow_extra_columns=True)):
@@ -135,6 +148,8 @@ def main() -> None:
     ap.add_argument("--max-db-mb", type=float, default=2000, help="skip SQLite files larger than this")
     ap.add_argument("--keep-work", action="store_true")
     args = ap.parse_args()
+    args.out = args.out.resolve()  # Cube runs in cube/, so relative paths would break
+    args.bird_dir = args.bird_dir.resolve()
     args.out.mkdir(parents=True, exist_ok=True)
 
     by_db = collections.defaultdict(list)

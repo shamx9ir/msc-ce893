@@ -24,7 +24,7 @@ class Catalog:
     """Maps tables/columns of one database to cube members, using Cube's /meta."""
 
     def __init__(self, cubes: list[dict]):
-        self.dims, self.measures, self.types, self.pks = {}, {}, {}, {}
+        self.dims, self.measures, self.types, self.cube_names = {}, {}, {}, set()
         for c in cubes:
             t = c["name"].lower()
             for d in c["dimensions"]:
@@ -33,7 +33,7 @@ class Catalog:
                 self.types[d["name"]] = d["type"]
             for m in c["measures"]:
                 self.measures[(t, m["name"].split(".", 1)[1].lower())] = m["name"]
-            self.cube_names = getattr(self, "cube_names", set()) | {t}
+            self.cube_names.add(t)
 
     def dim(self, table: str, col: str) -> str:
         key = (table.lower(), re.sub(r"\W+", "_", col.strip()).strip("_").lower())
@@ -66,7 +66,7 @@ class Translator:
     def _tables(self, select: exp.Select) -> dict:
         aliases = {}
         for t in select.find_all(exp.Table):
-            name = t.name
+            name = re.sub(r"\W+", "_", t.name.strip()).strip("_")  # same rule as the model generator
             if name.lower() not in self.cat.cube_names:
                 raise Unsupported(f"unknown table {name}")
             aliases[(t.alias or name).lower()] = name

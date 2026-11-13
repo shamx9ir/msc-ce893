@@ -62,7 +62,8 @@ def main() -> None:
     ap.add_argument("--seed", type=int, default=13)
     args = ap.parse_args()
 
-    recs = [json.loads(line) for line in open(args.data / "verified.jsonl")]
+    recs = list({(r["db_id"], r["question_id"]): r for r in
+                 map(json.loads, open(args.data / "verified.jsonl"))}.values())  # dedupe resumed runs
     test_dbs = {"formula_1", "student_club"} | {q["db_id"] for q in json.load(open(ROOT / "data/bird/dev.json"))} \
         if (ROOT / "data/bird/dev.json").exists() else {"formula_1", "student_club"}
     leaked = [r for r in recs if r["db_id"] in test_dbs]

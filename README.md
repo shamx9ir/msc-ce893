@@ -91,3 +91,17 @@ BIRD's train split (about 9,400 questions on 69 databases, none shared with the 
 python scripts/build_training_data.py --bird-dir data/bird_train --out data/training   # stop the main Cube first
 python scripts/make_sft.py --data data/training --out data/sft
 ```
+
+Result of the first run (59 of 69 train databases; the 10 largest, over 600 MB each, were skipped):
+
+| | Questions |
+|---|---|
+| BIRD train questions on the 59 databases | 8,003 |
+| translated **and** verified by execution | **3,531** |
+| not expressible by the rule-based translator | 2,782 |
+| translated but result differed | 682 |
+| Cube error (mostly many-to-many joins without a declared key) | 900 |
+| empty gold result (verifies nothing, dropped) | 108 |
+
+`make_sft.py` holds out 3 whole databases for validation (3,273 train / 258 val examples). Prompt
+length: 2,695 training examples fit in 4,096 tokens and 2,929 in 8,192 (large schemas make the rest long).
