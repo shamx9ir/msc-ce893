@@ -127,7 +127,7 @@ def main() -> None:
             res = harness.run(q["db_id"], q["question"], None if args.no_evidence else q.get("evidence"))
             ok = relaxed = False
             exec_error = res.error
-            if res.query is not None:
+            if res.query is not None and res.error is None:
                 try:
                     pred = cube_rows(harness.cube.load(res.query))
                     gold = run_gold(db_path, q["SQL"])

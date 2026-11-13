@@ -110,6 +110,30 @@ def unwrap_query(obj: dict) -> dict:
     return obj
 
 
+QUANTITY_WORDS = re.compile(
+    r"\b(how many|how much|number of|count|total|sum|average|avg|mean|amount|percentage|percent|ratio|"
+    r"rate|difference|max(imum)?|min(imum)?|score[sd]?|points)\b", re.I)
+
+
+def column_warning(query: dict, question: str) -> str | None:
+    """Heuristics for the most common wrong answer: returning columns the question did not ask for."""
+    if not question:
+        return None
+    single_value_filters = set()
+    for f in query.get("filters") or []:
+        if isinstance(f, dict) and f.get("operator") == "equals" and len(f.get("values") or []) == 1:
+            single_value_filters.add(f.get("member"))
+    redundant = [d for d in query.get("dimensions") or [] if d in single_value_filters]
+    if redundant:
+        return (f"{', '.join(redundant)} is filtered to one value and also returned as a column, "
+                "so it adds nothing to the answer.")
+    measures = query.get("measures") or []
+    if measures and query.get("dimensions") and not QUANTITY_WORDS.search(question):
+        return (f"the question does not ask for a number, but the query returns {', '.join(measures)}. "
+                "To rank by a measure, use it in \"order\" without listing it in \"measures\".")
+    return None
+
+
 def _members_in(query: dict) -> list[str]:
     names = list(query.get("measures") or []) + list(query.get("dimensions") or [])
     names += [t.get("dimension") for t in query.get("timeDimensions") or [] if isinstance(t, dict)]
@@ -223,13 +247,22 @@ class Harness:
             return None, f"Error: {e}"
 
     # ---- tools ---------------------------------------------------------
-    def _tools(self, db: str, res: AgentResult, tool_time: list):
+    def _tools(self, db: str, res: AgentResult, tool_time: list, question: str = ""):
+        warned: set[str] = set()
+        seen: dict[str, str] = {}
+
         def timed(fn):
             @functools.wraps(fn)  # keep the signature: ADK builds the tool schema from it
             def wrapper(*a, **k):
                 t = time.time()
+                key = fn.__name__ + dumps({n: v for n, v in k.items() if n != "tool_context"})
                 try:
-                    return fn(*a, **k)
+                    if key in seen and fn.__name__ != "submit_answer":
+                        return ("You already made this exact call. Its result was: " + seen[key][:1500] +
+                                "\nDo not repeat it; change the call or submit your answer.")
+                    out = fn(*a, **k)
+                    seen[key] = out
+                    return out
                 finally:
                     tool_time[0] += time.time() - t
             return wrapper
@@ -244,10 +277,17 @@ class Harness:
             """
             if dimension not in self.cube.member_names(db):
                 return f"Unknown dimension {dimension}."
+            kind = self.cube.member_types().get(dimension, "string")
             try:
-                return dumps(self.cube.dimension_values(dimension, text or None))
+                values = self.cube.dimension_values(dimension, text or None)
             except Exception as e:
                 return f"Error: {e}"
+            if kind != "string":
+                return (f"{dimension} is a {kind} dimension, so it cannot be searched as text. Sample values: "
+                        f"{dumps(values)}. Filter on it directly (equals, gt, lt, inDateRange).")
+            if not values:
+                return f"No value of {dimension} contains {text!r}. Try a shorter or different spelling."
+            return dumps(values)
 
         @timed
         def run_query(query: dict) -> str:
@@ -273,6 +313,12 @@ class Harness:
             if err:
                 res.error = err
                 return f"Not accepted: {err}\nFix the query and call submit_answer again."
+            warning = column_warning(query, question)
+            if warning and dumps(query) not in warned:
+                warned.add(dumps(query))
+                res.error = "column check"
+                return (f"Check before submitting: {warning} Return only the columns the question asks for. "
+                        "If the query is already right, call submit_answer again with the same query.")
             res.error = None
             tool_context.actions.skip_summarization = True  # stop here, no extra LLM call
             return "Accepted."
@@ -288,7 +334,7 @@ class Harness:
         res, tool_time = AgentResult(query=None), [0.0]
         agent = LlmAgent(
             name=AGENT_NAME, model=self.model, instruction=self.instruction(db),
-            tools=self._tools(db, res, tool_time) if self.mode == "tools" else [],
+            tools=self._tools(db, res, tool_time, question) if self.mode == "tools" else [],
             generate_content_config=types.GenerateContentConfig(temperature=0.0))
         runner = InMemoryRunner(agent=agent, app_name="bird_cube")
         session = await runner.session_service.create_session(app_name="bird_cube", user_id="eval")
@@ -350,6 +396,8 @@ class Harness:
                 prompt = f"run_query result: {preview}\nIf this answers the question, call submit_answer with the query."
             else:
                 prompt = f"That query failed: {err}\nFix it and call submit_answer."
+        if res.error == "column check":
+            res.error = None  # only a warning: the last submitted query ran fine
         res.wall_s = time.time() - t0
         res.llm_latency_s = max(0.0, res.wall_s - tool_time[0])
         return res

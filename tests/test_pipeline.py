@@ -159,3 +159,25 @@ def test_text_tool_calls_are_unwrapped_and_followed():
     assert res.query == q and res.error is None and res.steps == 2
     assert any(t.get("name") == "run_query(text)" for t in res.trace)
     assert extract_json('{"name": "submit_answer", "arguments": {"query": {"measures": ["a.b"]}}}') == {"measures": ["a.b"]}
+
+
+def test_column_check_warns_once_then_accepts():
+    q = {"dimensions": ["event.event_name"], "measures": ["attendance.count"], "order": {"attendance.count": "desc"}, "limit": 1}
+    good = {"dimensions": ["event.event_name"], "order": {"attendance.count": "desc"}, "limit": 1}
+    llm = ScriptedLLM(replies=[call("submit_answer", query=q), call("submit_answer", query=good)])
+    res = Harness(llm, CubeClient()).run(DB, "Which event had the highest attendance?")
+    assert res.query == good and res.error is None and res.steps == 2
+    assert "does not ask for a number" in [t for t in res.trace if t["role"] == "tool"][0]["content"]
+    # a model that insists gets its query accepted on the second identical submit
+    llm = ScriptedLLM(replies=[call("submit_answer", query=q), call("submit_answer", query=q)])
+    res = Harness(llm, CubeClient()).run(DB, "Which event had the highest attendance?")
+    assert res.query == q and res.error is None
+
+
+def test_repeated_calls_and_numeric_search():
+    llm = ScriptedLLM(replies=[call("search_values", dimension="member.zip", text="null"),
+                               call("search_values", dimension="member.zip", text="null"),
+                               call("submit_answer", query={"measures": ["member.count"]})])
+    res = Harness(llm, CubeClient()).run(DB, "How many members are there?")
+    outs = [t["content"] for t in res.trace if t["role"] == "tool"]
+    assert "number dimension" in outs[0] and "already made this exact call" in outs[1]

@@ -23,6 +23,7 @@ of BIRD's gold SQL on the original SQLite database (set comparison, column order
 | `scripts/build_training_data.py` | converts BIRD train questions to Cube queries and keeps only pairs whose results match the SQL |
 | `scripts/make_sft.py` | writes chat-format fine-tuning files that reproduce the harness's exact prompts |
 | `splits/test_ids.json` | the frozen test set: all 332 dev questions on formula_1 and student_club |
+| `splits/tune_ids.json` | tuning set for harness changes: 40 questions each from superhero, toxicology and california_schools (no overlap with the test databases) |
 | `tests/` | end-to-end tests with a scripted stand-in for the LLM |
 
 ## How the harness works
@@ -105,3 +106,21 @@ Result of the first run (59 of 69 train databases; the 10 largest, over 600 MB e
 
 `make_sft.py` holds out 3 whole databases for validation (3,273 train / 258 val examples). Prompt
 length: 2,695 training examples fit in 4,096 tokens and 2,929 in 8,192 (large schemas make the rest long).
+
+## Harness versions
+
+Tune on `splits/tune_ids.json`, report on `splits/test_ids.json`. The tuning databases need their own
+DuckDB copy and Cube models:
+
+```bash
+python scripts/build_duckdb.py --bird-dir data/bird --out data/bird.duckdb --db formula_1 --db student_club --db superhero --db toxicology --db california_schools
+python scripts/gen_cube_models.py --bird-dir data/bird --out cube/model --db formula_1 --db student_club --db superhero --db toxicology --db california_schools
+python -m harness.evaluate --db superhero --db toxicology --db california_schools --ids-file splits/tune_ids.json \
+    --model ollama_chat/qwen2.5-coder:7b --setup harness-v3 --out runs/tune_v3.jsonl
+```
+
+| Version | Commit | Change | Test strict / relaxed |
+|---|---|---|---|
+| v1 | 0c95b22 | first harness | 13.3% / 26.8% |
+| v2 | bb618ff | measure/dimension and filter checks, text tool calls unwrapped, rules + 4 examples in the prompt | 20.5% / 34.3% |
+| v3 | (this) | value lookup on number/time columns, repeated-call guard, one-time column check at submit | not yet run |

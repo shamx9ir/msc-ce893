@@ -79,10 +79,15 @@ class CubeClient:
                 out.append(f"  meas {m['name']} ({m.get('aggType', m['type'])})")
         return "\n".join(out)
 
+    def member_types(self) -> dict[str, str]:
+        return {d["name"]: d["type"] for c in self.meta()["cubes"] for d in c.get("dimensions", [])}
+
     def dimension_values(self, dimension: str, search: str | None = None,
                          limit: int = 20) -> list:
+        """Distinct stored values; `search` narrows string dimensions (contains, case-insensitive).
+        Number/time dimensions cannot be searched as text, so a sample of values is returned."""
         q = {"dimensions": [dimension], "limit": limit}
-        if search:
+        if search and self.member_types().get(dimension, "string") == "string":
             q["filters"] = [{"member": dimension, "operator": "contains", "values": [search]}]
         return [row[dimension] for row in self.load(q)]
 
