@@ -63,7 +63,7 @@ def make_model(model: str, base_url: str | None = None, api_key: str | None = No
     return LiteLlm(model=model, **kwargs)
 
 
-def extract_json(text: str) -> dict | None:
+def extract_json(text: str, unwrap: bool = True) -> dict | None:
     """Pull the first JSON object out of free text (models often wrap it in prose or ``` fences)."""
     if not text:
         return None
@@ -80,12 +80,34 @@ def extract_json(text: str) -> dict | None:
                     try:
                         obj = json.loads(text[start:i + 1])
                         if isinstance(obj, dict):
-                            return obj["query"] if isinstance(obj.get("query"), dict) else obj
+                            return unwrap_query(obj) if unwrap else obj
                     except json.JSONDecodeError:
                         pass
                     break
         start = text.find("{", start + 1)
     return None
+
+
+def unwrap_query(obj: dict) -> dict:
+    """Small models often write a tool call as text: {"name": "run_query", "arguments": {"query": {...}}}
+    or {"query": {...}}. Return the Cube query inside."""
+    args = obj.get("arguments") or obj.get("parameters")
+    if isinstance(args, str):
+        try:
+            args = json.loads(args)
+        except json.JSONDecodeError:
+            args = None
+    if isinstance(args, dict):
+        obj = args
+    if isinstance(obj.get("query"), dict):
+        obj = obj["query"]
+    elif isinstance(obj.get("query"), str):
+        try:
+            inner = json.loads(obj["query"])
+            obj = inner if isinstance(inner, dict) else obj
+        except json.JSONDecodeError:
+            pass
+    return obj
 
 
 def _members_in(query: dict) -> list[str]:
@@ -152,8 +174,41 @@ class Harness:
             hints = {m: difflib.get_close_matches(m, known, n=3) for m in bad}
             return "Unknown members: " + "; ".join(
                 f"{m} (did you mean {', '.join(h) or 'nothing close'}?)" for m, h in hints.items())
+        kinds = self.cube.member_kinds(db)
+        wrong = [m for m in query.get("measures") or [] if kinds.get(m) == "dimension"]
+        if wrong:
+            return (f"{', '.join(wrong)} {'is a dimension' if len(wrong) == 1 else 'are dimensions'}, not "
+                    f"{'a measure' if len(wrong) == 1 else 'measures'}: put it under \"dimensions\", or use a "
+                    f"measure such as count, sum_x or avg_x.")
+        wrong = [m for m in query.get("dimensions") or [] if kinds.get(m) == "measure"]
+        if wrong:
+            return f"{', '.join(wrong)} is a measure, not a dimension: put it under \"measures\"."
+        bad_filter = self._check_filters(query.get("filters"))
+        if bad_filter:
+            return bad_filter
         if not query.get("measures") and not query.get("dimensions") and not query.get("timeDimensions"):
             return "The query needs at least one measure or dimension."
+        return None
+
+    @staticmethod
+    def _check_filters(filters) -> str | None:
+        shape = 'Each filter must look like {"member": "cube.dim", "operator": "equals", "values": ["x"]}.'
+        if filters is None:
+            return None
+        if not isinstance(filters, list):
+            return "\"filters\" must be a list. " + shape
+        for f in filters:
+            if not isinstance(f, dict):
+                return shape
+            if "or" in f or "and" in f:
+                err = Harness._check_filters(f.get("or") or f.get("and"))
+                if err:
+                    return err
+                continue
+            if "member" not in f or "operator" not in f:
+                return f"Bad filter {json.dumps(f)}. " + shape
+            if f["operator"] not in ("set", "notSet") and not isinstance(f.get("values"), list):
+                return f"Filter on {f['member']} needs \"values\" as a list of strings. " + shape
         return None
 
     def try_run(self, db: str, query) -> tuple[list | None, str | None]:
@@ -240,12 +295,12 @@ class Harness:
         last_text = ""
         submitted = False
         prompt = user_prompt(question, evidence)
-        for attempt in range(2):  # second pass only if the model never submitted anything usable
+        for attempt in range(4):  # extra passes only when the model answered in text instead of tools
             try:
                 async for ev in runner.run_async(
                         user_id="eval", session_id=session.id,
                         new_message=types.Content(role="user", parts=[types.Part(text=prompt)]),
-                        run_config=RunConfig(max_llm_calls=self.max_steps)):
+                        run_config=RunConfig(max_llm_calls=max(1, self.max_steps - res.steps))):
                     self._record(ev, res)
                     for p in (ev.content.parts if ev.content else []) or []:
                         if p.text and ev.author == agent.name:
@@ -257,19 +312,44 @@ class Harness:
                 break
             if res.query is not None and res.error is None:
                 break
-            # Fallback: a JSON object in the final text counts as the answer (small models often do this).
-            query = extract_json(last_text)
-            if query is not None:
-                _, err = self.try_run(db, query)
-                res.query, res.error = query, err
-                if err is None or self.mode == "single" or res.steps >= self.max_steps:
-                    break
-                prompt = f"That query failed: {err}\nFix it and call submit_answer."
-            elif self.mode == "single" or submitted or res.steps >= self.max_steps:
-                res.error = res.error or "No query submitted"
+            if self.mode == "single" or res.steps >= self.max_steps:
+                if res.query is None:
+                    raw = extract_json(last_text, unwrap=False)
+                    query = unwrap_query(raw) if raw else None
+                    if query is not None:
+                        _, err = self.try_run(db, query)
+                        res.query, res.error = query, err
+                res.error = res.error if res.query is not None else (res.error or "No query submitted")
                 break
-            else:
+            # Fallback for tool calls written as text (common with small models).
+            raw = extract_json(last_text, unwrap=False)
+            if raw is None:
+                if submitted:
+                    break
                 prompt = "Call submit_answer with your final Cube query."
+                continue
+            if raw.get("name") == "search_values":
+                args = unwrap_query(raw)
+                dim = args.get("dimension", "")
+                try:
+                    found = (dumps(self.cube.dimension_values(dim, args.get("text") or None))
+                             if dim in self.cube.member_names(db) else f"Unknown dimension {dim}.")
+                except Exception as e:
+                    found = f"Error: {e}"
+                res.trace.append({"role": "tool", "name": "search_values(text)", "content": found[:2000]})
+                prompt = f"search_values result: {found}\nContinue, and finish by calling submit_answer."
+                continue
+            query = unwrap_query(raw)
+            rows, err = self.try_run(db, query)
+            res.query, res.error = query, err
+            if err is None and raw.get("name") != "run_query":
+                break  # a final answer given as text
+            if err is None:
+                preview = dumps({"row_count": len(rows), "rows": rows[: self.preview_rows]})
+                res.trace.append({"role": "tool", "name": "run_query(text)", "content": preview[:2000]})
+                prompt = f"run_query result: {preview}\nIf this answers the question, call submit_answer with the query."
+            else:
+                prompt = f"That query failed: {err}\nFix it and call submit_answer."
         res.wall_s = time.time() - t0
         res.llm_latency_s = max(0.0, res.wall_s - tool_time[0])
         return res

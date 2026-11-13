@@ -138,3 +138,24 @@ def test_sql_to_cube_translation_verifies():
     assert cq == {"measures": ["member.count"],
                   "filters": [{"member": "major.college", "operator": "equals", "values": ["College of Engineering"]}]}
     assert results_match(cube_rows(c.load(cq)), gold(1313))
+
+
+def test_dimension_used_as_measure_gets_a_hint():
+    h = Harness(ScriptedLLM(replies=[]), CubeClient())
+    err = h.validate(DB, {"measures": ["event.event_name"]})
+    assert "is a dimension" in err and '"dimensions"' in err
+    assert "Each filter must look like" in h.validate(
+        DB, {"measures": ["member.count"], "filters": [{"dimension": "major.college", "value": "x"}]})
+
+
+def test_text_tool_calls_are_unwrapped_and_followed():
+    """A model that writes run_query as text gets the result back and then submits."""
+    q = {"measures": ["member.count"]}
+    llm = ScriptedLLM(replies=[
+        json.dumps({"name": "run_query", "arguments": {"query": q}}),
+        call("submit_answer", query=q),
+    ])
+    res = Harness(llm, CubeClient()).run(DB, "How many members are there?")
+    assert res.query == q and res.error is None and res.steps == 2
+    assert any(t.get("name") == "run_query(text)" for t in res.trace)
+    assert extract_json('{"name": "submit_answer", "arguments": {"query": {"measures": ["a.b"]}}}') == {"measures": ["a.b"]}

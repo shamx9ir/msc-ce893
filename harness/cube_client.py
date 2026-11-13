@@ -58,6 +58,13 @@ class CubeClient:
                 names.update(m["name"] for m in c.get(kind, []))
         return names
 
+    def member_kinds(self, db: str) -> dict[str, str]:
+        kinds = {}
+        for c in self.cubes_for(db):
+            kinds.update({m["name"]: "measure" for m in c.get("measures", [])})
+            kinds.update({d["name"]: "dimension" for d in c.get("dimensions", [])})
+        return kinds
+
     def describe(self, db: str, with_descriptions: bool = True) -> str:
         """Compact, LLM-friendly rendering of the semantic layer for one database."""
         out = []
