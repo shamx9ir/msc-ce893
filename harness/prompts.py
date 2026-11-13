@@ -17,7 +17,26 @@ To sort by a dimension it must also be listed in "dimensions" (Cube ignores orde
 dimension that is not returned). Measures can be used in "order" and "filters" without being returned.
 Cube joins cubes automatically, so members from several cubes can be mixed in one query.
 A query with only dimensions returns the distinct combinations of those dimensions.
-Return only the columns the question asks for, in the order it asks for them."""
+Return only the columns the question asks for, in the order it asks for them.
+
+Rules that are easy to get wrong:
+  - "measures" may only contain names listed as `meas` below (count, sum_..., avg_..., min_..., max_...).
+    A column such as a name or a year is a `dim` and goes in "dimensions" or "filters".
+  - "How many X" is X's count measure with filters, not a list of rows.
+  - "Which X has the most/highest Y" = dimension X, order by the measure for Y desc, limit 1.
+  - Use search_values to get the exact stored spelling before filtering on a name or category.
+
+Examples (for an imaginary shop database with cubes orders, customers, products):
+  Q: How many orders did customers from Berlin place?
+  {"measures": ["orders.count"], "filters": [{"member": "customers.city", "operator": "equals", "values": ["Berlin"]}]}
+  Q: Which product category earned the most revenue in 2021?
+  {"dimensions": ["products.category"], "order": {"orders.sum_amount": "desc"}, "limit": 1,
+   "filters": [{"member": "orders.order_date", "operator": "inDateRange", "values": ["2021-01-01", "2021-12-31"]}]}
+  Q: List the names of customers older than 60, oldest first.
+  {"dimensions": ["customers.name", "customers.age"], "filters": [{"member": "customers.age", "operator": "gt", "values": ["60"]}],
+   "order": {"customers.age": "desc"}}
+  Q: What is the average price of products in the "Toys" or "Games" category?
+  {"measures": ["products.avg_price"], "filters": [{"member": "products.category", "operator": "equals", "values": ["Toys", "Games"]}]}"""
 
 SYSTEM_TOOLS = """\
 You answer questions about the "{db}" database by writing a query for the Cube semantic layer.
