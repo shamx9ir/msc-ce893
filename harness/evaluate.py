@@ -44,16 +44,24 @@ def norm_rows(rows) -> set:
     return {tuple(norm_value(v) for v in r) for r in rows}
 
 
-def results_match(pred_rows: list[tuple], gold_rows: list[tuple]) -> bool:
+def results_match(pred_rows: list[tuple], gold_rows: list[tuple], allow_extra_columns: bool = False) -> bool:
+    """Set equality of rows, ignoring column order.
+
+    allow_extra_columns: the prediction may return additional columns (Cube must return any
+    dimension it sorts by, which SQL can leave out); some choice of its columns must then
+    reproduce the gold rows exactly, with the same number of distinct rows.
+    """
     gold = norm_rows(gold_rows)
     if not pred_rows or not gold_rows:
         return norm_rows(pred_rows) == gold
-    width = len(pred_rows[0])
-    if width != len(gold_rows[0]):
+    pw, gw = len(pred_rows[0]), len(gold_rows[0])
+    if pw < gw or (pw > gw and not allow_extra_columns):
         return False
-    if width > 6:  # avoid factorial blow-up; require same order
-        return norm_rows(pred_rows) == gold
-    for perm in itertools.permutations(range(width)):
+    if pw > 6:  # avoid combinatorial blow-up; require same order
+        return pw == gw and norm_rows(pred_rows) == gold
+    if pw > gw and len(norm_rows(pred_rows)) != len(gold):
+        return False
+    for perm in itertools.permutations(range(pw), gw):
         if norm_rows([tuple(r[i] for i in perm) for r in pred_rows]) == gold:
             return True
     return False
@@ -109,26 +117,30 @@ def main() -> None:
     done = set()
     if args.out.exists():  # resume
         done = {json.loads(line)["question_id"] for line in open(args.out)}
-    correct = total = 0
+    correct = relaxed_total = total = 0
     with open(args.out, "a") as f:
         for q in questions:
             if q["question_id"] in done:
                 continue
             db_path = args.bird_dir / "dev_databases" / q["db_id"] / f"{q['db_id']}.sqlite"
             res = harness.run(q["db_id"], q["question"], None if args.no_evidence else q.get("evidence"))
-            ok, exec_error = False, res.error
+            ok = relaxed = False
+            exec_error = res.error
             if res.query is not None:
                 try:
                     pred = cube_rows(harness.cube.load(res.query))
-                    ok = results_match(pred, run_gold(db_path, q["SQL"]))
+                    gold = run_gold(db_path, q["SQL"])
+                    ok = results_match(pred, gold)
+                    relaxed = ok or results_match(pred, gold, allow_extra_columns=True)
                 except Exception as e:
                     exec_error = str(e)
             correct += ok
+            relaxed_total += relaxed
             total += 1
             rec = {"question_id": q["question_id"], "db_id": q["db_id"], "difficulty": q["difficulty"],
                    "setup": args.setup, "model": args.model, "mode": args.mode,
                    "question": q["question"], "evidence": q.get("evidence"), "gold_sql": q["SQL"],
-                   "pred_query": res.query, "correct": ok, "error": exec_error, "steps": res.steps,
+                   "pred_query": res.query, "correct": ok, "correct_relaxed": relaxed, "error": exec_error, "steps": res.steps,
                    "prompt_tokens": res.prompt_tokens, "completion_tokens": res.completion_tokens,
                    "llm_latency_s": round(res.llm_latency_s, 3), "wall_s": round(res.wall_s, 3),
                    "trace": res.trace}
@@ -137,7 +149,8 @@ def main() -> None:
             print(f"[{total}/{len(questions) - len(done)}] q{q['question_id']} {'OK ' if ok else 'BAD'} "
                   f"acc={correct / total:.1%} steps={res.steps} {exec_error or ''}"[:200])
     if total:
-        print(f"\nExecution accuracy: {correct}/{total} = {correct / total:.1%}")
+        print(f"\nExecution accuracy: {correct}/{total} = {correct / total:.1%} "
+              f"(allowing extra columns: {relaxed_total}/{total} = {relaxed_total / total:.1%})")
 
 
 if __name__ == "__main__":

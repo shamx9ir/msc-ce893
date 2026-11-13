@@ -25,7 +25,7 @@ def duck_type(decl: str) -> str:
     return TYPE_MAP.get(decl, "VARCHAR")
 
 
-def copy_db(con: duckdb.DuckDBPyConnection, sqlite_path: Path, schema: str) -> None:
+def copy_db(con: duckdb.DuckDBPyConnection, sqlite_path: Path, schema: str, quiet: bool = False) -> None:
     src = sqlite3.connect(sqlite_path)
     src.text_factory = lambda b: b.decode("utf-8", errors="replace")
     con.execute(f'CREATE SCHEMA IF NOT EXISTS "{schema}"')
@@ -42,7 +42,8 @@ def copy_db(con: duckdb.DuckDBPyConnection, sqlite_path: Path, schema: str) -> N
         con.execute(f'CREATE OR REPLACE TABLE "{schema}"."{table}" AS SELECT {select} FROM df_src')
         con.unregister("df_src")
         n = con.execute(f'SELECT count(*) FROM "{schema}"."{table}"').fetchone()[0]
-        print(f"  {schema}.{table}: {n} rows")
+        if not quiet:
+            print(f"  {schema}.{table}: {n} rows")
 
 
 def main() -> None:
@@ -50,12 +51,13 @@ def main() -> None:
     ap.add_argument("--bird-dir", required=True, type=Path)
     ap.add_argument("--out", required=True, type=Path)
     ap.add_argument("--db", action="append", required=True)
+    ap.add_argument("--split", default="dev", choices=["dev", "train"])
     args = ap.parse_args()
     args.out.parent.mkdir(parents=True, exist_ok=True)
     con = duckdb.connect(str(args.out))
     for db in args.db:
         print(db)
-        copy_db(con, args.bird_dir / "dev_databases" / db / f"{db}.sqlite", db)
+        copy_db(con, args.bird_dir / f"{args.split}_databases" / db / f"{db}.sqlite", db)
     con.close()
 
 

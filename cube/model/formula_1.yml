@@ -2,6 +2,7 @@
 cubes:
 - name: circuits
   sql_table: formula_1."circuits"
+  sql_alias: t_circuits
   meta:
     db: formula_1
   dimensions:
@@ -97,10 +98,11 @@ cubes:
     description: MAX of circuits.alt
   joins:
   - name: races
-    sql: '{races}."circuitId" = {circuits}."circuitId"'
+    sql: '{races}."circuitId" = {CUBE}."circuitId"'
     relationship: one_to_many
 - name: constructors
   sql_table: formula_1."constructors"
+  sql_alias: t_constructors
   meta:
     db: formula_1
   dimensions:
@@ -133,19 +135,20 @@ cubes:
     description: Number of constructors rows
   joins:
   - name: constructorResults
-    sql: '{constructorResults}."constructorId" = {constructors}."constructorId"'
+    sql: '{constructorResults}."constructorId" = {CUBE}."constructorId"'
     relationship: one_to_many
   - name: constructorStandings
-    sql: '{constructorStandings}."constructorId" = {constructors}."constructorId"'
+    sql: '{constructorStandings}."constructorId" = {CUBE}."constructorId"'
     relationship: one_to_many
   - name: qualifying
-    sql: '{qualifying}."constructorId" = {constructors}."constructorId"'
+    sql: '{qualifying}."constructorId" = {CUBE}."constructorId"'
     relationship: one_to_many
   - name: results
-    sql: '{results}."constructorId" = {constructors}."constructorId"'
+    sql: '{results}."constructorId" = {CUBE}."constructorId"'
     relationship: one_to_many
 - name: drivers
   sql_table: formula_1."drivers"
+  sql_alias: t_drivers
   meta:
     db: formula_1
   dimensions:
@@ -209,22 +212,23 @@ cubes:
     description: MAX of drivers.number
   joins:
   - name: driverStandings
-    sql: '{driverStandings}."driverId" = {drivers}."driverId"'
+    sql: '{driverStandings}."driverId" = {CUBE}."driverId"'
     relationship: one_to_many
   - name: lapTimes
-    sql: '{lapTimes}."driverId" = {drivers}."driverId"'
+    sql: '{lapTimes}."driverId" = {CUBE}."driverId"'
     relationship: one_to_many
   - name: pitStops
-    sql: '{pitStops}."driverId" = {drivers}."driverId"'
+    sql: '{pitStops}."driverId" = {CUBE}."driverId"'
     relationship: one_to_many
   - name: qualifying
-    sql: '{qualifying}."driverId" = {drivers}."driverId"'
+    sql: '{qualifying}."driverId" = {CUBE}."driverId"'
     relationship: one_to_many
   - name: results
-    sql: '{results}."driverId" = {drivers}."driverId"'
+    sql: '{results}."driverId" = {CUBE}."driverId"'
     relationship: one_to_many
 - name: seasons
   sql_table: formula_1."seasons"
+  sql_alias: t_seasons
   meta:
     db: formula_1
   dimensions:
@@ -244,10 +248,11 @@ cubes:
     description: Number of seasons rows
   joins:
   - name: races
-    sql: '{races}."year" = {seasons}."year"'
+    sql: '{races}."year" = {CUBE}."year"'
     relationship: one_to_many
 - name: races
   sql_table: formula_1."races"
+  sql_alias: t_races
   meta:
     db: formula_1
   dimensions:
@@ -307,34 +312,35 @@ cubes:
     description: MAX of races.round
   joins:
   - name: circuits
-    sql: '{races}."circuitId" = {circuits}."circuitId"'
+    sql: '{CUBE}."circuitId" = {circuits}."circuitId"'
     relationship: many_to_one
   - name: seasons
-    sql: '{races}."year" = {seasons}."year"'
+    sql: '{CUBE}."year" = {seasons}."year"'
     relationship: many_to_one
   - name: constructorResults
-    sql: '{constructorResults}."raceId" = {races}."raceId"'
+    sql: '{constructorResults}."raceId" = {CUBE}."raceId"'
     relationship: one_to_many
   - name: constructorStandings
-    sql: '{constructorStandings}."raceId" = {races}."raceId"'
+    sql: '{constructorStandings}."raceId" = {CUBE}."raceId"'
     relationship: one_to_many
   - name: driverStandings
-    sql: '{driverStandings}."raceId" = {races}."raceId"'
+    sql: '{driverStandings}."raceId" = {CUBE}."raceId"'
     relationship: one_to_many
   - name: lapTimes
-    sql: '{lapTimes}."raceId" = {races}."raceId"'
+    sql: '{lapTimes}."raceId" = {CUBE}."raceId"'
     relationship: one_to_many
   - name: pitStops
-    sql: '{pitStops}."raceId" = {races}."raceId"'
+    sql: '{pitStops}."raceId" = {CUBE}."raceId"'
     relationship: one_to_many
   - name: qualifying
-    sql: '{qualifying}."raceId" = {races}."raceId"'
+    sql: '{qualifying}."raceId" = {CUBE}."raceId"'
     relationship: one_to_many
   - name: results
-    sql: '{results}."raceId" = {races}."raceId"'
+    sql: '{results}."raceId" = {CUBE}."raceId"'
     relationship: one_to_many
 - name: constructorResults
   sql_table: formula_1."constructorResults"
+  sql_alias: t_constructorResults
   meta:
     db: formula_1
   dimensions:
@@ -382,13 +388,14 @@ cubes:
     description: MAX of constructorResults.points
   joins:
   - name: constructors
-    sql: '{constructorResults}."constructorId" = {constructors}."constructorId"'
+    sql: '{CUBE}."constructorId" = {constructors}."constructorId"'
     relationship: many_to_one
   - name: races
-    sql: '{constructorResults}."raceId" = {races}."raceId"'
+    sql: '{CUBE}."raceId" = {races}."raceId"'
     relationship: many_to_one
 - name: constructorStandings
   sql_table: formula_1."constructorStandings"
+  sql_alias: t_constructorStandings
   meta:
     db: formula_1
   dimensions:
@@ -476,13 +483,14 @@ cubes:
     description: MAX of constructorStandings.wins
   joins:
   - name: constructors
-    sql: '{constructorStandings}."constructorId" = {constructors}."constructorId"'
+    sql: '{CUBE}."constructorId" = {constructors}."constructorId"'
     relationship: many_to_one
   - name: races
-    sql: '{constructorStandings}."raceId" = {races}."raceId"'
+    sql: '{CUBE}."raceId" = {races}."raceId"'
     relationship: many_to_one
 - name: driverStandings
   sql_table: formula_1."driverStandings"
+  sql_alias: t_driverStandings
   meta:
     db: formula_1
   dimensions:
@@ -570,13 +578,14 @@ cubes:
     description: MAX of driverStandings.wins
   joins:
   - name: drivers
-    sql: '{driverStandings}."driverId" = {drivers}."driverId"'
+    sql: '{CUBE}."driverId" = {drivers}."driverId"'
     relationship: many_to_one
   - name: races
-    sql: '{driverStandings}."raceId" = {races}."raceId"'
+    sql: '{CUBE}."raceId" = {races}."raceId"'
     relationship: many_to_one
 - name: lapTimes
   sql_table: formula_1."lapTimes"
+  sql_alias: t_lapTimes
   meta:
     db: formula_1
   dimensions:
@@ -647,13 +656,14 @@ cubes:
     description: MAX of lapTimes.milliseconds
   joins:
   - name: drivers
-    sql: '{lapTimes}."driverId" = {drivers}."driverId"'
+    sql: '{CUBE}."driverId" = {drivers}."driverId"'
     relationship: many_to_one
   - name: races
-    sql: '{lapTimes}."raceId" = {races}."raceId"'
+    sql: '{CUBE}."raceId" = {races}."raceId"'
     relationship: many_to_one
 - name: pitStops
   sql_table: formula_1."pitStops"
+  sql_alias: t_pitStops
   meta:
     db: formula_1
   dimensions:
@@ -728,13 +738,14 @@ cubes:
     description: MAX of pitStops.milliseconds
   joins:
   - name: drivers
-    sql: '{pitStops}."driverId" = {drivers}."driverId"'
+    sql: '{CUBE}."driverId" = {drivers}."driverId"'
     relationship: many_to_one
   - name: races
-    sql: '{pitStops}."raceId" = {races}."raceId"'
+    sql: '{CUBE}."raceId" = {races}."raceId"'
     relationship: many_to_one
 - name: qualifying
   sql_table: formula_1."qualifying"
+  sql_alias: t_qualifying
   meta:
     db: formula_1
   dimensions:
@@ -821,16 +832,17 @@ cubes:
     description: MAX of qualifying.position
   joins:
   - name: constructors
-    sql: '{qualifying}."constructorId" = {constructors}."constructorId"'
+    sql: '{CUBE}."constructorId" = {constructors}."constructorId"'
     relationship: many_to_one
   - name: drivers
-    sql: '{qualifying}."driverId" = {drivers}."driverId"'
+    sql: '{CUBE}."driverId" = {drivers}."driverId"'
     relationship: many_to_one
   - name: races
-    sql: '{qualifying}."raceId" = {races}."raceId"'
+    sql: '{CUBE}."raceId" = {races}."raceId"'
     relationship: many_to_one
 - name: status
   sql_table: formula_1."status"
+  sql_alias: t_status
   meta:
     db: formula_1
   dimensions:
@@ -850,10 +862,11 @@ cubes:
     description: Number of status rows
   joins:
   - name: results
-    sql: '{results}."statusId" = {status}."statusId"'
+    sql: '{results}."statusId" = {CUBE}."statusId"'
     relationship: one_to_many
 - name: results
   sql_table: formula_1."results"
+  sql_alias: t_results
   meta:
     db: formula_1
   dimensions:
@@ -1067,14 +1080,14 @@ cubes:
     description: MAX of results.rank
   joins:
   - name: status
-    sql: '{results}."statusId" = {status}."statusId"'
+    sql: '{CUBE}."statusId" = {status}."statusId"'
     relationship: many_to_one
   - name: constructors
-    sql: '{results}."constructorId" = {constructors}."constructorId"'
+    sql: '{CUBE}."constructorId" = {constructors}."constructorId"'
     relationship: many_to_one
   - name: drivers
-    sql: '{results}."driverId" = {drivers}."driverId"'
+    sql: '{CUBE}."driverId" = {drivers}."driverId"'
     relationship: many_to_one
   - name: races
-    sql: '{results}."raceId" = {races}."raceId"'
+    sql: '{CUBE}."raceId" = {races}."raceId"'
     relationship: many_to_one

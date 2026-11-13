@@ -97,6 +97,21 @@ def _members_in(query: dict) -> list[str]:
     return [n for n in names if isinstance(n, str)]
 
 
+AGENT_NAME = "cube_analyst"
+# ADK appends this to the instruction; training prompts must carry it too (checked in tests).
+ADK_SUFFIX = f'\n\nYou are an agent. Your internal name is "{AGENT_NAME}".'
+
+
+def render_instruction(mode: str, db: str, schema: str) -> str:
+    tmpl = SYSTEM_TOOLS if mode == "tools" else SYSTEM_SINGLE
+    return tmpl.format(db=db, guide=QUERY_GUIDE, schema=schema)
+
+
+def system_prompt(mode: str, db: str, schema: str) -> str:
+    """The exact system message the model receives through ADK."""
+    return render_instruction(mode, db, schema) + ADK_SUFFIX
+
+
 class Harness:
     def __init__(self, model: BaseLlm, cube: CubeClient, mode: str = "tools",
                  max_steps: int = 8, preview_rows: int = 10):
@@ -112,8 +127,7 @@ class Harness:
         return self._schema_cache[db]
 
     def instruction(self, db: str) -> str:
-        tmpl = SYSTEM_TOOLS if self.mode == "tools" else SYSTEM_SINGLE
-        return tmpl.format(db=db, guide=QUERY_GUIDE, schema=self.schema(db))
+        return render_instruction(self.mode, db, self.schema(db))
 
     # ---- validation ----------------------------------------------------
     def validate(self, db: str, query) -> str | None:
@@ -209,7 +223,7 @@ class Harness:
         t0 = time.time()
         res, tool_time = AgentResult(query=None), [0.0]
         agent = LlmAgent(
-            name="cube_analyst", model=self.model, instruction=self.instruction(db),
+            name=AGENT_NAME, model=self.model, instruction=self.instruction(db),
             tools=self._tools(db, res, tool_time) if self.mode == "tools" else [],
             generate_content_config=types.GenerateContentConfig(temperature=0.0))
         runner = InMemoryRunner(agent=agent, app_name="bird_cube")

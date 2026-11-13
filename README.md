@@ -19,7 +19,11 @@ of BIRD's gold SQL on the original SQLite database (set comparison, column order
 | `scripts/gen_cube_models.py` | generates Cube models from BIRD's schema and column descriptions (`cube/model/*.yml`) |
 | `cube/` | Cube server (DuckDB driver) |
 | `harness/` | the harness: an ADK agent with Cube tools, prompts, evaluator |
-| `tests/` | end-to-end test with a scripted stand-in for the LLM |
+| `harness/sql2cube.py` | translates simple gold SQL into Cube queries (used to build training data) |
+| `scripts/build_training_data.py` | converts BIRD train questions to Cube queries and keeps only pairs whose results match the SQL |
+| `scripts/make_sft.py` | writes chat-format fine-tuning files that reproduce the harness's exact prompts |
+| `splits/test_ids.json` | the frozen test set: all 332 dev questions on formula_1 and student_club |
+| `tests/` | end-to-end tests with a scripted stand-in for the LLM |
 
 ## How the harness works
 
@@ -49,7 +53,7 @@ pip install -r requirements.txt
 
 python scripts/download_bird.py
 python scripts/build_duckdb.py --bird-dir data/bird --out data/bird.duckdb --db formula_1 --db student_club
-python scripts/gen_cube_models.py --bird-dir data/bird --duckdb data/bird.duckdb --out cube/model --db formula_1 --db student_club
+python scripts/gen_cube_models.py --bird-dir data/bird --out cube/model --db formula_1 --db student_club
 
 cd cube && copy .env.example .env && npm install && npm run dev      # cp on macOS/Linux; Cube on :4000
 ```
@@ -67,3 +71,23 @@ Each line of the output file records the question, the predicted Cube query, whe
 correct, the number of steps, tokens and latency, and the full tool trace. Runs resume if interrupted.
 `--model` is a LiteLLM id (`ollama_chat/...` for Ollama, `openai/<name>` with `--base-url http://localhost:8000/v1` for vLLM).
 Use `--limit 10` for a quick trial and `--mode single` for the no-tools baseline.
+
+## Scoring
+
+`correct` is strict: same rows, same number of columns. `correct_relaxed` also accepts extra
+columns, because Cube must return any dimension it sorts by while SQL can sort by a column it
+does not return (e.g. "the driver with the earliest birth date"). Report both.
+
+As a ceiling, the rule-based translator reproduces 231 of the 332 test answers (70%) with relaxed
+scoring; the other 101 need SQL a semantic layer cannot express (subqueries, CASE arithmetic,
+string slicing) or differ in edge cases such as ties.
+
+## LoRA training data
+
+BIRD's train split (about 9,400 questions on 69 databases, none shared with the test set):
+
+```bash
+# download train.zip from https://bird-bench.oss-cn-beijing.aliyuncs.com/train.zip and unpack to data/bird_train
+python scripts/build_training_data.py --bird-dir data/bird_train --out data/training   # stop the main Cube first
+python scripts/make_sft.py --data data/training --out data/sft
+```

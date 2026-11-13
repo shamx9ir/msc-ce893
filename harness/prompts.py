@@ -13,6 +13,8 @@ A Cube query is a JSON object with these optional keys:
                       "granularity": "year"}]     granularity is optional (day, week, month, quarter, year)
   "order":      {"cube.member": "asc" | "desc"}
   "limit":      N
+To sort by a dimension it must also be listed in "dimensions" (Cube ignores ordering by a
+dimension that is not returned). Measures can be used in "order" and "filters" without being returned.
 Cube joins cubes automatically, so members from several cubes can be mixed in one query.
 A query with only dimensions returns the distinct combinations of those dimensions.
 Return only the columns the question asks for, in the order it asks for them."""

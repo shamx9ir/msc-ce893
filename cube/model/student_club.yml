@@ -2,6 +2,7 @@
 cubes:
 - name: event
   sql_table: student_club."event"
+  sql_alias: t_event
   meta:
     db: student_club
   dimensions:
@@ -41,13 +42,14 @@ cubes:
     description: Number of event rows
   joins:
   - name: attendance
-    sql: '{attendance}."link_to_event" = {event}."event_id"'
+    sql: '{attendance}."link_to_event" = {CUBE}."event_id"'
     relationship: one_to_many
   - name: budget
-    sql: '{budget}."link_to_event" = {event}."event_id"'
+    sql: '{budget}."link_to_event" = {CUBE}."event_id"'
     relationship: one_to_many
 - name: major
   sql_table: student_club."major"
+  sql_alias: t_major
   meta:
     db: student_club
   dimensions:
@@ -75,10 +77,11 @@ cubes:
     description: Number of major rows
   joins:
   - name: member
-    sql: '{member}."link_to_major" = {major}."major_id"'
+    sql: '{member}."link_to_major" = {CUBE}."major_id"'
     relationship: one_to_many
 - name: zip_code
   sql_table: student_club."zip_code"
+  sql_alias: t_zip_code
   meta:
     db: student_club
   dimensions:
@@ -115,10 +118,11 @@ cubes:
     description: Number of zip_code rows
   joins:
   - name: member
-    sql: '{member}."zip" = {zip_code}."zip_code"'
+    sql: '{member}."zip" = {CUBE}."zip_code"'
     relationship: one_to_many
 - name: attendance
   sql_table: student_club."attendance"
+  sql_alias: t_attendance
   meta:
     db: student_club
   dimensions:
@@ -141,13 +145,14 @@ cubes:
     description: Number of attendance rows
   joins:
   - name: member
-    sql: '{attendance}."link_to_member" = {member}."member_id"'
+    sql: '{CUBE}."link_to_member" = {member}."member_id"'
     relationship: many_to_one
   - name: event
-    sql: '{attendance}."link_to_event" = {event}."event_id"'
+    sql: '{CUBE}."link_to_event" = {event}."event_id"'
     relationship: many_to_one
 - name: budget
   sql_table: student_club."budget"
+  sql_alias: t_budget
   meta:
     db: student_club
   dimensions:
@@ -241,13 +246,14 @@ cubes:
     description: MAX of budget.amount
   joins:
   - name: event
-    sql: '{budget}."link_to_event" = {event}."event_id"'
+    sql: '{CUBE}."link_to_event" = {event}."event_id"'
     relationship: many_to_one
   - name: expense
-    sql: '{expense}."link_to_budget" = {budget}."budget_id"'
+    sql: '{expense}."link_to_budget" = {CUBE}."budget_id"'
     relationship: one_to_many
 - name: expense
   sql_table: student_club."expense"
+  sql_alias: t_expense
   meta:
     db: student_club
   dimensions:
@@ -304,13 +310,14 @@ cubes:
     description: MAX of expense.cost
   joins:
   - name: member
-    sql: '{expense}."link_to_member" = {member}."member_id"'
+    sql: '{CUBE}."link_to_member" = {member}."member_id"'
     relationship: many_to_one
   - name: budget
-    sql: '{expense}."link_to_budget" = {budget}."budget_id"'
+    sql: '{CUBE}."link_to_budget" = {budget}."budget_id"'
     relationship: many_to_one
 - name: income
   sql_table: student_club."income"
+  sql_alias: t_income
   meta:
     db: student_club
   dimensions:
@@ -362,10 +369,11 @@ cubes:
     description: MAX of income.amount
   joins:
   - name: member
-    sql: '{income}."link_to_member" = {member}."member_id"'
+    sql: '{CUBE}."link_to_member" = {member}."member_id"'
     relationship: many_to_one
 - name: member
   sql_table: student_club."member"
+  sql_alias: t_member
   meta:
     db: student_club
   dimensions:
@@ -415,17 +423,17 @@ cubes:
     description: Number of member rows
   joins:
   - name: attendance
-    sql: '{attendance}."link_to_member" = {member}."member_id"'
+    sql: '{attendance}."link_to_member" = {CUBE}."member_id"'
     relationship: one_to_many
   - name: expense
-    sql: '{expense}."link_to_member" = {member}."member_id"'
+    sql: '{expense}."link_to_member" = {CUBE}."member_id"'
     relationship: one_to_many
   - name: income
-    sql: '{income}."link_to_member" = {member}."member_id"'
+    sql: '{income}."link_to_member" = {CUBE}."member_id"'
     relationship: one_to_many
   - name: zip_code
-    sql: '{member}."zip" = {zip_code}."zip_code"'
+    sql: '{CUBE}."zip" = {zip_code}."zip_code"'
     relationship: many_to_one
   - name: major
-    sql: '{member}."link_to_major" = {major}."major_id"'
+    sql: '{CUBE}."link_to_major" = {major}."major_id"'
     relationship: many_to_one

@@ -83,3 +83,58 @@ def test_text_answer_fallback_and_retry():
     llm = ScriptedLLM(replies=['Answer: {"measures": ["memb.count"]}', '{"measures": ["member.count"]}'])
     res = Harness(llm, CubeClient()).run(DB, "How many members are there?")
     assert res.query == {"measures": ["member.count"]} and res.error is None and res.steps == 2
+
+
+def test_training_prompt_matches_what_adk_sends():
+    """The LoRA training data must use exactly the system prompt ADK builds at run time."""
+    from harness.agent import system_prompt
+    llm = ScriptedLLM(replies=[call("submit_answer", query={"measures": ["member.count"]})])
+    h = Harness(llm, CubeClient())
+    h.run(DB, "How many members are there?")
+    assert llm.seen[0].config.system_instruction == system_prompt("tools", DB, h.schema(DB))
+
+
+def test_tool_schema_matches_litellm_request():
+    """harness/tool_schema.json (used in training files) equals the tools LiteLLM sends."""
+    import threading
+    from http.server import BaseHTTPRequestHandler, HTTPServer
+    from harness.agent import make_model
+    captured = {}
+
+    class Capture(BaseHTTPRequestHandler):
+        def do_POST(self):
+            captured.update(json.loads(self.rfile.read(int(self.headers["Content-Length"]))))
+            msg = {"role": "assistant", "content": None, "tool_calls": [{"id": "c", "type": "function",
+                   "function": {"name": "submit_answer", "arguments": json.dumps({"query": {"measures": ["member.count"]}})}}]}
+            out = json.dumps({"id": "x", "object": "chat.completion", "created": 0, "model": "m",
+                              "choices": [{"index": 0, "finish_reason": "tool_calls", "message": msg}],
+                              "usage": {"prompt_tokens": 1, "completion_tokens": 1, "total_tokens": 2}}).encode()
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(out)
+
+        def log_message(self, *a):
+            pass
+
+    srv = HTTPServer(("127.0.0.1", 0), Capture)
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    try:
+        h = Harness(make_model("openai/capture", f"http://127.0.0.1:{srv.server_port}/v1", "x"), CubeClient())
+        res = h.run(DB, "How many members are there?")
+    finally:
+        srv.shutdown()
+    assert res.query == {"measures": ["member.count"]}
+    expected = json.load(open(Path(__file__).parent.parent / "harness" / "tool_schema.json"))
+    assert captured["tools"] == expected
+
+
+def test_sql_to_cube_translation_verifies():
+    from harness.sql2cube import Catalog, Translator
+    c = CubeClient()
+    tr = Translator(Catalog(c.cubes_for(DB)))
+    q = next(q for q in json.load(open(BIRD / "dev.json")) if q["question_id"] == 1313)
+    cq = tr.translate(q["SQL"])
+    assert cq == {"measures": ["member.count"],
+                  "filters": [{"member": "major.college", "operator": "equals", "values": ["College of Engineering"]}]}
+    assert results_match(cube_rows(c.load(cq)), gold(1313))
