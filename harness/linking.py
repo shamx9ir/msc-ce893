@@ -59,24 +59,28 @@ def parse_schema(text: str) -> list[CubeText]:
 
 
 def linked_fields(schema_text: str, question: str, evidence: str | None = None,
-                  max_fields: int = 8) -> list[str]:
+                  max_fields: int = 5) -> list[str]:
     """Dimensions whose names the question or hint mention, best first.
 
-    A name the hint spells out (e.g. `bond_type = '-'`) ranks highest; words that only repeat
-    the cube's own name count for little, so `superhero.id` does not match "superheroes"."""
+    A name the hint spells out (e.g. `bond_type = '-'`) ranks highest. Other words count by how
+    rare they are among the field names (1 / number of fields containing the word), so a word
+    like "school" that appears in a dozen field names does not pull them all in. Words that only
+    repeat the cube's own name are ignored, so `superhero.id` does not match "superheroes"."""
+    dims = [m for c in parse_schema(schema_text) for m in c.members if m.kind == "dim"]
+    own = {m.name: m.name_tokens - tokens(m.name.split(".", 1)[0]) for m in dims}
+    df: dict[str, int] = {}
+    for toks in own.values():
+        for t in toks:
+            df[t] = df.get(t, 0) + 1
     q = tokens(question) | tokens(evidence or "")
-    hint_t = tokens(evidence or "")
     hint = (evidence or "").lower()
 
     def score(m: Member) -> float:
-        own = m.name_tokens - tokens(m.name.split(".", 1)[0])
-        s = 2.0 * len(own & q) + 1.0 * len(own & hint_t) + 0.3 * len(m.desc_tokens & q)
-        s += 0.5 * len((m.name_tokens - own) & q)
+        s = sum(2.0 / df[t] for t in own[m.name] & q)
         bare = m.name.split(".", 1)[-1].lower()
         if len(bare) > 3 and re.search(r"(?<![a-z0-9_])" + re.escape(bare) + r"(?![a-z0-9_])", hint):
             s += 5
         return s
 
-    scored = [(score(m), i, m) for i, m in enumerate(
-        m for c in parse_schema(schema_text) for m in c.members if m.kind == "dim")]
-    return [m.name for s, _, m in sorted(scored, key=lambda x: (-x[0], x[1])) if s >= 1.5][:max_fields]
+    scored = [(score(m), i, m) for i, m in enumerate(dims)]
+    return [m.name for s, _, m in sorted(scored, key=lambda x: (-x[0], x[1])) if s >= 1.0][:max_fields]

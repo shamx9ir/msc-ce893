@@ -194,6 +194,11 @@ class Harness:
             return f"Unknown query keys {sorted(unknown_keys)}. Allowed: {sorted(QUERY_KEYS)}."
         known = self.cube.member_names(db)
         bad = [m for m in _members_in(query) if m not in known]
+        exprs = [m for m in bad if isinstance(m, str) and re.search(r"[()*/+:]| when ", m.lower())]
+        if exprs:
+            return (f"{exprs[0]} is an expression, but members must be names from the schema exactly "
+                    f"(e.g. cube.count, cube.sum_x, cube.dim). Cube cannot compute formulas; return the "
+                    f"measures you need, filtered as the question asks.")
         if bad:
             hints = {m: difflib.get_close_matches(m, known, n=3) for m in bad}
             return "Unknown members: " + "; ".join(

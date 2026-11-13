@@ -73,6 +73,7 @@ def user_prompt(question: str, evidence: str | None, schema: str | None = None) 
         from .linking import linked_fields
         fields = linked_fields(schema, question, evidence)
         if fields:
-            text += "\nFields that match words in the question or hint: " + ", ".join(fields)
+            text += ("\nPossibly relevant fields (they share words with the question or hint; this is not a "
+                     "list of columns to return): " + ", ".join(fields))
     return text
 
