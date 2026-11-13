@@ -83,7 +83,7 @@ def cube_rows(rows: list[dict]) -> list[tuple]:
 
 
 def load_questions(bird_dir: Path, dbs: list[str], ids: set[int] | None, limit: int | None):
-    qs = [q for q in json.load(open(bird_dir / "dev.json")) if q["db_id"] in dbs]
+    qs = [q for q in json.load(open(bird_dir / "dev.json", encoding="utf-8")) if q["db_id"] in dbs]
     if ids:
         qs = [q for q in qs if q["question_id"] in ids]
     return qs[:limit] if limit else qs
@@ -101,6 +101,7 @@ def main() -> None:
     ap.add_argument("--base-url", help="model server URL, e.g. http://localhost:11434 (Ollama) "
                                        "or http://localhost:8000/v1 (vLLM)")
     ap.add_argument("--api-key")
+    ap.add_argument("--num-ctx", type=int, default=16384, help="Ollama context window (same for both arms)")
     ap.add_argument("--cube-url", default="http://localhost:4000/cubejs-api/v1")
     ap.add_argument("--mode", choices=["tools", "single"], default="tools")
     ap.add_argument("--max-steps", type=int, default=8)
@@ -109,16 +110,16 @@ def main() -> None:
     ap.add_argument("--out", type=Path, required=True)
     args = ap.parse_args()
 
-    ids = set(json.load(open(args.ids_file))) if args.ids_file else None
+    ids = set(json.load(open(args.ids_file, encoding="utf-8"))) if args.ids_file else None
     questions = load_questions(args.bird_dir, args.db, ids, args.limit)
-    harness = Harness(make_model(args.model, args.base_url, args.api_key),
+    harness = Harness(make_model(args.model, args.base_url, args.api_key, num_ctx=args.num_ctx),
                       CubeClient(args.cube_url), mode=args.mode, max_steps=args.max_steps)
     args.out.parent.mkdir(parents=True, exist_ok=True)
     done = set()
     if args.out.exists():  # resume
-        done = {json.loads(line)["question_id"] for line in open(args.out)}
+        done = {json.loads(line)["question_id"] for line in open(args.out, encoding="utf-8")}
     correct = relaxed_total = total = 0
-    with open(args.out, "a") as f:
+    with open(args.out, "a", encoding="utf-8") as f:
         for q in questions:
             if q["question_id"] in done:
                 continue

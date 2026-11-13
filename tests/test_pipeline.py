@@ -38,7 +38,7 @@ class ScriptedLLM(BaseLlm):
 
 
 def gold(qid):
-    q = next(q for q in json.load(open(BIRD / "dev.json")) if q["question_id"] == qid)
+    q = next(q for q in json.load(open(BIRD / "dev.json", encoding="utf-8")) if q["question_id"] == qid)
     return run_gold(BIRD / "dev_databases" / DB / f"{DB}.sqlite", q["SQL"])
 
 
@@ -125,7 +125,7 @@ def test_tool_schema_matches_litellm_request():
     finally:
         srv.shutdown()
     assert res.query == {"measures": ["member.count"]}
-    expected = json.load(open(Path(__file__).parent.parent / "harness" / "tool_schema.json"))
+    expected = json.load(open(Path(__file__).parent.parent / "harness" / "tool_schema.json", encoding="utf-8"))
     assert captured["tools"] == expected
 
 
@@ -133,7 +133,7 @@ def test_sql_to_cube_translation_verifies():
     from harness.sql2cube import Catalog, Translator
     c = CubeClient()
     tr = Translator(Catalog(c.cubes_for(DB)))
-    q = next(q for q in json.load(open(BIRD / "dev.json")) if q["question_id"] == 1313)
+    q = next(q for q in json.load(open(BIRD / "dev.json", encoding="utf-8")) if q["question_id"] == 1313)
     cq = tr.translate(q["SQL"])
     assert cq == {"measures": ["member.count"],
                   "filters": [{"member": "major.college", "operator": "equals", "values": ["College of Engineering"]}]}

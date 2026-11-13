@@ -49,7 +49,7 @@ def start_cube(duck: Path, model_dir: Path, port: int, log: Path) -> subprocess.
     npx = shutil.which("npx") or "npx"
     proc = subprocess.Popen([npx, "cubejs-server"], cwd=ROOT / "cube", env=env,
                             stdout=open(log, "w"), stderr=subprocess.STDOUT,
-                            start_new_session=True)  # own process group: npx spawns node children
+                            start_new_session=True, encoding="utf-8")  # own process group: npx spawns node children
     base = f"http://localhost:{port}"
     for _ in range(90):
         try:
@@ -95,14 +95,14 @@ def process_db(db: str, questions: list, args) -> collections.Counter:
     model_dir = work / f"model_{db}"
     model_dir.mkdir(exist_ok=True)
     (model_dir / f"{db}.yml").write_text(yaml.safe_dump(build_db(args.bird_dir, db, "train"),
-                                                        sort_keys=False, allow_unicode=True, width=120))
+                                                        sort_keys=False, allow_unicode=True, width=120), encoding="utf-8")
     proc = start_cube(duck, model_dir, args.port, work / f"cube_{db}.log")
     try:
         cube = CubeClient(f"http://localhost:{args.port}/cubejs-api/v1", timeout=args.timeout)
         (args.out / "schemas").mkdir(exist_ok=True)
-        (args.out / "schemas" / f"{db}.txt").write_text(cube.describe(db))
+        (args.out / "schemas" / f"{db}.txt").write_text(cube.describe(db), encoding="utf-8")
         tr = Translator(Catalog(cube.cubes_for(db)))
-        with open(args.out / "verified.jsonl", "a") as f:
+        with open(args.out / "verified.jsonl", "a", encoding="utf-8") as f:
             for q in questions:
                 try:
                     cq = tr.translate(q["SQL"])
@@ -115,7 +115,7 @@ def process_db(db: str, questions: list, args) -> collections.Counter:
                     gold = run_gold(sqlite_path, q["SQL"], timeout_s=args.timeout)
                 except Exception as e:
                     stats["exec_error"] += 1
-                    with open(args.out / "exec_errors.jsonl", "a") as ef:
+                    with open(args.out / "exec_errors.jsonl", "a", encoding="utf-8") as ef:
                         ef.write(json.dumps({"db_id": db, "sql": q["SQL"], "cube_query": cq,
                                              "error": str(e)[:300]}, default=str) + "\n")
                     continue
@@ -153,11 +153,11 @@ def main() -> None:
     args.out.mkdir(parents=True, exist_ok=True)
 
     by_db = collections.defaultdict(list)
-    for q in json.load(open(args.bird_dir / "train.json")):
+    for q in json.load(open(args.bird_dir / "train.json", encoding="utf-8")):
         q.setdefault("question_id", len(by_db[q["db_id"]]) + sum(map(len, by_db.values())))
         by_db[q["db_id"]].append(q)
     done_path = args.out / "stats.json"
-    all_stats = json.loads(done_path.read_text()) if done_path.exists() else {}
+    all_stats = json.loads(done_path.read_text(encoding="utf-8")) if done_path.exists() else {}
     for db in sorted(args.db or by_db):
         if db in all_stats:
             continue
@@ -169,7 +169,7 @@ def main() -> None:
             print(f"{db}: ERROR {e}")
         stats["questions"] = len(by_db[db])
         all_stats[db] = dict(stats)
-        done_path.write_text(json.dumps(all_stats, indent=1))
+        done_path.write_text(json.dumps(all_stats, indent=1), encoding="utf-8")
         print(f"{db}: {dict(stats)} ({time.time() - t0:.0f}s)", flush=True)
     total = collections.Counter()
     for s in all_stats.values():

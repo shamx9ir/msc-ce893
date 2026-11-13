@@ -41,12 +41,21 @@ class AgentResult:
 
 
 def make_model(model: str, base_url: str | None = None, api_key: str | None = None,
-               temperature: float = 0.0) -> LiteLlm:
+               temperature: float = 0.0, num_ctx: int | None = 16384,
+               max_tokens: int | None = 1024) -> LiteLlm:
     """`model` is a LiteLLM id, e.g. "ollama_chat/qwen2.5-coder:7b" or "openai/my-lora" (vLLM).
-    A bare name like "qwen2.5-coder:7b" is treated as an Ollama model."""
+    A bare name like "qwen2.5-coder:7b" is treated as an Ollama model.
+
+    num_ctx: Ollama's context window. Its default (4,096) is shorter than the formula_1 prompt,
+    which silently truncates the conversation, so both arms run with the same larger window.
+    max_tokens caps one reply, so a runaway generation cannot stall a question."""
     if "/" not in model:
         model = f"ollama_chat/{model}"
     kwargs = {"temperature": temperature}
+    if max_tokens:
+        kwargs["max_tokens"] = max_tokens
+    if num_ctx and model.startswith("ollama"):
+        kwargs["num_ctx"] = num_ctx
     if base_url:
         kwargs["api_base"] = base_url
     if api_key:

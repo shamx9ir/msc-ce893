@@ -26,7 +26,7 @@ sys.path.insert(0, str(ROOT))
 from harness.agent import system_prompt  # noqa: E402
 from harness.prompts import user_prompt  # noqa: E402
 
-TOOLS = json.loads((ROOT / "harness" / "tool_schema.json").read_text())
+TOOLS = json.loads((ROOT / "harness" / "tool_schema.json").read_text(encoding="utf-8"))
 
 
 def dumps(obj) -> str:
@@ -63,12 +63,12 @@ def main() -> None:
     args = ap.parse_args()
 
     recs = list({(r["db_id"], r["question_id"]): r for r in
-                 map(json.loads, open(args.data / "verified.jsonl"))}.values())  # dedupe resumed runs
-    test_dbs = {"formula_1", "student_club"} | {q["db_id"] for q in json.load(open(ROOT / "data/bird/dev.json"))} \
+                 map(json.loads, open(args.data / "verified.jsonl", encoding="utf-8"))}.values())  # dedupe resumed runs
+    test_dbs = {"formula_1", "student_club"} | {q["db_id"] for q in json.load(open(ROOT / "data/bird/dev.json", encoding="utf-8"))} \
         if (ROOT / "data/bird/dev.json").exists() else {"formula_1", "student_club"}
     leaked = [r for r in recs if r["db_id"] in test_dbs]
     assert not leaked, f"{len(leaked)} training pairs come from test databases"
-    schemas = {p.stem: p.read_text() for p in (args.data / "schemas").glob("*.txt")}
+    schemas = {p.stem: p.read_text(encoding="utf-8") for p in (args.data / "schemas").glob("*.txt")}
     dbs = sorted({r["db_id"] for r in recs})
     random.Random(args.seed).shuffle(dbs)
     val_dbs = set(dbs[: max(1, round(len(dbs) * args.val_share))])
@@ -79,11 +79,11 @@ def main() -> None:
             rows = [example(r, schemas[r["db_id"]], mode, not args.no_evidence) for r in recs
                     if (r["db_id"] in val_dbs) == (split == "val")]
             path = args.out / f"sft_{mode}_{split}.jsonl"
-            with open(path, "w") as f:
+            with open(path, "w", encoding="utf-8") as f:
                 for row in rows:
                     f.write(dumps(row) + "\n")
             counts[path.name] = len(rows)
-    (args.out / "split.json").write_text(dumps({"val_dbs": sorted(val_dbs), "counts": counts}))
+    (args.out / "split.json").write_text(dumps({"val_dbs": sorted(val_dbs), "counts": counts}), encoding="utf-8")
     print(counts, "val dbs:", sorted(val_dbs))
 
 
