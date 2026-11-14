@@ -4,7 +4,8 @@ Each example is the conversation the harness would have on a perfect run:
   system  - the same system prompt ADK sends (instruction + ADK's agent line), with the
             database's Cube schema
   user    - the question and BIRD's hint
-  tools mode:  assistant calls run_query(query) -> tool returns the real preview ->
+  tools mode:  [assistant calls search_values for a filter value, when the record has "searches"] ->
+               assistant calls run_query(query) -> tool returns the real preview ->
                assistant calls submit_answer(query) -> "Accepted."
   single mode: assistant replies with the query JSON
 
@@ -46,10 +47,16 @@ def example(rec: dict, schema: str, mode: str, with_evidence: bool = True) -> di
         msgs.append({"role": "assistant", "content": dumps(q)})
         return {"messages": msgs}
     preview = dumps({"row_count": rec["row_count"], "rows": rec["preview"]})
-    msgs += [{"role": "assistant", "content": "", "tool_calls": [tool_call(0, "run_query", {"query": q})]},
-             {"role": "tool", "tool_call_id": "call_0", "name": "run_query", "content": preview},
-             {"role": "assistant", "content": "", "tool_calls": [tool_call(1, "submit_answer", {"query": q})]},
-             {"role": "tool", "tool_call_id": "call_1", "name": "submit_answer", "content": "Accepted."}]
+    i = 0
+    for srch in rec.get("searches") or []:  # value lookups, added by scripts/add_value_searches.py
+        msgs += [{"role": "assistant", "content": "", "tool_calls": [
+                     tool_call(i, "search_values", {"dimension": srch["dimension"], "text": srch["text"]})]},
+                 {"role": "tool", "tool_call_id": f"call_{i}", "name": "search_values", "content": dumps(srch["result"])}]
+        i += 1
+    msgs += [{"role": "assistant", "content": "", "tool_calls": [tool_call(i, "run_query", {"query": q})]},
+             {"role": "tool", "tool_call_id": f"call_{i}", "name": "run_query", "content": preview},
+             {"role": "assistant", "content": "", "tool_calls": [tool_call(i + 1, "submit_answer", {"query": q})]},
+             {"role": "tool", "tool_call_id": f"call_{i + 1}", "name": "submit_answer", "content": "Accepted."}]
     return {"messages": msgs, "tools": TOOLS}
 
 

@@ -134,7 +134,7 @@ python -m harness.evaluate --db superhero --db toxicology --db california_school
 Rebuild the chat-format files after any prompt change (`data/sft/` is not in git):
 
 ```bash
-python scripts/make_sft.py --data training_data --out data/sft
+python scripts/make_sft.py --data training_data --out data/sft      # training_data already has search_values steps (scripts/add_value_searches.py, needs BIRD train)
 pip install torch --index-url https://download.pytorch.org/whl/cu128 && pip install -r requirements-train.txt
 python scripts/train_lora.py --base Qwen/Qwen2.5-Coder-7B-Instruct --out lora/qwen7b --dry-run   # check masking
 python scripts/train_lora.py --base Qwen/Qwen2.5-Coder-7B-Instruct --out lora/qwen7b
