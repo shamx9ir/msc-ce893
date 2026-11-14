@@ -1,0 +1,82 @@
+cube Community_Area
+  dim  Community_Area.community_area_no (number) -- unique community area number
+  dim  Community_Area.community_area_name (string) -- community area name
+  dim  Community_Area.side (string) -- district
+  dim  Community_Area.population (string) -- population of the community
+  meas Community_Area.count (count)
+cube District
+  dim  District.district_no (number) -- unique number identifying the district
+  dim  District.district_name (string) -- name of the district
+  dim  District.address (string) -- Street address of the police district building
+  dim  District.zip_code (number) -- ZIP code of the police district building
+  dim  District.commander (string) -- Name of the district's commanding officer the person who should be responsible for the crime case.
+  dim  District.email (string) -- Email address to contact district administrators
+  dim  District.phone (string) -- Main telephone number for the district
+  dim  District.fax (string) -- Fax number for the district
+  dim  District.tty (string) -- Number of the district teletype machine. A teletype machine is a device that lets people who are deaf, hard of hearing, or speech-impaired use the telephone to communicate, by allowing them to type text messages.
+  dim  District.twitter (string) -- The district twitter handle. Twitter is a social networking service on which users post and interact with brief messages known as "tweets"
+  meas District.count (count)
+  meas District.sum_zip_code (sum)
+  meas District.avg_zip_code (avg)
+  meas District.min_zip_code (min)
+  meas District.max_zip_code (max)
+cube FBI_Code
+  dim  FBI_Code.fbi_code_no (string) -- unique code made by fbi to classify the crime cases
+  dim  FBI_Code.title (string) -- Short description of the kind of crime
+  dim  FBI_Code.description (string) -- Detailed description of the kind of crime
+  dim  FBI_Code.crime_against (string) -- States who the crime is against. Values are Persons, Property, Society, or "Persons and Society"
+  meas FBI_Code.count (count)
+cube IUCR
+  dim  IUCR.iucr_no (string) -- Unique identifier for the incident classification
+  dim  IUCR.primary_description (string) -- The general description of the incident classification It's the general description
+  dim  IUCR.secondary_description (string) -- The specific description of the incident classification It's the specific description
+  dim  IUCR.index_code (string) -- Uses values "I" and "N" to indicate crimes â¢ "Indexed" (severe, such as murder, rape, arson, and robbery) â¢ "Non-Indexed" (less severe, such as vandalism, weapons violations, and peace disturbance)
+  meas IUCR.count (count)
+cube Neighborhood
+  dim  Neighborhood.neighborhood_name (string) -- The neighborhood name as used in everyday communication
+  dim  Neighborhood.community_area_no (number) -- The community area in which most of the neighborhood is located
+  meas Neighborhood.count (count)
+cube Ward
+  dim  Ward.ward_no (number)
+  dim  Ward.alderman_first_name (string)
+  dim  Ward.alderman_last_name (string)
+  dim  Ward.alderman_name_suffix (string)
+  dim  Ward.ward_office_address (string)
+  dim  Ward.ward_office_zip (string)
+  dim  Ward.ward_email (string)
+  dim  Ward.ward_office_phone (string)
+  dim  Ward.ward_office_fax (string)
+  dim  Ward.city_hall_office_room (number)
+  dim  Ward.city_hall_office_phone (string)
+  dim  Ward.city_hall_office_fax (string)
+  dim  Ward.Population (number)
+  meas Ward.count (count)
+  meas Ward.sum_city_hall_office_room (sum)
+  meas Ward.avg_city_hall_office_room (avg)
+  meas Ward.min_city_hall_office_room (min)
+  meas Ward.max_city_hall_office_room (max)
+  meas Ward.sum_Population (sum)
+  meas Ward.avg_Population (avg)
+  meas Ward.min_Population (min)
+  meas Ward.max_Population (max)
+cube Crime
+  dim  Crime.report_no (number) -- unique Numeric identifier of the crime report.
+  dim  Crime.case_number (string) -- Case number assigned to the reported crime. There is usually one case number for any reported crime except in the case of multiple homicide where a single report will produce one case number for each victim if case_number appears > 1, it means this is a multiple homicide
+  dim  Crime.date (string) -- Date of the occurrence of the incident being reported
+  dim  Crime.block (string) -- A redacted address indicating in which city block the incident occurred
+  dim  Crime.iucr_no (string) -- Illinois Uniform Crime Reporting code: a four digit code used to classify criminal incidents when taking reports.
+  dim  Crime.location_description (string) -- A description of the kind of area where incident occurred
+  dim  Crime.arrest (string) -- A true/false value indicating if an arrest has been made
+  dim  Crime.domestic (string) -- A true/false value indicating if the incident is as case of domestic violence
+  dim  Crime.beat (number)
+  dim  Crime.district_no (number) -- A number indicating the geographic subdivision of the police district where the incident occurred
+  dim  Crime.ward_no (number) -- A two digit number identifying the legislative district (ward) where the incident occurred.
+  dim  Crime.community_area_no (number) -- A number identifying one of 77 geographic areas where the incident occurred
+  dim  Crime.fbi_code_no (string) -- A code identifying the type of crime reported according to the classification scheme used by the FBI.
+  dim  Crime.latitude (string) -- The latitude where incident is reported to have occurred.
+  dim  Crime.longitude (string) -- The longitude where incident is reported to have occurred. The precise location / coordinate: combines the longitude and latitude for plotting purposes. (latitude, longitude)
+  meas Crime.count (count)
+  meas Crime.sum_beat (sum)
+  meas Crime.avg_beat (avg)
+  meas Crime.min_beat (min)
+  meas Crime.max_beat (max)

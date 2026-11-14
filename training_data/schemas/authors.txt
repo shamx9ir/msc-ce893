@@ -1,0 +1,36 @@
+cube Author
+  dim  Author.Id (number) -- Id of the author
+  dim  Author.Name (string) -- Author Name
+  dim  Author.Affiliation (string) -- Organization name with which the author is affiliated. the name of an organization with which an author can be affiliated
+  meas Author.count (count)
+cube Conference
+  dim  Conference.Id (number) -- Conference Id
+  dim  Conference.ShortName (string) -- Short name
+  dim  Conference.FullName (string) -- Full name
+  dim  Conference.HomePage (string) -- Homepage URL of conference
+  meas Conference.count (count)
+cube Journal
+  dim  Journal.Id (number) -- Journal Id
+  dim  Journal.ShortName (string) -- Short name
+  dim  Journal.FullName (string) -- Full name
+  dim  Journal.HomePage (string) -- Homepage URL of journal
+  meas Journal.count (count)
+cube Paper
+  dim  Paper.Id (number) -- Id of the paper
+  dim  Paper.Title (string) -- Title of the paper
+  dim  Paper.Year (number) -- Year of the paper commonsense reasoning: if the year is "0", it means this paper is preprint, or not published
+  dim  Paper.ConferenceId (number) -- Conference Id in which paper was published
+  dim  Paper.JournalId (number) -- Journal Id in which paper was published commonsense reasoning: If a paper contain "0" in both ConferenceID and JournalId, it means this paper is preprint
+  dim  Paper.Keyword (string) -- Keywords of the paper commonsense reasoning: Keywords should contain words and phrases that suggest what the topic is about. Similar keywords represent similar fields or sub-field.
+  meas Paper.count (count)
+  meas Paper.sum_Year (sum)
+  meas Paper.avg_Year (avg)
+  meas Paper.min_Year (min)
+  meas Paper.max_Year (max)
+cube PaperAuthor
+  dim  PaperAuthor.row_key (string)
+  dim  PaperAuthor.PaperId (number) -- Paper Id
+  dim  PaperAuthor.AuthorId (number) -- Author Id commonsense reasoning: A paper can have more than one author. Co-authorship can be derived from (paper ID, author ID) pair.
+  dim  PaperAuthor.Name (string) -- Author Name (as written on paper)
+  dim  PaperAuthor.Affiliation (string) -- Author Affiliation (as written on paper) the name of an organization with which an author can be affiliated
+  meas PaperAuthor.count (count)

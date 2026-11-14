@@ -1,0 +1,73 @@
+cube city
+  dim  city.id (number) -- the unique identifier of the city
+  dim  city.city_name (string) -- the name of the city
+  meas city.count (count)
+cube games
+  dim  games.id (number) -- the unique identifier of the game
+  dim  games.games_year (number) -- the year of the game
+  dim  games.games_name (string) -- the name of the game games_name is 'games_year season'
+  dim  games.season (string) -- the season of the game The Olympics are held every four years and include both summer and winter games. The summer games include a wide range of sports, such as athletics, swimming, and gymnastics, while the winter games feature sports that are played on ice or snow, such as ice hockey, figure skating, and skiing.
+  meas games.count (count)
+  meas games.sum_games_year (sum)
+  meas games.avg_games_year (avg)
+  meas games.min_games_year (min)
+  meas games.max_games_year (max)
+cube games_city
+  dim  games_city.row_key (string)
+  dim  games_city.games_id (number) -- the id of the game Maps to games(id)
+  dim  games_city.city_id (number) -- the id of the city that held the game Maps to city(id)
+  meas games_city.count (count)
+cube medal
+  dim  medal.id (number) -- the unique identifier of the metal
+  dim  medal.medal_name (string) -- the name of the medal
+  meas medal.count (count)
+cube noc_region
+  dim  noc_region.id (number) -- the unique identifier of the noc region
+  dim  noc_region.noc (string) -- the NOC code of the region A NOC code is a number used by the International Olympic Committee (IOC) to identify each of the national Olympic committees (NOCs) from around the world.
+  dim  noc_region.region_name (string) -- the name of the region
+  meas noc_region.count (count)
+cube person
+  dim  person.id (number) -- the unique identifier of the person
+  dim  person.full_name (string) -- the full name of the person A person's full name is the complete name that they are known by, which typically includes their first name, middle name (if applicable), and last name.
+  dim  person.gender (string) -- the gender of the person M stands for male and F stands for female.
+  dim  person.height (number) -- the height of the person
+  dim  person.weight (number) -- the weight of the person The unit of height is cm, and the unit of weight is kg. If the height or the weight of the person is 0, it means his/her height or weight is missing.
+  meas person.count (count)
+  meas person.sum_height (sum)
+  meas person.avg_height (avg)
+  meas person.min_height (min)
+  meas person.max_height (max)
+  meas person.sum_weight (sum)
+  meas person.avg_weight (avg)
+  meas person.min_weight (min)
+  meas person.max_weight (max)
+cube games_competitor
+  dim  games_competitor.id (number) -- the unique identifier of the record
+  dim  games_competitor.games_id (number) -- the id of the game Maps to games(id)
+  dim  games_competitor.person_id (number) -- the id of the person Maps to person(id) The times a person participated in the Olympics games could be calculated by grouping by person_id.
+  dim  games_competitor.age (number) -- the age of the person when he/she participated in the game If person A's age was 22 when he participated in game A and his age was 24 when he participated in game B, it means that game A was held two years earlier than game B.
+  meas games_competitor.count (count)
+  meas games_competitor.sum_age (sum)
+  meas games_competitor.avg_age (avg)
+  meas games_competitor.min_age (min)
+  meas games_competitor.max_age (max)
+cube person_region
+  dim  person_region.row_key (string)
+  dim  person_region.person_id (number) -- the id of the person Maps to person(id)
+  dim  person_region.region_id (number) -- the id of the noc region Maps to noc_region(id)
+  meas person_region.count (count)
+cube sport
+  dim  sport.id (number) -- the unique identifier of the sport
+  dim  sport.sport_name (string) -- the name of the sport
+  meas sport.count (count)
+cube event
+  dim  event.id (number) -- the unique identifier of the event
+  dim  event.sport_id (number) -- the id of the sport Maps to sport(id) There may be different events for the same sport in Olympics.
+  dim  event.event_name (string) -- the name of the event
+  meas event.count (count)
+cube competitor_event
+  dim  competitor_event.row_key (string)
+  dim  competitor_event.event_id (number) -- the id of the event Maps to event(id)
+  dim  competitor_event.competitor_id (number) -- the id of the competitor Maps to games_competitor(id) The number of competitors who participated in a specific event could be calculated by grouping by event_id.
+  dim  competitor_event.medal_id (number) -- the id of the medal Maps to medal(id) For a specific event, the competitor whose medal_id = 1 is the champion, the competitor whose medal_id = 2 is the runner-up, and the competitor whose medal_id = 3 got third place.
+  meas competitor_event.count (count)

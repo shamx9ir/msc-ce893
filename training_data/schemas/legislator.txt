@@ -1,0 +1,143 @@
+cube current
+  dim  current.row_key (string)
+  dim  current.ballotpedia_id (string) -- The ballotpedia.org page name for the person (spaces are given as spaces, not underscores). if this value is null or empty, it means this legislator doesn't have account on ballotpedia.org
+  dim  current.bioguide_id (string) -- The alphanumeric ID for this legislator
+  dim  current.birthday_bio (time) -- The legislator's birthday, in YYYY-MM-DD format.
+  dim  current.cspan_id (number) -- The numeric ID for this legislator on C-SPAN's video website, if this value is null or empty, it means this legislator doesn't have account on C-SPAN's video website
+  dim  current.fec_id (string) -- A list of IDs for this legislator in Federal Election Commission data. if this value is null or empty, it means this legislator hasn't not been registered in Federal Election Commission data.
+  dim  current.first_name (string) -- first name of the legislator
+  dim  current.gender_bio (string) -- gender of the legislator
+  dim  current.google_entity_id_id (string) -- google entity id if this value is null or empty, it means this legislator are not google entities
+  dim  current.govtrack_id (number) -- The numeric ID for this legislator on GovTrack.us if this value is null or empty, it means this legislator doesn't have account on GovTrack.us
+  dim  current.house_history_id (number) -- The numeric ID for this legislator on http://history.house.gov/People/Search/ The ID is present only for members who have served in the U.S. House.
+  dim  current.icpsr_id (number) -- The numeric ID for this legislator in Keith Poole's VoteView.com website, originally based on an ID system by the Interuniversity Consortium for Political and Social Research (stored as an integer). if this value is null or empty, it means this legislator doesn't have account on VoteView.com
+  dim  current.last_name (string) -- last name of the legislator
+  dim  current.lis_id (string) -- The alphanumeric ID for this legislator found in Senate roll call votes The ID is present only for members who attended in Senate roll call votes
+  dim  current.maplight_id (number) -- The numeric ID for this legislator on maplight.org if this value is null or empty, it means this legislator doesn't have account on maplight.org
+  dim  current.middle_name (string) -- the middle name of the legislator
+  dim  current.nickname_name (string) -- nickname of the legislator
+  dim  current.official_full_name (string) -- official full name
+  dim  current.opensecrets_id (string) -- The alphanumeric ID for this legislator on OpenSecrets.org. if this value is null or empty, it means this legislator doesn't have account on OpenSecrets.org.
+  dim  current.religion_bio (string) -- The legislator's religion.
+  dim  current.suffix_name (string) -- suffix name
+  dim  current.thomas_id (number) -- The numeric ID for this legislator on http://thomas.gov and http://beta.congress.gov. if this value is null or empty, it means this legislator doesn't have account on both http://thomas.gov and http://beta.congress.gov.
+  dim  current.votesmart_id (number) -- The numeric ID for this legislator on VoteSmart.org if this value is null or empty, it means this legislator doesn't have account on VoteSmart.org
+  dim  current.wikidata_id (string) -- the id for wikidata
+  dim  current.wikipedia_id (string) -- The Wikipedia page name for the person if a legislator has wikipedia id, it means he or she is famous or impact
+  meas current.count (count)
+cube current_terms
+  dim  current_terms.row_key (string)
+  dim  current_terms.address (string) -- the address of this legislator
+  dim  current_terms.bioguide (string) -- The alphanumeric ID for this legislator
+  dim  current_terms.caucus (string) -- caucus For independents, the party that the legislator caucuses with, using the same values as the party field. Omitted if the legislator caucuses with the party indicated in the party field. When in doubt about the difference between the party and caucus fields, the party field is what displays after the legislator's name (i.e. "(D)") but the caucus field is what normally determines committee sen
+  dim  current_terms.chamber (string) -- chamber â¢ senate â¢ house
+  dim  current_terms.class (number) -- class For senators, their election class (1, 2, or 3). only senator has class, if the value is null or empty, it means this legislator is not senator.
+  dim  current_terms.contact_form (string) -- The website URL of the contact page on the legislator's official website
+  dim  current_terms.district (number) -- district For representatives, the district number they are serving from. if null or empty, they are not representatives.
+  dim  current_terms.end (time) -- the end of the term end: The date the term ended (because the Congress ended or the legislator died or resigned, etc.). End dates follow the Constitutional end of a term. Since 1935, terms begin and end on January 3 at noon in odd-numbered years, and thus a term end date may also be a term start date. Prior to 1935, terms began on March 4 and ended either on March 3 or March 4. The end date is the
+  dim  current_terms.fax (string) -- The fax number of the legislator's Washington, D.C. office only valid if the term is current
+  dim  current_terms.last (string) -- the last known number
+  dim  current_terms.name (string) -- not useful
+  dim  current_terms.office (string) -- office only valid if the term is current, otherwise the last known office
+  dim  current_terms.party (string) -- The political party of the legislator. If the legislator changed parties, this is the most recent party held during the term and party_affiliations will be set. Values are typically "Democrat", "Independent", or "Republican". The value typically matches the political party of the legislator on the ballot in his or her last election, although for state affiliate parties such as "Democratic Farmer L
+  dim  current_terms.party_affiliations (string) -- This field is present if the legislator changed party or caucus affiliation during the term. The value is a list of time periods, with start and end dates, each of which has a party field and a caucus field if applicable, with the same meanings as the main party and caucus fields. The time periods cover the entire term, so the first start will match the term start, the last end will match the term
+  dim  current_terms.phone (string) -- The phone number of the legislator's Washington, D.C. office only valid if the term is current, otherwise the last known number
+  dim  current_terms.relation (string) -- not useful
+  dim  current_terms.rss_url (string) -- The URL to the official website's RSS feed
+  dim  current_terms.start (time) -- The date legislative service began: the date the legislator was sworn in, if known, or else the beginning of the legislator's term. Since 1935 regularly elected terms begin on January 3 at noon on odd-numbered years, but when Congress does not first meet on January 3, term start dates might reflect that swearing-in occurred on a later date. (Prior to 1935, terms began on March 4 of odd-numbered ye
+  dim  current_terms.state (string) -- state code AK: Alaska AL: Alabama AR: Arkansas AZ: Arizona CA: California CO: Colorado CT: Connecticut DE: Delaware FL: Florida GA: Georgia HI: Hawaii IA: Iowa ID: Idaho IL: Illinois IN: Indiana KS: Kansas KY: Kentucky LA: Louisiana MA: Massachusetts MD: Maryland ME: Maine MI: Michigan MN: Minnesota MO: Missouri MS: Mississippi MT: Montana NC: North Carolina ND: North Dakota NE: Nebraska NH: New H
+  dim  current_terms.state_rank (string) -- whether they are the "junior" or "senior" senator only valid if the term is current, otherwise the senator's rank at the time the term ended only senator has this value
+  dim  current_terms.title (string) -- title of the legislator
+  dim  current_terms.type (string) -- The type of the term. Either "sen" for senators or "rep" for representatives and delegates to the House
+  dim  current_terms.url (string) -- The official website URL of the legislator only valid if the term is current
+  meas current_terms.count (count)
+  meas current_terms.sum_class (sum)
+  meas current_terms.avg_class (avg)
+  meas current_terms.min_class (min)
+  meas current_terms.max_class (max)
+  meas current_terms.sum_district (sum)
+  meas current_terms.avg_district (avg)
+  meas current_terms.min_district (min)
+  meas current_terms.max_district (max)
+cube historical
+  dim  historical.ballotpedia_id (string) -- The ballotpedia.org page name for the person (spaces are given as spaces, not underscores). if this value is null or empty, it means this legislator doesn't have account on ballotpedia.org
+  dim  historical.bioguide_id (string) -- The alphanumeric ID for this legislator
+  dim  historical.bioguide_previous_id (string) -- The previous alphanumeric ID for this legislator
+  dim  historical.birthday_bio (time) -- The legislator's birthday, in YYYY-MM-DD format.
+  dim  historical.cspan_id (string) -- The numeric ID for this legislator on C-SPAN's video website, if this value is null or empty, it means this legislator doesn't have account on C-SPAN's video website
+  dim  historical.fec_id (string) -- A list of IDs for this legislator in Federal Election Commission data. if this value is null or empty, it means this legislator hasn't not been registered in Federal Election Commission data.
+  dim  historical.first_name (string) -- first name of the legislator
+  dim  historical.gender_bio (string) -- gender of the legislator
+  dim  historical.google_entity_id_id (string) -- google entity id if this value is null or empty, it means this legislator are not google entities
+  dim  historical.govtrack_id (number) -- The numeric ID for this legislator on GovTrack.us if this value is null or empty, it means this legislator doesn't have account on GovTrack.us
+  dim  historical.house_history_alternate_id (string) -- The alternative numeric ID for this legislator
+  dim  historical.house_history_id (number) -- The numeric ID for this legislator on http://history.house.gov/People/Search/ The ID is present only for members who have served in the U.S. House.
+  dim  historical.icpsr_id (number) -- The numeric ID for this legislator in Keith Poole's VoteView.com website, originally based on an ID system by the Interuniversity Consortium for Political and Social Research (stored as an integer). if this value is null or empty, it means this legislator doesn't have account on VoteView.com
+  dim  historical.last_name (string) -- last name of the legislator
+  dim  historical.lis_id (string) -- The alphanumeric ID for this legislator found in Senate roll call votes The ID is present only for members who attended in Senate roll call votes
+  dim  historical.maplight_id (string) -- The numeric ID for this legislator on maplight.org if this value is null or empty, it means this legislator doesn't have account on maplight.org
+  dim  historical.middle_name (string) -- the middle name of the legislator
+  dim  historical.nickname_name (string) -- nickname of the legislator
+  dim  historical.official_full_name (string) -- official full name
+  dim  historical.opensecrets_id (string) -- The alphanumeric ID for this legislator on OpenSecrets.org. if this value is null or empty, it means this legislator doesn't have account on OpenSecrets.org.
+  dim  historical.religion_bio (string) -- The legislator's religion.
+  dim  historical.suffix_name (string) -- suffix name
+  dim  historical.thomas_id (string) -- The numeric ID for this legislator on http://thomas.gov and http://beta.congress.gov. if this value is null or empty, it means this legislator doesn't have account on both http://thomas.gov and http://beta.congress.gov.
+  dim  historical.votesmart_id (string) -- The numeric ID for this legislator on VoteSmart.org if this value is null or empty, it means this legislator doesn't have account on VoteSmart.org
+  dim  historical.wikidata_id (string) -- the id for wikidata
+  dim  historical.wikipedia_id (string) -- The Wikipedia page name for the person if a legislator has wikipedia id, it means he or she is famous or impact
+  meas historical.count (count)
+cube historical_terms
+  dim  historical_terms.address (string) -- the address of this legislator
+  dim  historical_terms.bioguide (string) -- The alphanumeric ID for this legislator
+  dim  historical_terms.chamber (string) -- chamber â¢ senate â¢ house
+  dim  historical_terms.class (number) -- class For senators, their election class (1, 2, or 3). only senator has class, if the value is null or empty, it means this legislator is not senator.
+  dim  historical_terms.contact_form (string) -- The website URL of the contact page on the legislator's official website
+  dim  historical_terms.district (number) -- district For representatives, the district number they are serving from. if null or empty, they are not representatives.
+  dim  historical_terms.end (time) -- the end of the term end: The date the term ended (because the Congress ended or the legislator died or resigned, etc.). End dates follow the Constitutional end of a term. Since 1935, terms begin and end on January 3 at noon in odd-numbered years, and thus a term end date may also be a term start date. Prior to 1935, terms began on March 4 and ended either on March 3 or March 4. The end date is the
+  dim  historical_terms.fax (string) -- The fax number of the legislator's Washington, D.C. office only valid if the term is current
+  dim  historical_terms.last (string) -- the last known number
+  dim  historical_terms.middle (string)
+  dim  historical_terms.name (string) -- not useful
+  dim  historical_terms.office (string) -- office only valid if the term is current, otherwise the last known office
+  dim  historical_terms.party (string) -- The political party of the legislator. If the legislator changed parties, this is the most recent party held during the term and party_affiliations will be set. Values are typically "Democrat", "Independent", or "Republican". The value typically matches the political party of the legislator on the ballot in his or her last election, although for state affiliate parties such as "Democratic Farmer L
+  dim  historical_terms.party_affiliations (string) -- This field is present if the legislator changed party or caucus affiliation during the term. The value is a list of time periods, with start and end dates, each of which has a party field and a caucus field if applicable, with the same meanings as the main party and caucus fields. The time periods cover the entire term, so the first start will match the term start, the last end will match the term
+  dim  historical_terms.phone (string) -- The phone number of the legislator's Washington, D.C. office only valid if the term is current, otherwise the last known number
+  dim  historical_terms.relation (string) -- not useful
+  dim  historical_terms.rss_url (string) -- The URL to the official website's RSS feed
+  dim  historical_terms.start (time) -- The date legislative service began: the date the legislator was sworn in, if known, or else the beginning of the legislator's term. Since 1935 regularly elected terms begin on January 3 at noon on odd-numbered years, but when Congress does not first meet on January 3, term start dates might reflect that swearing-in occurred on a later date. (Prior to 1935, terms began on March 4 of odd-numbered ye
+  dim  historical_terms.state (string) -- state code AK: Alaska AL: Alabama AR: Arkansas AZ: Arizona CA: California CO: Colorado CT: Connecticut DE: Delaware FL: Florida GA: Georgia HI: Hawaii IA: Iowa ID: Idaho IL: Illinois IN: Indiana KS: Kansas KY: Kentucky LA: Louisiana MA: Massachusetts MD: Maryland ME: Maine MI: Michigan MN: Minnesota MO: Missouri MS: Mississippi MT: Montana NC: North Carolina ND: North Dakota NE: Nebraska NH: New H
+  dim  historical_terms.state_rank (string) -- whether they are the "junior" or "senior" senator only valid if the term is current, otherwise the senator's rank at the time the term ended only senator has this value
+  dim  historical_terms.title (string) -- title of the legislator
+  dim  historical_terms.type (string) -- The type of the term. Either "sen" for senators or "rep" for representatives and delegates to the House
+  dim  historical_terms.url (string) -- The official website URL of the legislator only valid if the term is current
+  meas historical_terms.count (count)
+  meas historical_terms.sum_class (sum)
+  meas historical_terms.avg_class (avg)
+  meas historical_terms.min_class (min)
+  meas historical_terms.max_class (max)
+  meas historical_terms.sum_district (sum)
+  meas historical_terms.avg_district (avg)
+  meas historical_terms.min_district (min)
+  meas historical_terms.max_district (max)
+cube social_media
+  dim  social_media.bioguide (string) -- The unique alphanumeric ID for this legislator
+  dim  social_media.facebook (string) -- The username of the current official Facebook presence of the legislator.
+  dim  social_media.facebook_id (number) -- The numeric ID of the current official Facebook presence of the legislator.
+  dim  social_media.govtrack (number) -- The numeric ID for this legislator on GovTrack.us
+  dim  social_media.instagram (string) -- The current official Instagram handle of the legislator.
+  dim  social_media.instagram_id (number) -- The numeric ID of the current official Instagram handle of the legislator.
+  dim  social_media.thomas (number) -- The numeric ID for this legislator on http://thomas.gov and http://beta.congress.gov.
+  dim  social_media.twitter (string) -- The current official Twitter handle of the legislator.
+  dim  social_media.twitter_id (number) -- The numeric ID of the current official twitter handle of the legislator.
+  dim  social_media.youtube (string) -- The current official YouTube username of the legislator.
+  dim  social_media.youtube_id (string) -- The current official YouTube channel ID of the legislator.
+  meas social_media.count (count)
+  meas social_media.sum_govtrack (sum)
+  meas social_media.avg_govtrack (avg)
+  meas social_media.min_govtrack (min)
+  meas social_media.max_govtrack (max)
+  meas social_media.sum_thomas (sum)
+  meas social_media.avg_thomas (avg)
+  meas social_media.min_thomas (min)
+  meas social_media.max_thomas (max)

@@ -1,0 +1,67 @@
+cube City
+  dim  City.ID (number) -- the unique id for the city
+  dim  City.Name (string) -- the name of the city
+  dim  City.CountryCode (string) -- the country code of the country that the city is belonged
+  dim  City.District (string) -- the district where the city locates
+  dim  City.Population (number) -- the number of the population in the area more population --> more crowded
+  meas City.count (count)
+  meas City.sum_Population (sum)
+  meas City.avg_Population (avg)
+  meas City.min_Population (min)
+  meas City.max_Population (max)
+cube Country
+  dim  Country.Code (string) -- the unique country code of the country
+  dim  Country.Name (string) -- the country name
+  dim  Country.Continent (string) -- the continent that the country locates
+  dim  Country.Region (string) -- the region that the country locates
+  dim  Country.SurfaceArea (number) -- the surface area of the country
+  dim  Country.IndepYear (number) -- the year that the country declared independence
+  dim  Country.Population (number) -- the number of the population in the area more population --> more crowded
+  dim  Country.LifeExpectancy (number) -- the life expectancy at birth of the country Life expectancy at birth is defined as how long, on average, a newborn can expect to live if current death rates do not change
+  dim  Country.GNP (number) -- the GNP of the country GNP measures the total monetary value of the output produced by a country's residents.
+  dim  Country.GNPOld (number) -- Gross national product - old value.
+  dim  Country.LocalName (string) -- The country's local name
+  dim  Country.GovernmentForm (string) -- The country's goverment form. Republic: governmentform contains "Republic"
+  dim  Country.HeadOfState (string) -- The head of state full name.
+  dim  Country.Capital (number) -- The country's capital if the capital is null, it means this country doesn't have a city where a region's government is located
+  dim  Country.Code2 (string) -- The second country code.
+  meas Country.count (count)
+  meas Country.sum_SurfaceArea (sum)
+  meas Country.avg_SurfaceArea (avg)
+  meas Country.min_SurfaceArea (min)
+  meas Country.max_SurfaceArea (max)
+  meas Country.sum_IndepYear (sum)
+  meas Country.avg_IndepYear (avg)
+  meas Country.min_IndepYear (min)
+  meas Country.max_IndepYear (max)
+  meas Country.sum_Population (sum)
+  meas Country.avg_Population (avg)
+  meas Country.min_Population (min)
+  meas Country.max_Population (max)
+  meas Country.sum_LifeExpectancy (sum)
+  meas Country.avg_LifeExpectancy (avg)
+  meas Country.min_LifeExpectancy (min)
+  meas Country.max_LifeExpectancy (max)
+  meas Country.sum_GNP (sum)
+  meas Country.avg_GNP (avg)
+  meas Country.min_GNP (min)
+  meas Country.max_GNP (max)
+  meas Country.sum_GNPOld (sum)
+  meas Country.avg_GNPOld (avg)
+  meas Country.min_GNPOld (min)
+  meas Country.max_GNPOld (max)
+  meas Country.sum_Capital (sum)
+  meas Country.avg_Capital (avg)
+  meas Country.min_Capital (min)
+  meas Country.max_Capital (max)
+cube CountryLanguage
+  dim  CountryLanguage.row_key (string)
+  dim  CountryLanguage.CountryCode (string) -- The unique code for country
+  dim  CountryLanguage.Language (string) -- Country language
+  dim  CountryLanguage.IsOfficial (string) -- Information on whether the language is official in a given country T / F
+  dim  CountryLanguage.Percentage (number) -- Percentage of language use
+  meas CountryLanguage.count (count)
+  meas CountryLanguage.sum_Percentage (sum)
+  meas CountryLanguage.avg_Percentage (avg)
+  meas CountryLanguage.min_Percentage (min)
+  meas CountryLanguage.max_Percentage (max)

@@ -1,0 +1,31 @@
+cube Classification
+  dim  Classification.GeneID (string) -- unique identifier number of genes
+  dim  Classification.Localization (string) -- location
+  meas Classification.count (count)
+cube Genes
+  dim  Genes.row_key (string)
+  dim  Genes.GeneID (string) -- identifier number of genes
+  dim  Genes.Essential (string) -- essential
+  dim  Genes.Class (string) -- class
+  dim  Genes.Complex (string) -- Complex
+  dim  Genes.Phenotype (string) -- Phenotype ?: means: doesn't exit the phenotype
+  dim  Genes.Motif (string) -- Motif
+  dim  Genes.Chromosome (number) -- Chromosome
+  dim  Genes.Function (string) -- Function
+  dim  Genes.Localization (string)
+  meas Genes.count (count)
+  meas Genes.sum_Chromosome (sum)
+  meas Genes.avg_Chromosome (avg)
+  meas Genes.min_Chromosome (min)
+  meas Genes.max_Chromosome (max)
+cube Interactions
+  dim  Interactions.row_key (string)
+  dim  Interactions.GeneID1 (string) -- identifier number of genes
+  dim  Interactions.GeneID2 (string) -- identifier number of genes
+  dim  Interactions.Type (string) -- Type
+  dim  Interactions.Expression_Corr (number) -- Expression correlation score range: (0,1) if the value is the positive then it's "positively correlated" if the value is the negative then it's "negatively correlated" if the value is very high positively, it means two genes are highly correlated
+  meas Interactions.count (count)
+  meas Interactions.sum_Expression_Corr (sum)
+  meas Interactions.avg_Expression_Corr (avg)
+  meas Interactions.min_Expression_Corr (min)
+  meas Interactions.max_Expression_Corr (max)

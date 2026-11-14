@@ -1,0 +1,113 @@
+cube offices
+  dim  offices.officeCode (string) -- unique ID of the office unique ID of the office
+  dim  offices.city (string)
+  dim  offices.phone (string) -- phone number
+  dim  offices.addressLine1 (string) -- addressLine1
+  dim  offices.addressLine2 (string) -- addressLine2 addressLine1 + addressLine2 = entire address
+  dim  offices.state (string)
+  dim  offices.country (string) -- country
+  dim  offices.postalCode (string) -- postalCode
+  dim  offices.territory (string) -- territory
+  meas offices.count (count)
+cube employees
+  dim  employees.employeeNumber (number) -- unique string ID of the employees
+  dim  employees.lastName (string) -- last name of employees
+  dim  employees.firstName (string) -- first name of employees
+  dim  employees.extension (string) -- extension number
+  dim  employees.email (string) -- email
+  dim  employees.officeCode (string) -- office code of the employees
+  dim  employees.reportsTo (number) -- represents for organization structure such as who reports to whom "reportsTO" is the leader of the "employeeNumber"
+  dim  employees.jobTitle (string) -- job title
+  meas employees.count (count)
+  meas employees.sum_reportsTo (sum)
+  meas employees.avg_reportsTo (avg)
+  meas employees.min_reportsTo (min)
+  meas employees.max_reportsTo (max)
+cube customers
+  dim  customers.customerNumber (number) -- unique id number of customer
+  dim  customers.customerName (string) -- the name when the customer registered
+  dim  customers.contactLastName (string) -- contact last name
+  dim  customers.contactFirstName (string) -- contact first name
+  dim  customers.phone (string) -- phone
+  dim  customers.addressLine1 (string) -- addressLine1
+  dim  customers.addressLine2 (string) -- addressLine2 addressLine1 + addressLine2 = entire address
+  dim  customers.city (string) -- city
+  dim  customers.state (string) -- state
+  dim  customers.postalCode (string) -- postalCode
+  dim  customers.country (string) -- country
+  dim  customers.salesRepEmployeeNumber (number) -- sales representative employee number
+  dim  customers.creditLimit (number) -- credit limit
+  meas customers.count (count)
+  meas customers.sum_creditLimit (sum)
+  meas customers.avg_creditLimit (avg)
+  meas customers.min_creditLimit (min)
+  meas customers.max_creditLimit (max)
+cube orders
+  dim  orders.orderNumber (number) -- unique order number unique order number
+  dim  orders.orderDate (time) -- order date
+  dim  orders.requiredDate (time) -- required Date
+  dim  orders.shippedDate (time) -- shipped Date
+  dim  orders.status (string) -- status
+  dim  orders.comments (string) -- comments
+  dim  orders.customerNumber (number) -- customer number
+  meas orders.count (count)
+cube payments
+  dim  payments.row_key (string)
+  dim  payments.customerNumber (number) -- customer number
+  dim  payments.checkNumber (string) -- check Number
+  dim  payments.paymentDate (time) -- payment Date
+  dim  payments.amount (number) -- amount
+  meas payments.count (count)
+  meas payments.sum_amount (sum)
+  meas payments.avg_amount (avg)
+  meas payments.min_amount (min)
+  meas payments.max_amount (max)
+cube productlines
+  dim  productlines.productLine (string) -- unique product line name
+  dim  productlines.textDescription (string) -- text description
+  dim  productlines.htmlDescription (string) -- html description
+  dim  productlines.image (string) -- image
+  meas productlines.count (count)
+cube products
+  dim  products.productCode (string) -- unique product code
+  dim  products.productName (string) -- product name
+  dim  products.productLine (string) -- product line name
+  dim  products.productScale (string) -- product scale
+  dim  products.productVendor (string) -- product vendor
+  dim  products.productDescription (string) -- product description
+  dim  products.quantityInStock (number) -- quantity in stock
+  dim  products.buyPrice (number) -- buy price from vendors
+  dim  products.MSRP (number) -- Manufacturer Suggested Retail Price expected profits: msrp - buyPrice
+  meas products.count (count)
+  meas products.sum_quantityInStock (sum)
+  meas products.avg_quantityInStock (avg)
+  meas products.min_quantityInStock (min)
+  meas products.max_quantityInStock (max)
+  meas products.sum_buyPrice (sum)
+  meas products.avg_buyPrice (avg)
+  meas products.min_buyPrice (min)
+  meas products.max_buyPrice (max)
+  meas products.sum_MSRP (sum)
+  meas products.avg_MSRP (avg)
+  meas products.min_MSRP (min)
+  meas products.max_MSRP (max)
+cube orderdetails
+  dim  orderdetails.row_key (string)
+  dim  orderdetails.orderNumber (number) -- order number
+  dim  orderdetails.productCode (string) -- product code
+  dim  orderdetails.quantityOrdered (number) -- quantity ordered
+  dim  orderdetails.priceEach (number) -- price for each total price = quantityOrdered x priceEach
+  dim  orderdetails.orderLineNumber (number) -- order Line Number
+  meas orderdetails.count (count)
+  meas orderdetails.sum_quantityOrdered (sum)
+  meas orderdetails.avg_quantityOrdered (avg)
+  meas orderdetails.min_quantityOrdered (min)
+  meas orderdetails.max_quantityOrdered (max)
+  meas orderdetails.sum_priceEach (sum)
+  meas orderdetails.avg_priceEach (avg)
+  meas orderdetails.min_priceEach (min)
+  meas orderdetails.max_priceEach (max)
+  meas orderdetails.sum_orderLineNumber (sum)
+  meas orderdetails.avg_orderLineNumber (avg)
+  meas orderdetails.min_orderLineNumber (min)
+  meas orderdetails.max_orderLineNumber (max)

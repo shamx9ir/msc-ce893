@@ -1,0 +1,122 @@
+cube country
+  dim  country.country_id (number) -- the unique identifier of the country
+  dim  country.country_iso_code (string) -- the ISO code ISO codes are typically used to identify countries and their subdivisions, and there are different types of ISO codes depending on the specific application. Here we use ISO 3166 code to identify countries.
+  dim  country.country_name (string) -- the name of the country
+  meas country.count (count)
+cube department
+  dim  department.department_id (number) -- the unique identifier of the department
+  dim  department.department_name (string) -- the name of the department
+  meas department.count (count)
+cube gender
+  dim  gender.gender_id (number) -- the unique identifier of the gender
+  dim  gender.gender (string) -- the gender female/ male/ unspecified
+  meas gender.count (count)
+cube genre
+  dim  genre.genre_id (number) -- the unique identifier of the genre
+  dim  genre.genre_name (string) -- the genre
+  meas genre.count (count)
+cube keyword
+  dim  keyword.keyword_id (number) -- the unique identifier of the keyword
+  dim  keyword.keyword_name (string) -- the keyword
+  meas keyword.count (count)
+cube language
+  dim  language.language_id (number) -- the unique identifier of the language
+  dim  language.language_code (string) -- the code of the language Here we use ISO 639 codes to identify the language.
+  dim  language.language_name (string) -- the language name
+  meas language.count (count)
+cube language_role
+  dim  language_role.role_id (number) -- the unique identifier of the language id
+  dim  language_role.language_role (string) -- the language role In the context of language roles in a movie or other audio-visual production, "original" and "spoken" refer to the languages in which the movie was originally produced, and the languages spoken by the characters in the movie, respectively.
+  meas language_role.count (count)
+cube movie
+  dim  movie.movie_id (number) -- the unique identifier of the movie
+  dim  movie.title (string) -- the title of the movie
+  dim  movie.budget (number) -- the budget for the movie If a movie has higher popularity, it means that it is well-liked by a large number of people. This can be determined by looking at the movie's ratings and reviews, as well as the box office performance and overall buzz surrounding the film. Higher popularity often translates to more success for the movie, both financially and critically.
+  dim  movie.homepage (string) -- the homepage of the movie
+  dim  movie.overview (string) -- the overview of the movie
+  dim  movie.popularity (number) -- the popularity of the movie If a movie has higher popularity, it means that it is well-liked by a large number of people. This can be determined by looking at the movie's ratings and reviews, as well as the box office performance and overall buzz surrounding the film. Higher popularity often translates to more success for the movie, both financially and critically.
+  dim  movie.release_date (time) -- the release date of the movie
+  dim  movie.revenue (number) -- the revenue of the movie A higher vote average indicates that a greater proportion of people who have seen the movie have given it positive ratings.
+  dim  movie.runtime (number) -- the runtime of the movie
+  dim  movie.movie_status (string) -- the status of the movie The only value of this column is 'Released'.
+  dim  movie.tagline (string) -- the tagline of the movie
+  dim  movie.vote_average (number) -- the average vote for the movie A higher vote average indicates that a greater proportion of people who have seen the movie have given it positive ratings.
+  dim  movie.vote_count (number) -- the vote count for the movie If a movie has a higher vote average and vote count, it means that it has been well-received by audiences and critics. A higher vote count means that more people have rated the movie, which can indicate a greater level of interest in the film.
+  meas movie.count (count)
+  meas movie.sum_budget (sum)
+  meas movie.avg_budget (avg)
+  meas movie.min_budget (min)
+  meas movie.max_budget (max)
+  meas movie.sum_popularity (sum)
+  meas movie.avg_popularity (avg)
+  meas movie.min_popularity (min)
+  meas movie.max_popularity (max)
+  meas movie.sum_revenue (sum)
+  meas movie.avg_revenue (avg)
+  meas movie.min_revenue (min)
+  meas movie.max_revenue (max)
+  meas movie.sum_runtime (sum)
+  meas movie.avg_runtime (avg)
+  meas movie.min_runtime (min)
+  meas movie.max_runtime (max)
+  meas movie.sum_vote_average (sum)
+  meas movie.avg_vote_average (avg)
+  meas movie.min_vote_average (min)
+  meas movie.max_vote_average (max)
+  meas movie.sum_vote_count (sum)
+  meas movie.avg_vote_count (avg)
+  meas movie.min_vote_count (min)
+  meas movie.max_vote_count (max)
+cube movie_genres
+  dim  movie_genres.row_key (string)
+  dim  movie_genres.movie_id (number) -- the id of the movie Maps to movie(movie_id)
+  dim  movie_genres.genre_id (number) -- the id of the movie genre Maps to genre(genre_id)
+  meas movie_genres.count (count)
+cube movie_languages
+  dim  movie_languages.row_key (string)
+  dim  movie_languages.movie_id (number) -- the id of the movie Maps to movie(movie_id)
+  dim  movie_languages.language_id (number) -- the id of the movie language Maps to language(language_id)
+  dim  movie_languages.language_role_id (number) -- the id of the role's language
+  meas movie_languages.count (count)
+cube person
+  dim  person.person_id (number) -- the unique identifier of the person
+  dim  person.person_name (string) -- the name of the person
+  meas person.count (count)
+cube movie_crew
+  dim  movie_crew.row_key (string)
+  dim  movie_crew.movie_id (number) -- the id of the movie that the crew worked for Maps to movie(movie_id)
+  dim  movie_crew.person_id (number) -- the id of the crew Maps to person(person_id)
+  dim  movie_crew.department_id (number) -- the id of the crew's department Maps to department(department_id)
+  dim  movie_crew.job (string) -- the job of the crew A movie may involve several crews with the same job title.
+  meas movie_crew.count (count)
+cube production_company
+  dim  production_company.company_id (number) -- the unique identifier of the company
+  dim  production_company.company_name (string) -- the name of the company
+  meas production_company.count (count)
+cube production_country
+  dim  production_country.row_key (string)
+  dim  production_country.movie_id (number) -- the unique identifier of the movie
+  dim  production_country.country_id (number) -- the id of the country
+  meas production_country.count (count)
+cube movie_cast
+  dim  movie_cast.row_key (string)
+  dim  movie_cast.movie_id (number) -- the id of the movie Maps to movie(movie_id)
+  dim  movie_cast.person_id (number) -- the id of the person Maps to person(person_id)
+  dim  movie_cast.character_name (string) -- the character name
+  dim  movie_cast.gender_id (number) -- the id of the cast's gender Maps to gender(gender_id)
+  dim  movie_cast.cast_order (number) -- the cast order of the cast The cast order of a movie or television show refers to the sequence in which the actors and actresses are listed in the credits. This order is typically determined by the relative importance of each actor's role in the production, with the main actors and actresses appearing first, followed by the supporting cast and extras.
+  meas movie_cast.count (count)
+  meas movie_cast.sum_cast_order (sum)
+  meas movie_cast.avg_cast_order (avg)
+  meas movie_cast.min_cast_order (min)
+  meas movie_cast.max_cast_order (max)
+cube movie_keywords
+  dim  movie_keywords.row_key (string)
+  dim  movie_keywords.movie_id (number) -- the id of the movie Maps to movie(movie_id)
+  dim  movie_keywords.keyword_id (number) -- the id of the movie keyword Maps to keyword(keyword_id) A movie may have many keywords. Audience could get the genre of the movie according to the movie keywords.
+  meas movie_keywords.count (count)
+cube movie_company
+  dim  movie_company.row_key (string)
+  dim  movie_company.movie_id (number) -- the id of the movie Maps to movie(movie_id)
+  dim  movie_company.company_id (number) -- the id of the company that produced the movie Maps to production_company(company_id) If movies with different movie_id have the same company_id, it means these movies were made by the same company.
+  meas movie_company.count (count)

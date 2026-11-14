@@ -1,0 +1,287 @@
+cube CBSA
+  dim  CBSA.CBSA (number) -- the code of the cbsa officer
+  dim  CBSA.CBSA_name (string) -- the name and the position of the cbsa officer
+  dim  CBSA.CBSA_type (string) -- the office type of the officer
+  meas CBSA.count (count)
+cube state
+  dim  state.abbreviation (string) -- the abbreviation of the state name
+  dim  state.name (string) -- the state name
+  meas state.count (count)
+cube congress
+  dim  congress.cognress_rep_id (string) -- the representative id of congress representatives
+  dim  congress.first_name (string) -- the first name of the congress representative
+  dim  congress.last_name (string) -- the last name of the congress representative
+  dim  congress.CID (string) -- the unique identifier for the congress representative
+  dim  congress.party (string) -- the party of the representative
+  dim  congress.state (string) -- the state that the representative is from
+  dim  congress.abbreviation (string) -- the abbreviation of the state
+  dim  congress.House (string) -- the house that the representative is from
+  dim  congress.District (number) -- the id of the district that the representative represents The state is divided into different districts. The districts under the same state will be numbered uniformly. 'NA' means that the state is not divided into districts.
+  dim  congress.land_area (number) -- the land area of the district
+  meas congress.count (count)
+  meas congress.sum_District (sum)
+  meas congress.avg_District (avg)
+  meas congress.min_District (min)
+  meas congress.max_District (max)
+  meas congress.sum_land_area (sum)
+  meas congress.avg_land_area (avg)
+  meas congress.min_land_area (min)
+  meas congress.max_land_area (max)
+cube zip_data
+  dim  zip_data.zip_code (number) -- the zip code of the postal point
+  dim  zip_data.city (string) -- the city where the postal point locates
+  dim  zip_data.state (string) -- the state of the city
+  dim  zip_data.multi_county (string) -- whether the country that the city belongs to is multi_country The meaning of multi_country is consisting of or involving multiple countries.
+  dim  zip_data.type (string) -- the type of the postal point
+  dim  zip_data.organization (string) -- the organization to which the postal point belongs 'No data' means the postal point is not affiliated with any organization
+  dim  zip_data.time_zone (string) -- the time zone of the postal point location
+  dim  zip_data.daylight_savings (string) -- whether the location implements daylight savings Daylight saving is the practice of advancing clocks (typically by one hour) during warmer months so that darkness falls at a later clock time. As a result, there is one 23-hour day in late winter or early spring and one 25-hour day in autumn.
+  dim  zip_data.latitude (number) -- the latitude of the postal point location
+  dim  zip_data.longitude (number) -- the longitude of the postal point location
+  dim  zip_data.elevation (number) -- the elevation of the postal point location
+  dim  zip_data.state_fips (number) -- state-level FIPS code
+  dim  zip_data.county_fips (number) -- country-level FIPS code FIPS codes are numbers that uniquely identify geographic areas. The number of digits in FIPS codes varies depending on the level of geography.
+  dim  zip_data.region (string) -- the region where the postal point locates
+  dim  zip_data.division (string) -- the division of the organization
+  dim  zip_data.population_2020 (number) -- the population of the residential area in 2020 'No data' means that the postal point is not affiliated with any organization. Or the organization has no division.
+  dim  zip_data.population_2010 (number) -- the population of the residential area in 2010
+  dim  zip_data.households (number) -- the number of the households in the residential area
+  dim  zip_data.avg_house_value (number) -- the average house value in the residential area
+  dim  zip_data.avg_income_per_household (number) -- the average income per household in the residential area
+  dim  zip_data.persons_per_household (number) -- the number of persons per household residential area
+  dim  zip_data.white_population (number) -- the population of white people in the residential area
+  dim  zip_data.black_population (number) -- the population of black people in the residential area
+  dim  zip_data.hispanic_population (number) -- the population of Hispanic people in the residential area
+  dim  zip_data.asian_population (number) -- the population of Asian people in the residential area
+  dim  zip_data.american_indian_population (number) -- the population of American Indian people in the residential area
+  dim  zip_data.hawaiian_population (number) -- the population of Hawaiian people in the residential area
+  dim  zip_data.other_population (number) -- the population of other races in the residential area
+  dim  zip_data.male_population (number) -- the population of males in the residential area
+  dim  zip_data.female_population (number) -- the population of females in the residential area
+  dim  zip_data.median_age (number) -- the median age of the residential area gender ratio in the residential area = male_population / female_population if female_population != 0
+  dim  zip_data.male_median_age (number) -- the male median age in the residential area
+  dim  zip_data.female_median_age (number) -- the female median age in the residential area
+  dim  zip_data.residential_mailboxes (number) -- the number of residential mailboxes in the residential area
+  dim  zip_data.business_mailboxes (number) -- the number of business mailboxes in the residential area
+  dim  zip_data.total_delivery_receptacles (number) -- the total number of delivery receptacles
+  dim  zip_data.businesses (number) -- the number of businesses in the residential area
+  dim  zip_data.c_1st_quarter_payroll (number) -- the total wages reported in the 1st quarter payroll report of the residential area
+  dim  zip_data.annual_payroll (number) -- the total wages reported in the annual payroll report of the residential area
+  dim  zip_data.employees (number) -- the number of employees in the residential area Employers must submit periodic payroll reports to the Internal Revenue Service and state taxing authority. The report is used by employers to report wage information.
+  dim  zip_data.water_area (number) -- the water area of the residential area
+  dim  zip_data.land_area (number) -- the land area of the residential area
+  dim  zip_data.single_family_delivery_units (number) -- the number of single-family delivery units in the residential area
+  dim  zip_data.multi_family_delivery_units (number) -- the number of single-family delivery units in the residential area A single-family unit can be described as a single unit that accommodates only one family or tenant at a time on rent.
+  dim  zip_data.total_beneficiaries (number) -- the total number of beneficiaries of the postal service multi-family units are usually under a greater surface area with the capacity to accommodate more than one tenant or multiple families on rent at the same time
+  dim  zip_data.retired_workers (number) -- the number of retired workers in the residential area
+  dim  zip_data.disabled_workers (number) -- the number of disabled workers in the residential area
+  dim  zip_data.parents_and_widowed (number) -- the number of parents and widowed in the residential area
+  dim  zip_data.spouses (number) -- the number of spouses in the residential area
+  dim  zip_data.children (number) -- the number of children in the residential area
+  dim  zip_data.over_65 (number) -- the number of people whose age is over 65 in the residential area
+  dim  zip_data.monthly_benefits_all (number) -- all benefit payments by month no. of over_65 can refer to elders. Higher means more elders if the ratio: over_65 / children is higher: the aging is more serious.
+  dim  zip_data.monthly_benefits_retired_workers (number) -- monthly benefit payments for retired workers usd
+  dim  zip_data.monthly_benefits_widowed (number) -- monthly benefit payments for retired workers
+  dim  zip_data.CBSA (number) -- the code of the cbsa officer
+  meas zip_data.count (count)
+  meas zip_data.sum_latitude (sum)
+  meas zip_data.avg_latitude (avg)
+  meas zip_data.min_latitude (min)
+  meas zip_data.max_latitude (max)
+  meas zip_data.sum_longitude (sum)
+  meas zip_data.avg_longitude (avg)
+  meas zip_data.min_longitude (min)
+  meas zip_data.max_longitude (max)
+  meas zip_data.sum_elevation (sum)
+  meas zip_data.avg_elevation (avg)
+  meas zip_data.min_elevation (min)
+  meas zip_data.max_elevation (max)
+  meas zip_data.sum_state_fips (sum)
+  meas zip_data.avg_state_fips (avg)
+  meas zip_data.min_state_fips (min)
+  meas zip_data.max_state_fips (max)
+  meas zip_data.sum_county_fips (sum)
+  meas zip_data.avg_county_fips (avg)
+  meas zip_data.min_county_fips (min)
+  meas zip_data.max_county_fips (max)
+  meas zip_data.sum_population_2020 (sum)
+  meas zip_data.avg_population_2020 (avg)
+  meas zip_data.min_population_2020 (min)
+  meas zip_data.max_population_2020 (max)
+  meas zip_data.sum_population_2010 (sum)
+  meas zip_data.avg_population_2010 (avg)
+  meas zip_data.min_population_2010 (min)
+  meas zip_data.max_population_2010 (max)
+  meas zip_data.sum_households (sum)
+  meas zip_data.avg_households (avg)
+  meas zip_data.min_households (min)
+  meas zip_data.max_households (max)
+  meas zip_data.sum_avg_house_value (sum)
+  meas zip_data.avg_avg_house_value (avg)
+  meas zip_data.min_avg_house_value (min)
+  meas zip_data.max_avg_house_value (max)
+  meas zip_data.sum_avg_income_per_household (sum)
+  meas zip_data.avg_avg_income_per_household (avg)
+  meas zip_data.min_avg_income_per_household (min)
+  meas zip_data.max_avg_income_per_household (max)
+  meas zip_data.sum_persons_per_household (sum)
+  meas zip_data.avg_persons_per_household (avg)
+  meas zip_data.min_persons_per_household (min)
+  meas zip_data.max_persons_per_household (max)
+  meas zip_data.sum_white_population (sum)
+  meas zip_data.avg_white_population (avg)
+  meas zip_data.min_white_population (min)
+  meas zip_data.max_white_population (max)
+  meas zip_data.sum_black_population (sum)
+  meas zip_data.avg_black_population (avg)
+  meas zip_data.min_black_population (min)
+  meas zip_data.max_black_population (max)
+  meas zip_data.sum_hispanic_population (sum)
+  meas zip_data.avg_hispanic_population (avg)
+  meas zip_data.min_hispanic_population (min)
+  meas zip_data.max_hispanic_population (max)
+  meas zip_data.sum_asian_population (sum)
+  meas zip_data.avg_asian_population (avg)
+  meas zip_data.min_asian_population (min)
+  meas zip_data.max_asian_population (max)
+  meas zip_data.sum_american_indian_population (sum)
+  meas zip_data.avg_american_indian_population (avg)
+  meas zip_data.min_american_indian_population (min)
+  meas zip_data.max_american_indian_population (max)
+  meas zip_data.sum_hawaiian_population (sum)
+  meas zip_data.avg_hawaiian_population (avg)
+  meas zip_data.min_hawaiian_population (min)
+  meas zip_data.max_hawaiian_population (max)
+  meas zip_data.sum_other_population (sum)
+  meas zip_data.avg_other_population (avg)
+  meas zip_data.min_other_population (min)
+  meas zip_data.max_other_population (max)
+  meas zip_data.sum_male_population (sum)
+  meas zip_data.avg_male_population (avg)
+  meas zip_data.min_male_population (min)
+  meas zip_data.max_male_population (max)
+  meas zip_data.sum_female_population (sum)
+  meas zip_data.avg_female_population (avg)
+  meas zip_data.min_female_population (min)
+  meas zip_data.max_female_population (max)
+  meas zip_data.sum_median_age (sum)
+  meas zip_data.avg_median_age (avg)
+  meas zip_data.min_median_age (min)
+  meas zip_data.max_median_age (max)
+  meas zip_data.sum_male_median_age (sum)
+  meas zip_data.avg_male_median_age (avg)
+  meas zip_data.min_male_median_age (min)
+  meas zip_data.max_male_median_age (max)
+  meas zip_data.sum_female_median_age (sum)
+  meas zip_data.avg_female_median_age (avg)
+  meas zip_data.min_female_median_age (min)
+  meas zip_data.max_female_median_age (max)
+  meas zip_data.sum_residential_mailboxes (sum)
+  meas zip_data.avg_residential_mailboxes (avg)
+  meas zip_data.min_residential_mailboxes (min)
+  meas zip_data.max_residential_mailboxes (max)
+  meas zip_data.sum_business_mailboxes (sum)
+  meas zip_data.avg_business_mailboxes (avg)
+  meas zip_data.min_business_mailboxes (min)
+  meas zip_data.max_business_mailboxes (max)
+  meas zip_data.sum_total_delivery_receptacles (sum)
+  meas zip_data.avg_total_delivery_receptacles (avg)
+  meas zip_data.min_total_delivery_receptacles (min)
+  meas zip_data.max_total_delivery_receptacles (max)
+  meas zip_data.sum_businesses (sum)
+  meas zip_data.avg_businesses (avg)
+  meas zip_data.min_businesses (min)
+  meas zip_data.max_businesses (max)
+  meas zip_data.sum_c_1st_quarter_payroll (sum)
+  meas zip_data.avg_c_1st_quarter_payroll (avg)
+  meas zip_data.min_c_1st_quarter_payroll (min)
+  meas zip_data.max_c_1st_quarter_payroll (max)
+  meas zip_data.sum_annual_payroll (sum)
+  meas zip_data.avg_annual_payroll (avg)
+  meas zip_data.min_annual_payroll (min)
+  meas zip_data.max_annual_payroll (max)
+  meas zip_data.sum_employees (sum)
+  meas zip_data.avg_employees (avg)
+  meas zip_data.min_employees (min)
+  meas zip_data.max_employees (max)
+  meas zip_data.sum_water_area (sum)
+  meas zip_data.avg_water_area (avg)
+  meas zip_data.min_water_area (min)
+  meas zip_data.max_water_area (max)
+  meas zip_data.sum_land_area (sum)
+  meas zip_data.avg_land_area (avg)
+  meas zip_data.min_land_area (min)
+  meas zip_data.max_land_area (max)
+  meas zip_data.sum_single_family_delivery_units (sum)
+  meas zip_data.avg_single_family_delivery_units (avg)
+  meas zip_data.min_single_family_delivery_units (min)
+  meas zip_data.max_single_family_delivery_units (max)
+  meas zip_data.sum_multi_family_delivery_units (sum)
+  meas zip_data.avg_multi_family_delivery_units (avg)
+  meas zip_data.min_multi_family_delivery_units (min)
+  meas zip_data.max_multi_family_delivery_units (max)
+  meas zip_data.sum_total_beneficiaries (sum)
+  meas zip_data.avg_total_beneficiaries (avg)
+  meas zip_data.min_total_beneficiaries (min)
+  meas zip_data.max_total_beneficiaries (max)
+  meas zip_data.sum_retired_workers (sum)
+  meas zip_data.avg_retired_workers (avg)
+  meas zip_data.min_retired_workers (min)
+  meas zip_data.max_retired_workers (max)
+  meas zip_data.sum_disabled_workers (sum)
+  meas zip_data.avg_disabled_workers (avg)
+  meas zip_data.min_disabled_workers (min)
+  meas zip_data.max_disabled_workers (max)
+  meas zip_data.sum_parents_and_widowed (sum)
+  meas zip_data.avg_parents_and_widowed (avg)
+  meas zip_data.min_parents_and_widowed (min)
+  meas zip_data.max_parents_and_widowed (max)
+  meas zip_data.sum_spouses (sum)
+  meas zip_data.avg_spouses (avg)
+  meas zip_data.min_spouses (min)
+  meas zip_data.max_spouses (max)
+  meas zip_data.sum_children (sum)
+  meas zip_data.avg_children (avg)
+  meas zip_data.min_children (min)
+  meas zip_data.max_children (max)
+  meas zip_data.sum_over_65 (sum)
+  meas zip_data.avg_over_65 (avg)
+  meas zip_data.min_over_65 (min)
+  meas zip_data.max_over_65 (max)
+  meas zip_data.sum_monthly_benefits_all (sum)
+  meas zip_data.avg_monthly_benefits_all (avg)
+  meas zip_data.min_monthly_benefits_all (min)
+  meas zip_data.max_monthly_benefits_all (max)
+  meas zip_data.sum_monthly_benefits_retired_workers (sum)
+  meas zip_data.avg_monthly_benefits_retired_workers (avg)
+  meas zip_data.min_monthly_benefits_retired_workers (min)
+  meas zip_data.max_monthly_benefits_retired_workers (max)
+  meas zip_data.sum_monthly_benefits_widowed (sum)
+  meas zip_data.avg_monthly_benefits_widowed (avg)
+  meas zip_data.min_monthly_benefits_widowed (min)
+  meas zip_data.max_monthly_benefits_widowed (max)
+cube alias
+  dim  alias.zip_code (number) -- the zip code of the alias
+  dim  alias.alias (string) -- the alias of the city
+  meas alias.count (count)
+cube area_code
+  dim  area_code.row_key (string)
+  dim  area_code.zip_code (number) -- the zip code of the area
+  dim  area_code.area_code (number) -- the code of the area
+  meas area_code.count (count)
+cube avoid
+  dim  avoid.row_key (string)
+  dim  avoid.zip_code (number) -- the zip code of the bad alias
+  dim  avoid.bad_alias (string) -- the bad alias
+  meas avoid.count (count)
+cube country
+  dim  country.row_key (string)
+  dim  country.zip_code (number) -- the zip code of the state in the country
+  dim  country.county (string) -- the country
+  dim  country.state (string) -- the state of the country
+  meas country.count (count)
+cube zip_congress
+  dim  zip_congress.row_key (string)
+  dim  zip_congress.zip_code (number) -- the zip code of the district
+  dim  zip_congress.district (string) -- the district
+  meas zip_congress.count (count)

@@ -127,3 +127,22 @@ python -m harness.evaluate --db superhero --db toxicology --db california_school
 | v4 | e9d1d12 | schema linking: the question message lists fields the question/hint name (`--no-link` turns it off); column check also on text answers; text values on number filters caught | tune 22.5% (california_schools 0/40, toxicology 15/40) |
 | v4.1 | 309104f | linked fields weighted by word rarity, at most 5, labelled "not a list of columns to return"; formula-like members get a clear error | tune 24.2% / 30.8% |
 | v4.2 | (this) | an unchanged resubmit after the column warning is trimmed by the harness; text answers get the same check; timeDimensions must be time fields | not yet run |
+
+## LoRA arm
+
+`training_data/` holds the 3,531 verified BIRD-train question → Cube query pairs and their schemas.
+Rebuild the chat-format files after any prompt change (`data/sft/` is not in git):
+
+```bash
+python scripts/make_sft.py --data training_data --out data/sft
+pip install torch --index-url https://download.pytorch.org/whl/cu128 && pip install -r requirements-train.txt
+python scripts/train_lora.py --base Qwen/Qwen2.5-Coder-7B-Instruct --out lora/qwen7b --dry-run   # check masking
+python scripts/train_lora.py --base Qwen/Qwen2.5-Coder-7B-Instruct --out lora/qwen7b
+python scripts/export_ollama.py --base Qwen/Qwen2.5-Coder-7B-Instruct --adapter lora/qwen7b/final \
+    --llama-cpp ../llama.cpp --quantize ../llama.cpp/build/bin/llama-quantize --ollama-base qwen2.5-coder:7b --name qwen7b-cube-lora
+python -m harness.evaluate --db formula_1 --db student_club --ids-file splits/test_ids.json \
+    --model ollama_chat/qwen7b-cube-lora --setup lora-v4.2-7b --out runs/test_lora_7b.jsonl
+```
+
+The same with `Qwen2.5-Coder-14B-Instruct` / `qwen2.5-coder:14b` for the 14B arm. Both arms use harness v4.2,
+examples up to 4,096 tokens, and Q4_K_M weights in Ollama, so each LoRA model differs from its baseline only by the adapter.

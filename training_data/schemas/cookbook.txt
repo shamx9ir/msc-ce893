@@ -1,0 +1,131 @@
+cube Ingredient
+  dim  Ingredient.ingredient_id (number) -- the unique identifier for the ingredient
+  dim  Ingredient.category (string) -- the category of the ingredient
+  dim  Ingredient.name (string) -- the name of the ingredient
+  dim  Ingredient.plural (string) -- the plural suffix of the ingredient
+  meas Ingredient.count (count)
+cube Recipe
+  dim  Recipe.recipe_id (number) -- the unique identifier for the recipe
+  dim  Recipe.title (string) -- the title of the recipe
+  dim  Recipe.subtitle (string) -- the subtitle of the recipe
+  dim  Recipe.servings (number) -- the number of people the recipe can serve
+  dim  Recipe.yield_unit (string) -- the unit of the yield for the recipe
+  dim  Recipe.prep_min (number) -- the preparation minute of the recipe
+  dim  Recipe.cook_min (number) -- the cooked minute of the recipe
+  dim  Recipe.stnd_min (number) -- the stand minute of the price The stand minute stands for the time to take the dish away from the heat source. the total time of the recipe = prep_min + cook_min + stnd_min
+  dim  Recipe.source (string) -- the source of the recipe
+  dim  Recipe.intro (string) -- the introduction of the recipe
+  dim  Recipe.directions (string) -- the directions of the recipe
+  meas Recipe.count (count)
+  meas Recipe.sum_servings (sum)
+  meas Recipe.avg_servings (avg)
+  meas Recipe.min_servings (min)
+  meas Recipe.max_servings (max)
+  meas Recipe.sum_prep_min (sum)
+  meas Recipe.avg_prep_min (avg)
+  meas Recipe.min_prep_min (min)
+  meas Recipe.max_prep_min (max)
+  meas Recipe.sum_cook_min (sum)
+  meas Recipe.avg_cook_min (avg)
+  meas Recipe.min_cook_min (min)
+  meas Recipe.max_cook_min (max)
+  meas Recipe.sum_stnd_min (sum)
+  meas Recipe.avg_stnd_min (avg)
+  meas Recipe.min_stnd_min (min)
+  meas Recipe.max_stnd_min (max)
+cube Nutrition
+  dim  Nutrition.recipe_id (number) -- the id of the recipe
+  dim  Nutrition.protein (number) -- the protein content in the recipe
+  dim  Nutrition.carbo (number) -- the carbo content in the recipe
+  dim  Nutrition.alcohol (number) -- the alcohol content in the recipe
+  dim  Nutrition.total_fat (number) -- the total fat content in the recipe higher --> higher possibility to gain weight
+  dim  Nutrition.sat_fat (number) -- the saturated fat content in the recipe unsaturated fat = total_fat - saturated fat
+  dim  Nutrition.cholestrl (number) -- the cholesterol content in the recipe
+  dim  Nutrition.sodium (number) -- the sodium content in the recipe Salt/Sodium-Free - Less than 5 mg of sodium per serving Very Low Sodium - 35 mg of sodium or less per serving Low Sodium -140 mg of sodium or less per serving Reduced Sodium - At least 25% less sodium than the regular product Light in Sodium or Lightly Salted - At least 50% less sodium than the regular product No-Salt-Added or Unsalted - No salt is added during pro
+  dim  Nutrition.iron (number) -- the iron content in the recipe if iron > 20mg, it will lead to  constipation  feeling sick  being sick  stomach pain question could mention any of functions listed before.
+  dim  Nutrition.vitamin_c (number) -- the vitamin c content in the recipe Vitamin C, also known as ascorbic acid, if the VC is higher, it will:  helping to protect cells and keeping them healthy  maintaining healthy skin, blood vessels, bones and cartilage  helping with wound healing question could mention any of functions listed before.
+  dim  Nutrition.vitamin_a (number) -- the vitamin a content in the recipe higher --> beneficial to  helping your body's natural defense against illness and infection (the immune system) work properly  helping vision in dim light  keeping skin and the lining of some parts of the body, such as the nose, healthy question could mention any of functions listed before.
+  dim  Nutrition.fiber (number) -- the fiber a content in the recipe
+  dim  Nutrition.pcnt_cal_carb (number) -- percentage of carbo in total nutrient composition
+  dim  Nutrition.pcnt_cal_fat (number) -- percentage of fat in total nutrient composition
+  dim  Nutrition.pcnt_cal_prot (number) -- percentage of protein in total nutrient composition
+  dim  Nutrition.calories (number) -- the calories of the recipe
+  meas Nutrition.count (count)
+  meas Nutrition.sum_protein (sum)
+  meas Nutrition.avg_protein (avg)
+  meas Nutrition.min_protein (min)
+  meas Nutrition.max_protein (max)
+  meas Nutrition.sum_carbo (sum)
+  meas Nutrition.avg_carbo (avg)
+  meas Nutrition.min_carbo (min)
+  meas Nutrition.max_carbo (max)
+  meas Nutrition.sum_alcohol (sum)
+  meas Nutrition.avg_alcohol (avg)
+  meas Nutrition.min_alcohol (min)
+  meas Nutrition.max_alcohol (max)
+  meas Nutrition.sum_total_fat (sum)
+  meas Nutrition.avg_total_fat (avg)
+  meas Nutrition.min_total_fat (min)
+  meas Nutrition.max_total_fat (max)
+  meas Nutrition.sum_sat_fat (sum)
+  meas Nutrition.avg_sat_fat (avg)
+  meas Nutrition.min_sat_fat (min)
+  meas Nutrition.max_sat_fat (max)
+  meas Nutrition.sum_cholestrl (sum)
+  meas Nutrition.avg_cholestrl (avg)
+  meas Nutrition.min_cholestrl (min)
+  meas Nutrition.max_cholestrl (max)
+  meas Nutrition.sum_sodium (sum)
+  meas Nutrition.avg_sodium (avg)
+  meas Nutrition.min_sodium (min)
+  meas Nutrition.max_sodium (max)
+  meas Nutrition.sum_iron (sum)
+  meas Nutrition.avg_iron (avg)
+  meas Nutrition.min_iron (min)
+  meas Nutrition.max_iron (max)
+  meas Nutrition.sum_vitamin_c (sum)
+  meas Nutrition.avg_vitamin_c (avg)
+  meas Nutrition.min_vitamin_c (min)
+  meas Nutrition.max_vitamin_c (max)
+  meas Nutrition.sum_vitamin_a (sum)
+  meas Nutrition.avg_vitamin_a (avg)
+  meas Nutrition.min_vitamin_a (min)
+  meas Nutrition.max_vitamin_a (max)
+  meas Nutrition.sum_fiber (sum)
+  meas Nutrition.avg_fiber (avg)
+  meas Nutrition.min_fiber (min)
+  meas Nutrition.max_fiber (max)
+  meas Nutrition.sum_pcnt_cal_carb (sum)
+  meas Nutrition.avg_pcnt_cal_carb (avg)
+  meas Nutrition.min_pcnt_cal_carb (min)
+  meas Nutrition.max_pcnt_cal_carb (max)
+  meas Nutrition.sum_pcnt_cal_fat (sum)
+  meas Nutrition.avg_pcnt_cal_fat (avg)
+  meas Nutrition.min_pcnt_cal_fat (min)
+  meas Nutrition.max_pcnt_cal_fat (max)
+  meas Nutrition.sum_pcnt_cal_prot (sum)
+  meas Nutrition.avg_pcnt_cal_prot (avg)
+  meas Nutrition.min_pcnt_cal_prot (min)
+  meas Nutrition.max_pcnt_cal_prot (max)
+  meas Nutrition.sum_calories (sum)
+  meas Nutrition.avg_calories (avg)
+  meas Nutrition.min_calories (min)
+  meas Nutrition.max_calories (max)
+cube Quantity
+  dim  Quantity.quantity_id (number) -- the unique identifier for the quantity
+  dim  Quantity.recipe_id (number) -- the id of the recipe
+  dim  Quantity.ingredient_id (number) -- the id of the ingredient
+  dim  Quantity.max_qty (number) -- the max quantity of the ingredient
+  dim  Quantity.min_qty (number) -- the min quantity of the ingredient If max_qty equals to min_qty, it means that the ingredient must be rationed.
+  dim  Quantity.unit (string) -- the unit of the ingredient
+  dim  Quantity.preparation (string) -- 'No data' means the ingredient doesn't need preprocessing.
+  dim  Quantity.optional (string) -- whether the ingredient is optional
+  meas Quantity.count (count)
+  meas Quantity.sum_max_qty (sum)
+  meas Quantity.avg_max_qty (avg)
+  meas Quantity.min_max_qty (min)
+  meas Quantity.max_max_qty (max)
+  meas Quantity.sum_min_qty (sum)
+  meas Quantity.avg_min_qty (avg)
+  meas Quantity.min_min_qty (min)
+  meas Quantity.max_min_qty (max)

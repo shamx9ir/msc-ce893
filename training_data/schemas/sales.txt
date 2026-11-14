@@ -1,0 +1,32 @@
+cube Customers
+  dim  Customers.CustomerID (number) -- the unique id of the customer
+  dim  Customers.FirstName (string) -- the customer's first name
+  dim  Customers.MiddleInitial (string) -- the customer's middle initial
+  dim  Customers.LastName (string) -- the customer's last name
+  meas Customers.count (count)
+cube Employees
+  dim  Employees.EmployeeID (number) -- the unique id of the employee
+  dim  Employees.FirstName (string) -- the employee's first name
+  dim  Employees.MiddleInitial (string) -- the employee's middle initial
+  dim  Employees.LastName (string) -- the employee's last name
+  meas Employees.count (count)
+cube Products
+  dim  Products.ProductID (number) -- the unique id of the product
+  dim  Products.Name (string) -- the product name
+  dim  Products.Price (number) -- the price of the product unit price if the price = 0.0, it means this product is free or a gift
+  meas Products.count (count)
+  meas Products.sum_Price (sum)
+  meas Products.avg_Price (avg)
+  meas Products.min_Price (min)
+  meas Products.max_Price (max)
+cube Sales
+  dim  Sales.SalesID (number) -- the unique id of the sales
+  dim  Sales.SalesPersonID (number) -- the unique id of the sale person
+  dim  Sales.CustomerID (number) -- the unique id of the customer
+  dim  Sales.ProductID (number) -- the unique id of the product
+  dim  Sales.Quantity (number) -- trading quantity total price = quantity x Products' Price
+  meas Sales.count (count)
+  meas Sales.sum_Quantity (sum)
+  meas Sales.avg_Quantity (avg)
+  meas Sales.min_Quantity (min)
+  meas Sales.max_Quantity (max)

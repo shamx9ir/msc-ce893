@@ -1,0 +1,133 @@
+cube Attributes
+  dim  Attributes.attribute_id (number) -- unique number identifying the attribute
+  dim  Attributes.attribute_name (string) -- the name of the attribute
+  meas Attributes.count (count)
+cube Categories
+  dim  Categories.category_id (number)
+  dim  Categories.category_name (string)
+  meas Categories.count (count)
+cube Compliments
+  dim  Compliments.compliment_id (number)
+  dim  Compliments.compliment_type (string)
+  meas Compliments.count (count)
+cube Days
+  dim  Days.day_id (number) -- the unique id identifying the day of the week
+  dim  Days.day_of_week (string) -- indicate the day of the week
+  meas Days.count (count)
+cube Years
+  dim  Years.year_id (number) -- the unique number identifying the year
+  dim  Years.actual_year (number) -- actual year
+  meas Years.count (count)
+  meas Years.sum_actual_year (sum)
+  meas Years.avg_actual_year (avg)
+  meas Years.min_actual_year (min)
+  meas Years.max_actual_year (max)
+cube Business_Attributes
+  dim  Business_Attributes.row_key (string)
+  dim  Business_Attributes.attribute_id (number) -- id number identifying the attribute
+  dim  Business_Attributes.business_id (number) -- id number identifying the business
+  dim  Business_Attributes.attribute_value (string) -- sort of the attributes for each business None, No or FALSE means the business does not have the attribute.
+  meas Business_Attributes.count (count)
+cube Business_Categories
+  dim  Business_Categories.row_key (string)
+  dim  Business_Categories.business_id (number) -- id number identifying the business
+  dim  Business_Categories.category_id (number) -- id number identifying the categories
+  meas Business_Categories.count (count)
+cube Business_Hours
+  dim  Business_Hours.row_key (string)
+  dim  Business_Hours.business_id (number) -- id number identifying the business
+  dim  Business_Hours.day_id (number) -- id number identifying each day of the week
+  dim  Business_Hours.opening_time (string) -- opening time of the business
+  dim  Business_Hours.closing_time (string) -- closing time of the business how much time does this business open: closing_time - opening_time
+  meas Business_Hours.count (count)
+cube Checkins
+  dim  Checkins.row_key (string)
+  dim  Checkins.business_id (number) -- id number identifying the business
+  dim  Checkins.day_id (number) -- id number identifying each day of the week
+  dim  Checkins.label_time_0 (string) -- indicates times of checkins on a business label_time_0: 12:00 a.m. label_time_23: 23:00 p.m. If the label_time recorded "None" for check-in on one day, then it means the business is closed on that day.
+  dim  Checkins.label_time_1 (string)
+  dim  Checkins.label_time_2 (string)
+  dim  Checkins.label_time_3 (string)
+  dim  Checkins.label_time_4 (string)
+  dim  Checkins.label_time_5 (string)
+  dim  Checkins.label_time_6 (string)
+  dim  Checkins.label_time_7 (string)
+  dim  Checkins.label_time_8 (string)
+  dim  Checkins.label_time_9 (string)
+  dim  Checkins.label_time_10 (string)
+  dim  Checkins.label_time_11 (string)
+  dim  Checkins.label_time_12 (string)
+  dim  Checkins.label_time_13 (string)
+  dim  Checkins.label_time_14 (string)
+  dim  Checkins.label_time_15 (string)
+  dim  Checkins.label_time_16 (string)
+  dim  Checkins.label_time_17 (string)
+  dim  Checkins.label_time_18 (string)
+  dim  Checkins.label_time_19 (string)
+  dim  Checkins.label_time_20 (string)
+  dim  Checkins.label_time_21 (string)
+  dim  Checkins.label_time_22 (string)
+  dim  Checkins.label_time_23 (string)
+  meas Checkins.count (count)
+cube Elite
+  dim  Elite.row_key (string)
+  dim  Elite.user_id (number) -- id number identifying the users
+  dim  Elite.year_id (number) -- id number identifying the year
+  meas Elite.count (count)
+cube Reviews
+  dim  Reviews.row_key (string)
+  dim  Reviews.business_id (number) -- the number identifying the business
+  dim  Reviews.user_id (number) -- the number identifying the user who comments on this business
+  dim  Reviews.review_stars (number) -- review on this business 5  Great experience 4  Good experience 3  Average experience 2  Bad experience 1 - Terrible experience
+  dim  Reviews.review_votes_funny (string) -- the amount of funny votes that the user received for the review If the reviews receive an Uber number of votes for funny, they will also receive an Uber, High or Medium number of votes for useful and cool.
+  dim  Reviews.review_votes_useful (string) -- how many useful votes that the user received for the review
+  dim  Reviews.review_votes_cool (string) -- how many cool votes that the user received for the review
+  dim  Reviews.review_length (string) -- The length of the review written by the user
+  meas Reviews.count (count)
+  meas Reviews.sum_review_stars (sum)
+  meas Reviews.avg_review_stars (avg)
+  meas Reviews.min_review_stars (min)
+  meas Reviews.max_review_stars (max)
+cube Tips
+  dim  Tips.row_key (string)
+  dim  Tips.business_id (number) -- the number identifying the business
+  dim  Tips.user_id (number) -- the number identifying the user who comments on this business
+  dim  Tips.likes (number) -- how many likes of this tips more likes mean this tip is more valuable
+  dim  Tips.tip_length (string) -- length of the tip
+  meas Tips.count (count)
+  meas Tips.sum_likes (sum)
+  meas Tips.avg_likes (avg)
+  meas Tips.min_likes (min)
+  meas Tips.max_likes (max)
+cube Users_Compliments
+  dim  Users_Compliments.row_key (string)
+  dim  Users_Compliments.compliment_id (number) -- the id number indicating the compliment
+  dim  Users_Compliments.user_id (number) -- the id number indicating the user
+  dim  Users_Compliments.number_of_compliments (string) -- how many compliments a user has received from other users more number_of_compliments indicates this user is more welcome or he / she is high-quality user
+  meas Users_Compliments.count (count)
+cube Business
+  dim  Business.business_id (number) -- unique number identifying the business
+  dim  Business.active (string) -- whether the business is still actively running until now commonsense reasoning: � "True": the business is still running � "False": the business is closed or not running now
+  dim  Business.city (string) -- The city where the business is located
+  dim  Business.state (string) -- The state where the business is located
+  dim  Business.stars (number) -- ratings of the business 5 � Great experience 4 � Good experience 3 � Average experience 2 � Bad experience 1 - Terrible experience � the rating of >3 stars referring to "wonderful experience" or positive comments and vice versa
+  dim  Business.review_count (string) -- the total number of reviews the users have written for a business � If a business has a low total review count and a high star rating of >3, it means there is a low veracity of reviews. � higher review count and with high star rating of > 3 means this business is more popular or more appealing to users.
+  meas Business.count (count)
+  meas Business.sum_stars (sum)
+  meas Business.avg_stars (avg)
+  meas Business.min_stars (min)
+  meas Business.max_stars (max)
+cube Users
+  dim  Users.user_id (number) -- the unique id number identifying which user
+  dim  Users.user_yelping_since_year (number) -- the time when the user join Yelp
+  dim  Users.user_average_stars (string) -- the average ratings of all review
+  dim  Users.user_votes_funny (string) -- total number of funny votes sent by the user
+  dim  Users.user_votes_useful (string) -- how many useful votes created by the user
+  dim  Users.user_votes_cool (string) -- how many cool votes created by the user
+  dim  Users.user_review_count (string) -- total number of reviews the user has written
+  dim  Users.user_fans (string) -- total number of fans / followers the user has Users with Uber number of fans indicate that they have sent an Uber number of cool, useful and funny votes.
+  meas Users.count (count)
+  meas Users.sum_user_yelping_since_year (sum)
+  meas Users.avg_user_yelping_since_year (avg)
+  meas Users.min_user_yelping_since_year (min)
+  meas Users.max_user_yelping_since_year (max)

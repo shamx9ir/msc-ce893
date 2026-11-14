@@ -1,0 +1,249 @@
+cube institution_details
+  dim  institution_details.unitid (number) -- unique Education Unit ID number
+  dim  institution_details.chronname (string) -- Institution name
+  dim  institution_details.city (string) -- Institution city
+  dim  institution_details.state (string) -- Institution state
+  dim  institution_details.level (string) -- Level of institution 4-year: bachelor's degree 2-year: associate's degree
+  dim  institution_details.control (string) -- Control of institution Public, Private not-for-profit, Private for-profit
+  dim  institution_details.basic (string) -- Carnegie Foundation for the Advancement of Teaching Basic Classification (2010 version)
+  dim  institution_details.hbcu (string) -- Denotes Historically Black College and Universities
+  dim  institution_details.flagship (string) -- Denotes Public flagship institutions
+  dim  institution_details.long_x (number) -- Institution longitude
+  dim  institution_details.lat_y (number) -- Institution latitude institute Coordinate
+  dim  institution_details.site (string) -- Institution Web site address
+  dim  institution_details.student_count (number) -- Total number of undergraduates in 2010
+  dim  institution_details.awards_per_value (number) -- Completions per 100 FTE (full-time equivalency) undergraduate students (average 2011, 2012, and 2013)
+  dim  institution_details.awards_per_state_value (number) -- Completions per 100 FTE (full-time equivalency) undergraduate students, state and sector average  if his institute's completion (or graduation) rate exceeds the average for the state and sector in which it belongs: awards_per_value > awards_per_state_value  if his institute's completion (or graduation) rate falls below the average for the state and sector in which it belongs: awards_per_value < 
+  dim  institution_details.awards_per_natl_value (number) -- Completions per 100 FTE (full-time equivalency) undergraduate students, national sector average  if his institute's completion (or graduation) rate exceeds the average for the nationalin which it belongs: awards_per_value > awards_per_natl_value  if his institute's completion (or graduation) rate falls below the average for the state and industry in which it belongs: awards_per_value < awards_pe
+  dim  institution_details.exp_award_value (number) -- Estimated educational spending per academic award in 2013. Includes all certificates and degrees expenses related to instruction, research, public service, student services, academic support, institutional support, operations and maintenance. Includes all certificates and degrees
+  dim  institution_details.exp_award_state_value (number) -- Spending per completion, state and sector average
+  dim  institution_details.exp_award_natl_value (number) -- Spending per completion, national sector average
+  dim  institution_details.exp_award_percentile (number)
+  dim  institution_details.ft_pct (number) -- Percentage of undergraduates who attend full-time
+  dim  institution_details.fte_value (number) -- total number of full-time equivalent undergraduates
+  dim  institution_details.fte_percentile (number)
+  dim  institution_details.med_sat_value (string) -- Median estimated SAT value for incoming students
+  dim  institution_details.med_sat_percentile (string) -- Institution's percent rank for median SAT value within sector Institution's percent rank for median SAT value within sector
+  dim  institution_details.aid_value (number) -- The average amount of student aid going to undergraduate recipients
+  dim  institution_details.aid_percentile (number) -- Institution's percent rank for average amount of student aid going to undergraduate recipients within sector Institution's percent rank for average amount of student aid going to undergraduate recipients within sector
+  dim  institution_details.endow_value (string) -- End-of-year endowment value per full-time equivalent student
+  dim  institution_details.endow_percentile (string) -- Institution's percent rank for endowment value per full-time equivalent student within sector
+  dim  institution_details.grad_100_value (number) -- percentage of first-time, full-time, degree-seeking undergraduates who complete a degree or certificate program within 100 percent of expected time (bachelor's-seeking group at 4-year institutions) %, lower means harder to graduate for bachelor
+  dim  institution_details.grad_100_percentile (number) -- Institution's percent rank for completers within 100 percent of normal time within sector
+  dim  institution_details.grad_150_value (number) -- percentage of first-time, full-time, degree-seeking undergraduates who complete a degree or certificate program within 150 percent of expected time (bachelor's-seeking group at 4-year institutions) %, lower means harder to graduate for bachelor
+  dim  institution_details.grad_150_percentile (number) -- Institution's percent rank for completers within 150 percent of normal time within sector
+  dim  institution_details.pell_value (number) -- percentage of undergraduates receiving a Pell Grant
+  dim  institution_details.pell_percentile (number) -- Institution's percent rank for undergraduate Pell recipients within sector
+  dim  institution_details.retain_value (number) -- share of freshman students retained for a second year
+  dim  institution_details.retain_percentile (number) -- Institution's percent rank for freshman retention percentage within sector
+  dim  institution_details.ft_fac_value (number) -- Percentage of employees devoted to instruction, research or public service who are full-time and do not work for an associated medical school
+  dim  institution_details.ft_fac_percentile (number) -- Institution's percent rank for full-time faculty share within sector
+  dim  institution_details.vsa_year (string) -- Most recent year of Student Success and Progress Rate data available from the Voluntary System of Accountability
+  dim  institution_details.vsa_grad_after4_first (string) -- First-time, full-time students who graduated from this institution within four years
+  dim  institution_details.vsa_grad_elsewhere_after4_first (string) -- First-time, full-time students who graduated from another institution within four years
+  dim  institution_details.vsa_enroll_after4_first (string) -- First-time, full-time students who are still enrolled at this institution after four years
+  dim  institution_details.vsa_enroll_elsewhere_after4_first (string) -- First-time, full-time students who are enrolled at another institution after four years
+  dim  institution_details.vsa_grad_after6_first (string) -- First-time, full-time students who graduated from this institution within six years null: not available
+  dim  institution_details.vsa_grad_elsewhere_after6_first (string) -- First-time, full-time students who graduated from another institution within six years
+  dim  institution_details.vsa_enroll_after6_first (string) -- First-time, full-time students who are still enrolled at this institution after six years
+  dim  institution_details.vsa_enroll_elsewhere_after6_first (string) -- First-time, full-time students who are enrolled at another institution after six years
+  dim  institution_details.vsa_grad_after4_transfer (string) -- Full-time transfer students who graduated from this institution within four years
+  dim  institution_details.vsa_grad_elsewhere_after4_transfer (string) -- Full-time transfer students who graduated from this institution within four years
+  dim  institution_details.vsa_enroll_after4_transfer (string) -- Full-time transfer students who are still enrolled at this institution after four years
+  dim  institution_details.vsa_enroll_elsewhere_after4_transfer (string) -- Full-time transfer students who are enrolled at another institution after four years
+  dim  institution_details.vsa_grad_after6_transfer (string) -- Full-time transfer students who graduated from this institution within six years
+  dim  institution_details.vsa_grad_elsewhere_after6_transfer (string) -- Full-time transfer students who graduated from another institution within six years
+  dim  institution_details.vsa_enroll_after6_transfer (string) -- Full-time transfer students who are still enrolled at this institution after six years
+  dim  institution_details.vsa_enroll_elsewhere_after6_transfer (string) -- Full-time transfer students who are enrolled at another institution after six years
+  dim  institution_details.similar (string)
+  dim  institution_details.state_sector_ct (number)
+  dim  institution_details.carnegie_ct (number)
+  dim  institution_details.counted_pct (string)
+  dim  institution_details.nicknames (string)
+  dim  institution_details.cohort_size (number)
+  meas institution_details.count (count)
+  meas institution_details.sum_long_x (sum)
+  meas institution_details.avg_long_x (avg)
+  meas institution_details.min_long_x (min)
+  meas institution_details.max_long_x (max)
+  meas institution_details.sum_lat_y (sum)
+  meas institution_details.avg_lat_y (avg)
+  meas institution_details.min_lat_y (min)
+  meas institution_details.max_lat_y (max)
+  meas institution_details.sum_student_count (sum)
+  meas institution_details.avg_student_count (avg)
+  meas institution_details.min_student_count (min)
+  meas institution_details.max_student_count (max)
+  meas institution_details.sum_awards_per_value (sum)
+  meas institution_details.avg_awards_per_value (avg)
+  meas institution_details.min_awards_per_value (min)
+  meas institution_details.max_awards_per_value (max)
+  meas institution_details.sum_awards_per_state_value (sum)
+  meas institution_details.avg_awards_per_state_value (avg)
+  meas institution_details.min_awards_per_state_value (min)
+  meas institution_details.max_awards_per_state_value (max)
+  meas institution_details.sum_awards_per_natl_value (sum)
+  meas institution_details.avg_awards_per_natl_value (avg)
+  meas institution_details.min_awards_per_natl_value (min)
+  meas institution_details.max_awards_per_natl_value (max)
+  meas institution_details.sum_exp_award_value (sum)
+  meas institution_details.avg_exp_award_value (avg)
+  meas institution_details.min_exp_award_value (min)
+  meas institution_details.max_exp_award_value (max)
+  meas institution_details.sum_exp_award_state_value (sum)
+  meas institution_details.avg_exp_award_state_value (avg)
+  meas institution_details.min_exp_award_state_value (min)
+  meas institution_details.max_exp_award_state_value (max)
+  meas institution_details.sum_exp_award_natl_value (sum)
+  meas institution_details.avg_exp_award_natl_value (avg)
+  meas institution_details.min_exp_award_natl_value (min)
+  meas institution_details.max_exp_award_natl_value (max)
+  meas institution_details.sum_exp_award_percentile (sum)
+  meas institution_details.avg_exp_award_percentile (avg)
+  meas institution_details.min_exp_award_percentile (min)
+  meas institution_details.max_exp_award_percentile (max)
+  meas institution_details.sum_ft_pct (sum)
+  meas institution_details.avg_ft_pct (avg)
+  meas institution_details.min_ft_pct (min)
+  meas institution_details.max_ft_pct (max)
+  meas institution_details.sum_fte_value (sum)
+  meas institution_details.avg_fte_value (avg)
+  meas institution_details.min_fte_value (min)
+  meas institution_details.max_fte_value (max)
+  meas institution_details.sum_fte_percentile (sum)
+  meas institution_details.avg_fte_percentile (avg)
+  meas institution_details.min_fte_percentile (min)
+  meas institution_details.max_fte_percentile (max)
+  meas institution_details.sum_aid_value (sum)
+  meas institution_details.avg_aid_value (avg)
+  meas institution_details.min_aid_value (min)
+  meas institution_details.max_aid_value (max)
+  meas institution_details.sum_aid_percentile (sum)
+  meas institution_details.avg_aid_percentile (avg)
+  meas institution_details.min_aid_percentile (min)
+  meas institution_details.max_aid_percentile (max)
+  meas institution_details.sum_grad_100_value (sum)
+  meas institution_details.avg_grad_100_value (avg)
+  meas institution_details.min_grad_100_value (min)
+  meas institution_details.max_grad_100_value (max)
+  meas institution_details.sum_grad_100_percentile (sum)
+  meas institution_details.avg_grad_100_percentile (avg)
+  meas institution_details.min_grad_100_percentile (min)
+  meas institution_details.max_grad_100_percentile (max)
+  meas institution_details.sum_grad_150_value (sum)
+  meas institution_details.avg_grad_150_value (avg)
+  meas institution_details.min_grad_150_value (min)
+  meas institution_details.max_grad_150_value (max)
+  meas institution_details.sum_grad_150_percentile (sum)
+  meas institution_details.avg_grad_150_percentile (avg)
+  meas institution_details.min_grad_150_percentile (min)
+  meas institution_details.max_grad_150_percentile (max)
+  meas institution_details.sum_pell_value (sum)
+  meas institution_details.avg_pell_value (avg)
+  meas institution_details.min_pell_value (min)
+  meas institution_details.max_pell_value (max)
+  meas institution_details.sum_pell_percentile (sum)
+  meas institution_details.avg_pell_percentile (avg)
+  meas institution_details.min_pell_percentile (min)
+  meas institution_details.max_pell_percentile (max)
+  meas institution_details.sum_retain_value (sum)
+  meas institution_details.avg_retain_value (avg)
+  meas institution_details.min_retain_value (min)
+  meas institution_details.max_retain_value (max)
+  meas institution_details.sum_retain_percentile (sum)
+  meas institution_details.avg_retain_percentile (avg)
+  meas institution_details.min_retain_percentile (min)
+  meas institution_details.max_retain_percentile (max)
+  meas institution_details.sum_ft_fac_value (sum)
+  meas institution_details.avg_ft_fac_value (avg)
+  meas institution_details.min_ft_fac_value (min)
+  meas institution_details.max_ft_fac_value (max)
+  meas institution_details.sum_ft_fac_percentile (sum)
+  meas institution_details.avg_ft_fac_percentile (avg)
+  meas institution_details.min_ft_fac_percentile (min)
+  meas institution_details.max_ft_fac_percentile (max)
+  meas institution_details.sum_state_sector_ct (sum)
+  meas institution_details.avg_state_sector_ct (avg)
+  meas institution_details.min_state_sector_ct (min)
+  meas institution_details.max_state_sector_ct (max)
+  meas institution_details.sum_carnegie_ct (sum)
+  meas institution_details.avg_carnegie_ct (avg)
+  meas institution_details.min_carnegie_ct (min)
+  meas institution_details.max_carnegie_ct (max)
+  meas institution_details.sum_cohort_size (sum)
+  meas institution_details.avg_cohort_size (avg)
+  meas institution_details.min_cohort_size (min)
+  meas institution_details.max_cohort_size (max)
+cube institution_grads
+  dim  institution_grads.row_key (string)
+  dim  institution_grads.unitid (number) -- Education Unit ID number
+  dim  institution_grads.year (number) -- year of data release
+  dim  institution_grads.gender (string) -- gender of students 'B' = both genders; 'M' = male; 'F' = female
+  dim  institution_grads.race (string) -- race/ethnicity of students 'X' = all students; 'Ai' = American Indian; 'A' = Asian; 'B' = Black; 'H' = Hispanic; 'W' = White
+  dim  institution_grads.cohort (string) -- degree-seeking cohort type  '4y bach' = Bachelor's/equivalent-seeking cohort at 4-year institutions;  '4y other' = Students seeking another type of degree or certificate at a 4-year institution;  '2y all' = Degree-seeking students at 2-year institutions 4-year degree is bachelor's degree 2-year degree is associate's degree
+  dim  institution_grads.grad_cohort (string) -- Number of first-time, full-time, degree-seeking students in the cohort being tracked, minus any exclusions
+  dim  institution_grads.grad_100 (string) -- Number of students who graduated within 100 percent of normal/expected time
+  dim  institution_grads.grad_150 (string) -- Number of students who graduated within 150 percent of normal/expected time
+  dim  institution_grads.grad_100_rate (string) -- Percentage of students who graduated within 100 percent of normal/expected time
+  dim  institution_grads.grad_150_rate (string) -- Percentage of students who graduated within 150 percent of normal/expected time
+  meas institution_grads.count (count)
+  meas institution_grads.sum_year (sum)
+  meas institution_grads.avg_year (avg)
+  meas institution_grads.min_year (min)
+  meas institution_grads.max_year (max)
+cube state_sector_grads
+  dim  state_sector_grads.row_key (string)
+  dim  state_sector_grads.stateid (number) -- state FIPS (Federal Information Processing System) code
+  dim  state_sector_grads.state (string) -- state name
+  dim  state_sector_grads.state_abbr (string)
+  dim  state_sector_grads.control (string) -- Public, Private not-for-profit, Private for-profit
+  dim  state_sector_grads.level (string) -- Level of institution 4-year: bachelor's degree 2-year: associate's degree
+  dim  state_sector_grads.year (number) -- year of data release
+  dim  state_sector_grads.gender (string) -- gender of students B' = both genders; 'M' = male; 'F' = female
+  dim  state_sector_grads.race (string) -- race/ethnicity of students 'X' = all students; 'Ai' = American Indian; 'A' = Asian; 'B' = Black; 'H' = Hispanic; 'W' = White
+  dim  state_sector_grads.cohort (string) -- degree-seeking cohort type  '4y bach' = Bachelor's/equivalent-seeking cohort at 4-year institutions;  '4y other' = Students seeking another type of degree or certificate at a 4-year institution;  '2y all' = Degree-seeking students at 2-year institutions 4-year degree is bachelor's degree 2-year degree is associate's degree
+  dim  state_sector_grads.grad_cohort (string) -- Number of first-time, full-time, degree-seeking students in the cohort being tracked, minus any exclusions
+  dim  state_sector_grads.grad_100 (string) -- Number of students who graduated within 100 percent of normal/expected time
+  dim  state_sector_grads.grad_150 (string) -- Number of students who graduated within 150 percent of normal/expected time
+  dim  state_sector_grads.grad_100_rate (string) -- Percentage of students who graduated within 100 percent of normal/expected time
+  dim  state_sector_grads.grad_150_rate (string) -- Percentage of students who graduated within 150 percent of normal/expected time
+  dim  state_sector_grads.grad_cohort_ct (number) -- Number of institutions with data included in the cohort
+  meas state_sector_grads.count (count)
+  meas state_sector_grads.sum_year (sum)
+  meas state_sector_grads.avg_year (avg)
+  meas state_sector_grads.min_year (min)
+  meas state_sector_grads.max_year (max)
+  meas state_sector_grads.sum_grad_cohort_ct (sum)
+  meas state_sector_grads.avg_grad_cohort_ct (avg)
+  meas state_sector_grads.min_grad_cohort_ct (min)
+  meas state_sector_grads.max_grad_cohort_ct (max)
+cube state_sector_details
+  dim  state_sector_details.row_key (string)
+  dim  state_sector_details.stateid (number) -- state FIPS (Federal Information Processing System) code
+  dim  state_sector_details.state (string) -- state name
+  dim  state_sector_details.state_post (string)
+  dim  state_sector_details.level (string) -- Level of institution 4-year: bachelor's degree 2-year: associate's degree
+  dim  state_sector_details.control (string) -- Public, Private not-for-profit, Private for-profit
+  dim  state_sector_details.schools_count (number)
+  dim  state_sector_details.counted_pct (string) -- Percentage of students in the entering class (Fall 2007 at 4-year institutions, Fall 2010 at 2-year institutions) who are first-time, full-time, degree-seeking students and generally part of the official graduation rate
+  dim  state_sector_details.awards_per_state_value (string) -- Completions per 100 FTE (full-time equivalent) undergraduate students, state and sector average
+  dim  state_sector_details.awards_per_natl_value (number) -- Completions per 100 FTE (full-time equivalent) undergraduate students, national sector average
+  dim  state_sector_details.exp_award_state_value (string) -- Spending per completion, state and sector average
+  dim  state_sector_details.exp_award_natl_value (number) -- Spending per completion, national sector average
+  dim  state_sector_details.state_appr_value (string) -- State appropriations to higher education in fiscal year 2011 per resident
+  dim  state_sector_details.state_appr_rank (string)
+  dim  state_sector_details.grad_rate_rank (string)
+  dim  state_sector_details.awards_per_rank (string)
+  meas state_sector_details.count (count)
+  meas state_sector_details.sum_schools_count (sum)
+  meas state_sector_details.avg_schools_count (avg)
+  meas state_sector_details.min_schools_count (min)
+  meas state_sector_details.max_schools_count (max)
+  meas state_sector_details.sum_awards_per_natl_value (sum)
+  meas state_sector_details.avg_awards_per_natl_value (avg)
+  meas state_sector_details.min_awards_per_natl_value (min)
+  meas state_sector_details.max_awards_per_natl_value (max)
+  meas state_sector_details.sum_exp_award_natl_value (sum)
+  meas state_sector_details.avg_exp_award_natl_value (avg)
+  meas state_sector_details.min_exp_award_natl_value (min)
+  meas state_sector_details.max_exp_award_natl_value (max)

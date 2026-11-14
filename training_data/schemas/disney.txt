@@ -1,0 +1,54 @@
+cube characters
+  dim  characters.movie_title (string) -- unique title of the movie
+  dim  characters.release_date (string) -- The release date of the movie.
+  dim  characters.hero (string) -- The main character of the movie. round role
+  dim  characters.villian (string) -- The villain of the movie. a character whose evil actions or motives are important to the plot.
+  dim  characters.song (string) -- A song associated with the movie.
+  meas characters.count (count)
+cube director
+  dim  director.name (string) -- unique movie name
+  dim  director.director (string) -- the name of the director one director may have multiple movies. more movies --> this director is more productive
+  meas director.count (count)
+cube movies_total_gross
+  dim  movies_total_gross.row_key (string)
+  dim  movies_total_gross.movie_title (string) -- movie title
+  dim  movies_total_gross.release_date (string) -- release date
+  dim  movies_total_gross.genre (string) -- genre of the movie
+  dim  movies_total_gross.MPAA_rating (string) -- Motion Picture Association of America of the disney movie â¢ G: general audience â¢ PG: mature audiences or parental guidance suggested â¢ R: restricted: no children under 17 allowed without parents or adult guardians â¢ PG-13: PARENTS STRONGLY CAUTIONED. Some material may be inappropriate for children under 13 movies need accompany with parents: PG, PG-13, PG-17; if "Not rated" or null, it me
+  dim  movies_total_gross.total_gross (string) -- The total gross of the movie. more total_gross--> more popular movie
+  dim  movies_total_gross.inflation_adjusted_gross (string) -- The inflation-adjusted gross of the movie. estimated inflation rate = inflation_adjusted_gross / total_gross; the current gross = inflation_adjusted_gross
+  meas movies_total_gross.count (count)
+cube revenue
+  dim  revenue.Year (number) -- The year the movie was released.
+  dim  revenue.Studio_Entertainment_NI_1 (number) -- The studio entertainment segment of the Walt Disney Company.
+  dim  revenue.Disney_Consumer_Products_NI_2 (number) -- The consumer products segment of the Walt Disney Company.
+  dim  revenue.Disney_Interactive_NI_3_Rev_1 (number) -- The interactive segment of the Walt Disney Company.
+  dim  revenue.Walt_Disney_Parks_and_Resorts (number) -- The parks and resorts segment of the Walt Disney Company.
+  dim  revenue.Disney_Media_Networks (string) -- The media networks segment of the Walt Disney Company.
+  dim  revenue.Total (number) -- The total box office gross for the movie.
+  meas revenue.count (count)
+  meas revenue.sum_Studio_Entertainment_NI_1 (sum)
+  meas revenue.avg_Studio_Entertainment_NI_1 (avg)
+  meas revenue.min_Studio_Entertainment_NI_1 (min)
+  meas revenue.max_Studio_Entertainment_NI_1 (max)
+  meas revenue.sum_Disney_Consumer_Products_NI_2 (sum)
+  meas revenue.avg_Disney_Consumer_Products_NI_2 (avg)
+  meas revenue.min_Disney_Consumer_Products_NI_2 (min)
+  meas revenue.max_Disney_Consumer_Products_NI_2 (max)
+  meas revenue.sum_Disney_Interactive_NI_3_Rev_1 (sum)
+  meas revenue.avg_Disney_Interactive_NI_3_Rev_1 (avg)
+  meas revenue.min_Disney_Interactive_NI_3_Rev_1 (min)
+  meas revenue.max_Disney_Interactive_NI_3_Rev_1 (max)
+  meas revenue.sum_Walt_Disney_Parks_and_Resorts (sum)
+  meas revenue.avg_Walt_Disney_Parks_and_Resorts (avg)
+  meas revenue.min_Walt_Disney_Parks_and_Resorts (min)
+  meas revenue.max_Walt_Disney_Parks_and_Resorts (max)
+  meas revenue.sum_Total (sum)
+  meas revenue.avg_Total (avg)
+  meas revenue.min_Total (min)
+  meas revenue.max_Total (max)
+cube voice_actors
+  dim  voice_actors.character (string) -- The unique name of the character.
+  dim  voice_actors.voice_actor (string) -- The name of the voice actor.
+  dim  voice_actors.movie (string) -- The name of the movie.
+  meas voice_actors.count (count)

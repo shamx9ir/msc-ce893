@@ -1,0 +1,55 @@
+cube location
+  dim  location.LocationID (number) -- unique id of the location
+  dim  location.Country (string) -- the country
+  dim  location.State (string) -- the state
+  dim  location.StateCode (string) -- state code
+  dim  location.City (string) -- the city
+  meas location.count (count)
+cube user
+  dim  user.UserID (string) -- the unique id of the user
+  dim  user.Gender (string) -- user's gender Male / Female / Unknown
+  meas user.count (count)
+cube twitter
+  dim  twitter.TweetID (string) -- the unique id of the tweet
+  dim  twitter.Weekday (string) -- the weekday that the tweet has been posted
+  dim  twitter.Hour (number) -- the hour that the tweet has been posted
+  dim  twitter.Day (number) -- the day that the tweet has been posted
+  dim  twitter.Lang (string) -- the language of the tweet
+  dim  twitter.IsReshare (string) -- whether the tweet is reshared A reshared tweet is when someone reshares or forwards a post to their own Twitter  true: the tweet is reshared  false: the tweet isn't reshared
+  dim  twitter.Reach (number) -- the reach of the tweet reach counts the number of unique users who have seen your tweet
+  dim  twitter.RetweetCount (number) -- the retweet count
+  dim  twitter.Likes (number) -- the number of likes
+  dim  twitter.Klout (number) -- the klout of the tweet
+  dim  twitter.Sentiment (number) -- the sentiment of the tweet  >0: the sentiment of the tweet is positive.  =0: the sentiment of the tweet is neutral.  <0: the sentiment of the tweet is negative.
+  dim  twitter.text (string) -- the text of the tweet
+  dim  twitter.LocationID (number) -- the location id of the poster
+  dim  twitter.UserID (string) -- the user id of the poster
+  meas twitter.count (count)
+  meas twitter.sum_Hour (sum)
+  meas twitter.avg_Hour (avg)
+  meas twitter.min_Hour (min)
+  meas twitter.max_Hour (max)
+  meas twitter.sum_Day (sum)
+  meas twitter.avg_Day (avg)
+  meas twitter.min_Day (min)
+  meas twitter.max_Day (max)
+  meas twitter.sum_Reach (sum)
+  meas twitter.avg_Reach (avg)
+  meas twitter.min_Reach (min)
+  meas twitter.max_Reach (max)
+  meas twitter.sum_RetweetCount (sum)
+  meas twitter.avg_RetweetCount (avg)
+  meas twitter.min_RetweetCount (min)
+  meas twitter.max_RetweetCount (max)
+  meas twitter.sum_Likes (sum)
+  meas twitter.avg_Likes (avg)
+  meas twitter.min_Likes (min)
+  meas twitter.max_Likes (max)
+  meas twitter.sum_Klout (sum)
+  meas twitter.avg_Klout (avg)
+  meas twitter.min_Klout (min)
+  meas twitter.max_Klout (max)
+  meas twitter.sum_Sentiment (sum)
+  meas twitter.avg_Sentiment (avg)
+  meas twitter.min_Sentiment (min)
+  meas twitter.max_Sentiment (max)

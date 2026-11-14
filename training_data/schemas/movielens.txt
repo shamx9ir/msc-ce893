@@ -1,0 +1,65 @@
+cube users
+  dim  users.userid (number) -- unique identifier number of users
+  dim  users.age (string) -- age 1: 1-18 years old; 18: 18-25 years old; 25: 25-35 years old; 35: 35-45 years old; 45: 45-50 years old; 50: 50-56 years old; 56: over 56 years old
+  dim  users.u_gender (string) -- user gender M / F: Male / Female
+  dim  users.occupation (string) -- occupation
+  meas users.count (count)
+cube directors
+  dim  directors.directorid (number) -- unique identification number of actors directors
+  dim  directors.d_quality (number) -- director quality higher value is better, lower is the worse
+  dim  directors.avg_revenue (number) -- average revenue higher value is the higher, lower is the lower
+  meas directors.count (count)
+  meas directors.sum_d_quality (sum)
+  meas directors.avg_d_quality (avg)
+  meas directors.min_d_quality (min)
+  meas directors.max_d_quality (max)
+  meas directors.sum_avg_revenue (sum)
+  meas directors.avg_avg_revenue (avg)
+  meas directors.min_avg_revenue (min)
+  meas directors.max_avg_revenue (max)
+cube actors
+  dim  actors.actorid (number) -- unique identificator number of actors
+  dim  actors.a_gender (string) -- actor gender M: male; F: female
+  dim  actors.a_quality (number) -- actor quality higher is better, lower is the worse
+  meas actors.count (count)
+  meas actors.sum_a_quality (sum)
+  meas actors.avg_a_quality (avg)
+  meas actors.min_a_quality (min)
+  meas actors.max_a_quality (max)
+cube movies
+  dim  movies.movieid (number) -- unique identifier number of movies
+  dim  movies.year (number) -- year 4: newest; 1: oldest higher value means newer published date
+  dim  movies.isEnglish (string) -- is English
+  dim  movies.country (string) -- country
+  dim  movies.runningtime (number)
+  meas movies.count (count)
+  meas movies.sum_year (sum)
+  meas movies.avg_year (avg)
+  meas movies.min_year (min)
+  meas movies.max_year (max)
+  meas movies.sum_runningtime (sum)
+  meas movies.avg_runningtime (avg)
+  meas movies.min_runningtime (min)
+  meas movies.max_runningtime (max)
+cube movies2actors
+  dim  movies2actors.row_key (string)
+  dim  movies2actors.movieid (number) -- identifier number of movies
+  dim  movies2actors.actorid (number) -- identifier number of actors
+  dim  movies2actors.cast_num (number) -- cast number
+  meas movies2actors.count (count)
+  meas movies2actors.sum_cast_num (sum)
+  meas movies2actors.avg_cast_num (avg)
+  meas movies2actors.min_cast_num (min)
+  meas movies2actors.max_cast_num (max)
+cube movies2directors
+  dim  movies2directors.row_key (string)
+  dim  movies2directors.movieid (number) -- identifier number of movies
+  dim  movies2directors.directorid (number) -- identifier number of directors
+  dim  movies2directors.genre (string) -- genre of movies
+  meas movies2directors.count (count)
+cube u2base
+  dim  u2base.row_key (string)
+  dim  u2base.userid (number) -- identifier number of users
+  dim  u2base.movieid (number) -- identifier number of movie
+  dim  u2base.rating (string) -- ratings of movies higher value refers to higher satisfactory, each value is the rating of movies left by users.
+  meas u2base.count (count)

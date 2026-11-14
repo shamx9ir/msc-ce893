@@ -1,0 +1,28 @@
+cube cars
+  dim  cars.id (number) -- the unique id number representing the cars
+  dim  cars.train_id (number) -- the counterpart id for trains that the cars belong to
+  dim  cars.position (number) -- postion id of cars in the trains 1-4: 1: head car 4: tail car
+  dim  cars.shape (string) -- shape of the cars â¢ rectangle â¢ bucket â¢ u_shaped â¢ hexagon â¢ elipse regular shape: rectangle, u_shaped, hexagon
+  dim  cars.len (string) -- length of the cars â¢ short â¢ long
+  dim  cars.sides (string) -- sides of the cars â¢ not_double â¢ double
+  dim  cars.roof (string) -- roof of the cars â¢ none: the roof is open â¢ peaked â¢ flat â¢ arc â¢ jagged
+  dim  cars.wheels (number) -- wheels of the cars â¢ 2: â¢ 3:
+  dim  cars.load_shape (string) -- load shape â¢ circle â¢ hexagon â¢ triangle â¢ rectangle â¢ diamond
+  dim  cars.load_num (number) -- load number 0-3: â¢ 0: empty load â¢ 3: full load
+  meas cars.count (count)
+  meas cars.sum_position (sum)
+  meas cars.avg_position (avg)
+  meas cars.min_position (min)
+  meas cars.max_position (max)
+  meas cars.sum_wheels (sum)
+  meas cars.avg_wheels (avg)
+  meas cars.min_wheels (min)
+  meas cars.max_wheels (max)
+  meas cars.sum_load_num (sum)
+  meas cars.avg_load_num (avg)
+  meas cars.min_load_num (min)
+  meas cars.max_load_num (max)
+cube trains
+  dim  trains.id (number) -- the unique id representing the trains
+  dim  trains.direction (string) -- the direction of trains that are running â¢ east; â¢ west;
+  meas trains.count (count)

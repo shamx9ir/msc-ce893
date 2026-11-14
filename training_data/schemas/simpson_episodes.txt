@@ -1,0 +1,100 @@
+cube Episode
+  dim  Episode.episode_id (string) -- A unique identifier for episodes
+  dim  Episode.season (number) -- the season of the episode
+  dim  Episode.episode (number) -- the episode number of the episode
+  dim  Episode.number_in_series (number) -- the number in series
+  dim  Episode.title (string) -- the title of the episode
+  dim  Episode.summary (string) -- the summary of the episode
+  dim  Episode.air_date (time) -- the air date of the episode YYYY-MM-DD
+  dim  Episode.episode_image (string) -- the image of episode
+  dim  Episode.rating (number) -- the rating of episode 0.0 - 10.0 Higher ratings mean higher quality and better response.  excellent: 7.0 < rating <= 10.0  average: 5.0 < rating <= 7.0  bad: 0.0 < rating <= 5.0 not bad: average, excellent
+  dim  Episode.votes (number) -- the votes of episode Higher votes mean more audience supports (or popular).
+  meas Episode.count (count)
+  meas Episode.sum_season (sum)
+  meas Episode.avg_season (avg)
+  meas Episode.min_season (min)
+  meas Episode.max_season (max)
+  meas Episode.sum_episode (sum)
+  meas Episode.avg_episode (avg)
+  meas Episode.min_episode (min)
+  meas Episode.max_episode (max)
+  meas Episode.sum_number_in_series (sum)
+  meas Episode.avg_number_in_series (avg)
+  meas Episode.min_number_in_series (min)
+  meas Episode.max_number_in_series (max)
+  meas Episode.sum_rating (sum)
+  meas Episode.avg_rating (avg)
+  meas Episode.min_rating (min)
+  meas Episode.max_rating (max)
+  meas Episode.sum_votes (sum)
+  meas Episode.avg_votes (avg)
+  meas Episode.min_votes (min)
+  meas Episode.max_votes (max)
+cube Person
+  dim  Person.name (string) -- the name of the crew
+  dim  Person.birthdate (time) -- the birth date of the crew YYYY-MM-DD
+  dim  Person.birth_name (string) -- the birth name of the crew
+  dim  Person.birth_place (string) -- the birth place of the crew
+  dim  Person.birth_region (string) -- the birth region of the crew
+  dim  Person.birth_country (string) -- the birth country of the crew
+  dim  Person.height_meters (number) -- the height of the crew the unit is meter
+  dim  Person.nickname (string) -- the nickname of the crew
+  meas Person.count (count)
+  meas Person.sum_height_meters (sum)
+  meas Person.avg_height_meters (avg)
+  meas Person.min_height_meters (min)
+  meas Person.max_height_meters (max)
+cube Award
+  dim  Award.award_id (number) -- the unique id for the award
+  dim  Award.organization (string) -- the organization that holds the award
+  dim  Award.year (number) -- year of award
+  dim  Award.award_category (string) -- the category of the award
+  dim  Award.award (string) -- the name of the award
+  dim  Award.person (string) -- the person who gets the award
+  dim  Award.role (string) -- the role of the honoree
+  dim  Award.episode_id (string) -- S stands for 'Season' and E stands for 'Episode'
+  dim  Award.season (string) -- the season of the awarded work
+  dim  Award.song (string) -- the theme song of the awarded work
+  dim  Award.result (string) -- the final award result  Nominee: the prospective recipient of the award. The nominee are people who were nominated but didn't win the award.  Winner: the people who finally won the award
+  meas Award.count (count)
+  meas Award.sum_year (sum)
+  meas Award.avg_year (avg)
+  meas Award.min_year (min)
+  meas Award.max_year (max)
+cube Character_Award
+  dim  Character_Award.row_key (string)
+  dim  Character_Award.award_id (number) -- A unique identifier for the award
+  dim  Character_Award.character (string) -- the name of the awarded character
+  meas Character_Award.count (count)
+cube Credit
+  dim  Credit.row_key (string)
+  dim  Credit.episode_id (string) -- A unique identifier for episodes
+  dim  Credit.category (string) -- the category of the credit
+  dim  Credit.person (string) -- the name of cast and crew members
+  dim  Credit.role (string) -- the role of the person
+  dim  Credit.credited (string) -- whether the person is credited true/ false  true: The person is included in the credit list  false: The person isn't included in the credit list
+  meas Credit.count (count)
+cube Keyword
+  dim  Keyword.row_key (string)
+  dim  Keyword.episode_id (string) -- A unique identifier for episodes
+  dim  Keyword.keyword (string) -- the keywords of episode
+  meas Keyword.count (count)
+cube Vote
+  dim  Vote.row_key (string)
+  dim  Vote.episode_id (string) -- A unique identifier for episodes
+  dim  Vote.stars (number) -- the star score of the episode 1-10 Star classification is a type of rating scale. The lowest star is 1 which means the worst, and the highest star is 10 which means the best.
+  dim  Vote.votes (number) -- the number of votes of the star score
+  dim  Vote.percent (number) -- the percent of the vote number of the star score percent = the number of votes for the star / the total amount of votes for all stars
+  meas Vote.count (count)
+  meas Vote.sum_stars (sum)
+  meas Vote.avg_stars (avg)
+  meas Vote.min_stars (min)
+  meas Vote.max_stars (max)
+  meas Vote.sum_votes (sum)
+  meas Vote.avg_votes (avg)
+  meas Vote.min_votes (min)
+  meas Vote.max_votes (max)
+  meas Vote.sum_percent (sum)
+  meas Vote.avg_percent (avg)
+  meas Vote.min_percent (min)
+  meas Vote.max_percent (max)

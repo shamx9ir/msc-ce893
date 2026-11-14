@@ -1,0 +1,992 @@
+cube CountryRegion
+  dim  CountryRegion.CountryRegionCode (string) -- The unique id number identifying Country Region ISO standard code for countries and regions.
+  dim  CountryRegion.Name (string) -- Country or region name.
+  dim  CountryRegion.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas CountryRegion.count (count)
+cube Culture
+  dim  Culture.CultureID (string) -- The unique id string identifying the language in which AdventrueWorks data is stored.
+  dim  Culture.Name (string) -- Name of the language.
+  dim  Culture.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas Culture.count (count)
+cube Currency
+  dim  Currency.CurrencyCode (string) -- The unique id string identifying the currency.
+  dim  Currency.Name (string) -- Currency name.
+  dim  Currency.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas Currency.count (count)
+cube CountryRegionCurrency
+  dim  CountryRegionCurrency.row_key (string)
+  dim  CountryRegionCurrency.CountryRegionCode (string) -- The id number identifying Country Region ISO standard code for countries and regions.
+  dim  CountryRegionCurrency.CurrencyCode (string) -- ISO standard currency code.
+  dim  CountryRegionCurrency.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas CountryRegionCurrency.count (count)
+cube Person
+  dim  Person.BusinessEntityID (number) -- The unique id number identifying the person.
+  dim  Person.PersonType (string) -- The type of person. Primary type of person: SC = Store Contact, IN = Individual (retail) customer, SP = Sales person, EM = Employee (non-sales), VC = Vendor contact, GC = General contact
+  dim  Person.NameStyle (number) -- Name Style. 0 = The data in FirstName and LastName are stored in western style (first name, last name) order. 1 = Eastern style (last name, first name) order. Default: 0
+  dim  Person.Title (string) -- A courtesy title.
+  dim  Person.FirstName (string) -- First name of the person. Default: getdate()
+  dim  Person.MiddleName (string) -- Middle name or middle initial of the person.
+  dim  Person.LastName (string) -- Last name of the person.
+  dim  Person.Suffix (string) -- Surname suffix.
+  dim  Person.EmailPromotion (number) -- Email Promotion. 0 = Contact does not wish to receive e-mail promotions, 1 = Contact does wish to receive e-mail promotions from AdventureWorks, 2 = Contact does wish to receive e-mail promotions from AdventureWorks and selected partners. Default: 0
+  dim  Person.AdditionalContactInfo (string) -- Additional contact information about the person stored in xml format.
+  dim  Person.Demographics (string) -- Personal information such as hobbies, and income collected from online shoppers. Used for sales analysis.
+  dim  Person.rowguid (string) -- Uniquely identifying the record. Used to support a merge replication sample. Default: newid()
+  dim  Person.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas Person.count (count)
+  meas Person.sum_NameStyle (sum)
+  meas Person.avg_NameStyle (avg)
+  meas Person.min_NameStyle (min)
+  meas Person.max_NameStyle (max)
+  meas Person.sum_EmailPromotion (sum)
+  meas Person.avg_EmailPromotion (avg)
+  meas Person.min_EmailPromotion (min)
+  meas Person.max_EmailPromotion (max)
+cube BusinessEntityContact
+  dim  BusinessEntityContact.row_key (string)
+  dim  BusinessEntityContact.BusinessEntityID (number) -- The id number identifying the Business Entity ID.
+  dim  BusinessEntityContact.PersonID (number) -- The id number identifying the Person ID.
+  dim  BusinessEntityContact.ContactTypeID (number) -- The id number identifying the contact type ID.
+  dim  BusinessEntityContact.rowguid (string) -- Uniquely identifying the record. Used to support a merge replication sample. Default: newid()
+  dim  BusinessEntityContact.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas BusinessEntityContact.count (count)
+cube EmailAddress
+  dim  EmailAddress.row_key (string)
+  dim  EmailAddress.BusinessEntityID (number) -- The id number identifying the person associated with this email address.
+  dim  EmailAddress.EmailAddressID (number) -- The ID of this email address.
+  dim  EmailAddress.EmailAddress (string) -- The E-mail address for the person.
+  dim  EmailAddress.rowguid (string) -- Uniquely identifying the record. Used to support a merge replication sample. Default: newid()
+  dim  EmailAddress.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas EmailAddress.count (count)
+cube Employee
+  dim  Employee.BusinessEntityID (number) -- The id number identifying the employee.
+  dim  Employee.NationalIDNumber (string) -- The national identification number such as a social security number.
+  dim  Employee.LoginID (string) -- Network login.
+  dim  Employee.OrganizationNode (string) -- Where the employee is located in corporate hierarchy. Default: newid()
+  dim  Employee.OrganizationLevel (number) -- The depth of the employee in the corporate hierarchy. Computed: [OrganizationNode].[GetLevel]()
+  dim  Employee.JobTitle (string) -- Work title such as Buyer or Sales Representative.
+  dim  Employee.BirthDate (time) -- Date of birth.
+  dim  Employee.MaritalStatus (string) -- Whether this employee is married or not. M = Married, S = Single
+  dim  Employee.Gender (string) -- The gender of this employee. M = Male, F = Female
+  dim  Employee.HireDate (time) -- The employee was hired on this date.
+  dim  Employee.SalariedFlag (number) -- Job classification. 0 = Hourly, not exempt from collective bargaining. 1 = Salaried, exempt from collective bargaining.
+  dim  Employee.VacationHours (number) -- The number of available vacation hours.
+  dim  Employee.SickLeaveHours (number) -- The number of available sick leave hours.
+  dim  Employee.CurrentFlag (number) -- Whether this employee is active or not 0 = Inactive, 1 = Active
+  dim  Employee.rowguid (string) -- Uniquely identifying the record. Used to support a merge replication sample. Default: newid()
+  dim  Employee.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas Employee.count (count)
+  meas Employee.sum_OrganizationLevel (sum)
+  meas Employee.avg_OrganizationLevel (avg)
+  meas Employee.min_OrganizationLevel (min)
+  meas Employee.max_OrganizationLevel (max)
+  meas Employee.sum_SalariedFlag (sum)
+  meas Employee.avg_SalariedFlag (avg)
+  meas Employee.min_SalariedFlag (min)
+  meas Employee.max_SalariedFlag (max)
+  meas Employee.sum_VacationHours (sum)
+  meas Employee.avg_VacationHours (avg)
+  meas Employee.min_VacationHours (min)
+  meas Employee.max_VacationHours (max)
+  meas Employee.sum_SickLeaveHours (sum)
+  meas Employee.avg_SickLeaveHours (avg)
+  meas Employee.min_SickLeaveHours (min)
+  meas Employee.max_SickLeaveHours (max)
+  meas Employee.sum_CurrentFlag (sum)
+  meas Employee.avg_CurrentFlag (avg)
+  meas Employee.min_CurrentFlag (min)
+  meas Employee.max_CurrentFlag (max)
+cube Password
+  dim  Password.BusinessEntityID (number) -- The unique id number identifying the person.
+  dim  Password.PasswordHash (string) -- Password for the e-mail account.
+  dim  Password.PasswordSalt (string) -- Random value concatenated with the password string before the password is hashed.
+  dim  Password.rowguid (string) -- Uniquely identifying the record. Used to support a merge replication sample. Default: newid()
+  dim  Password.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas Password.count (count)
+cube PersonCreditCard
+  dim  PersonCreditCard.row_key (string)
+  dim  PersonCreditCard.BusinessEntityID (number) -- The id number identifying the person.
+  dim  PersonCreditCard.CreditCardID (number) -- Credit card identification number.
+  dim  PersonCreditCard.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas PersonCreditCard.count (count)
+cube ProductCategory
+  dim  ProductCategory.ProductCategoryID (number) -- The unique id number identifying the product category.
+  dim  ProductCategory.Name (string) -- Category description
+  dim  ProductCategory.rowguid (string) -- Uniquely identifying the record. Used to support a merge replication sample. Default: newid()
+  dim  ProductCategory.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas ProductCategory.count (count)
+cube ProductDescription
+  dim  ProductDescription.ProductDescriptionID (number) -- The unique id number identifying the product description.
+  dim  ProductDescription.Description (string) -- Description of the product.
+  dim  ProductDescription.rowguid (string) -- Uniquely identifying the record. Used to support a merge replication sample. Default: newid()
+  dim  ProductDescription.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas ProductDescription.count (count)
+cube ProductModel
+  dim  ProductModel.ProductModelID (number) -- The unique id number identifying the product model.
+  dim  ProductModel.Name (string) -- Product model description.
+  dim  ProductModel.CatalogDescription (string) -- Detailed product catalog information in xml format.
+  dim  ProductModel.Instructions (string) -- Manufacturing instructions in xml format.
+  dim  ProductModel.rowguid (string) -- Uniquely identifying the record. Used to support a merge replication sample. Default: newid()
+  dim  ProductModel.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas ProductModel.count (count)
+cube ProductModelProductDescriptionCulture
+  dim  ProductModelProductDescriptionCulture.row_key (string)
+  dim  ProductModelProductDescriptionCulture.ProductModelID (number) -- The id number identifying the product model.
+  dim  ProductModelProductDescriptionCulture.ProductDescriptionID (number) -- Product description identification number.
+  dim  ProductModelProductDescriptionCulture.CultureID (string) -- Culture identification number.
+  dim  ProductModelProductDescriptionCulture.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas ProductModelProductDescriptionCulture.count (count)
+cube ProductPhoto
+  dim  ProductPhoto.ProductPhotoID (number) -- unique id number identifying the products
+  dim  ProductPhoto.ThumbNailPhoto (string) -- Small image of the product. The size of small images. "80x49 GIF image 3.07 kB". "3.07" represents the size of images, "GIF" refers to type of images like JPEG, GIF, etc.
+  dim  ProductPhoto.ThumbnailPhotoFileName (string) -- Small image file name
+  dim  ProductPhoto.LargePhoto (string) -- Large image of the product.
+  dim  ProductPhoto.LargePhotoFileName (string) -- Large image file name. similar to ThumbNailPhoto
+  dim  ProductPhoto.ModifiedDate (time) -- Date and time the record was last updated.
+  meas ProductPhoto.count (count)
+cube ProductSubcategory
+  dim  ProductSubcategory.ProductSubcategoryID (number) -- Unique id number identifying the subcategory of products.
+  dim  ProductSubcategory.ProductCategoryID (number) -- Product category identification number.
+  dim  ProductSubcategory.Name (string) -- Subcategory description.
+  dim  ProductSubcategory.rowguid (string) -- Uniquely identifying the record. Used to support a merge replication sample. Default: newid()
+  dim  ProductSubcategory.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas ProductSubcategory.count (count)
+cube SalesReason
+  dim  SalesReason.SalesReasonID (number) -- The unique number identifying SalesReason records.
+  dim  SalesReason.Name (string) -- Sales reason description
+  dim  SalesReason.ReasonType (string) -- Category the sales reason belongs to.
+  dim  SalesReason.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas SalesReason.count (count)
+cube SalesTerritory
+  dim  SalesTerritory.TerritoryID (number) -- The unique id number for SalesTerritory records.
+  dim  SalesTerritory.Name (string) -- Sales territory description.
+  dim  SalesTerritory.CountryRegionCode (string) -- ISO standard country or region code.
+  dim  SalesTerritory.Group (string) -- Geographic area to which the sales territory belong.
+  dim  SalesTerritory.SalesYTD (number) -- Sales in the territory year to date.
+  dim  SalesTerritory.SalesLastYear (number) -- Sales in the territory the previous year.
+  dim  SalesTerritory.CostYTD (number) -- Business costs in the territory year to date.
+  dim  SalesTerritory.CostLastYear (number) -- Business costs in the territory the previous year.
+  dim  SalesTerritory.rowguid (string) -- Uniquely identifying the record. Used to support a merge replication sample. Default: newid()
+  dim  SalesTerritory.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas SalesTerritory.count (count)
+  meas SalesTerritory.sum_SalesYTD (sum)
+  meas SalesTerritory.avg_SalesYTD (avg)
+  meas SalesTerritory.min_SalesYTD (min)
+  meas SalesTerritory.max_SalesYTD (max)
+  meas SalesTerritory.sum_SalesLastYear (sum)
+  meas SalesTerritory.avg_SalesLastYear (avg)
+  meas SalesTerritory.min_SalesLastYear (min)
+  meas SalesTerritory.max_SalesLastYear (max)
+  meas SalesTerritory.sum_CostYTD (sum)
+  meas SalesTerritory.avg_CostYTD (avg)
+  meas SalesTerritory.min_CostYTD (min)
+  meas SalesTerritory.max_CostYTD (max)
+  meas SalesTerritory.sum_CostLastYear (sum)
+  meas SalesTerritory.avg_CostLastYear (avg)
+  meas SalesTerritory.min_CostLastYear (min)
+  meas SalesTerritory.max_CostLastYear (max)
+cube SalesPerson
+  dim  SalesPerson.BusinessEntityID (number) -- The unique id number identifying the business entity.
+  dim  SalesPerson.TerritoryID (number) -- Territory currently assigned to.
+  dim  SalesPerson.SalesQuota (number) -- Projected yearly sales
+  dim  SalesPerson.Bonus (number) -- Bonus due if quota is met. if bonus is equal to 0, it means this salesperson doesn't meet quota. vice versa.
+  dim  SalesPerson.CommissionPct (number) -- Commission percent received per sale
+  dim  SalesPerson.SalesYTD (number) -- Sales total year to date
+  dim  SalesPerson.SalesLastYear (number) -- Sales total of previous year.
+  dim  SalesPerson.rowguid (string) -- Uniquely identifying the record. Used to support a merge replication sample. Default: newid()
+  dim  SalesPerson.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas SalesPerson.count (count)
+  meas SalesPerson.sum_SalesQuota (sum)
+  meas SalesPerson.avg_SalesQuota (avg)
+  meas SalesPerson.min_SalesQuota (min)
+  meas SalesPerson.max_SalesQuota (max)
+  meas SalesPerson.sum_Bonus (sum)
+  meas SalesPerson.avg_Bonus (avg)
+  meas SalesPerson.min_Bonus (min)
+  meas SalesPerson.max_Bonus (max)
+  meas SalesPerson.sum_CommissionPct (sum)
+  meas SalesPerson.avg_CommissionPct (avg)
+  meas SalesPerson.min_CommissionPct (min)
+  meas SalesPerson.max_CommissionPct (max)
+  meas SalesPerson.sum_SalesYTD (sum)
+  meas SalesPerson.avg_SalesYTD (avg)
+  meas SalesPerson.min_SalesYTD (min)
+  meas SalesPerson.max_SalesYTD (max)
+  meas SalesPerson.sum_SalesLastYear (sum)
+  meas SalesPerson.avg_SalesLastYear (avg)
+  meas SalesPerson.min_SalesLastYear (min)
+  meas SalesPerson.max_SalesLastYear (max)
+cube SalesPersonQuotaHistory
+  dim  SalesPersonQuotaHistory.row_key (string)
+  dim  SalesPersonQuotaHistory.BusinessEntityID (number) -- Sales person identification number
+  dim  SalesPersonQuotaHistory.QuotaDate (time) -- Sales quota date
+  dim  SalesPersonQuotaHistory.SalesQuota (number) -- Sales quota amount
+  dim  SalesPersonQuotaHistory.rowguid (string) -- Uniquely identifying the record. Used to support a merge replication sample. Default: newid()
+  dim  SalesPersonQuotaHistory.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas SalesPersonQuotaHistory.count (count)
+  meas SalesPersonQuotaHistory.sum_SalesQuota (sum)
+  meas SalesPersonQuotaHistory.avg_SalesQuota (avg)
+  meas SalesPersonQuotaHistory.min_SalesQuota (min)
+  meas SalesPersonQuotaHistory.max_SalesQuota (max)
+cube SalesTerritoryHistory
+  dim  SalesTerritoryHistory.row_key (string)
+  dim  SalesTerritoryHistory.BusinessEntityID (number) -- The sales representative.
+  dim  SalesTerritoryHistory.TerritoryID (number) -- Territory identification number.
+  dim  SalesTerritoryHistory.StartDate (time) -- Date the sales representive started work in the territory.
+  dim  SalesTerritoryHistory.EndDate (time) -- Date the sales representative left work in the territory.
+  dim  SalesTerritoryHistory.rowguid (string) -- Uniquely identifying the record. Used to support a merge replication sample. Default: newid()
+  dim  SalesTerritoryHistory.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas SalesTerritoryHistory.count (count)
+cube ScrapReason
+  dim  ScrapReason.ScrapReasonID (number) -- The unique number identifying for ScrapReason records.
+  dim  ScrapReason.Name (string) -- Failure description.
+  dim  ScrapReason.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas ScrapReason.count (count)
+cube Shift
+  dim  Shift.ShiftID (number) -- The unique number identifying the shift.
+  dim  Shift.Name (string) -- Shift description.
+  dim  Shift.StartTime (string) -- Shift start time.
+  dim  Shift.EndTime (string) -- Shift end time.
+  dim  Shift.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas Shift.count (count)
+cube ShipMethod
+  dim  ShipMethod.ShipMethodID (number) -- The unique number for ShipMethod records.
+  dim  ShipMethod.Name (string) -- Shipping company name.
+  dim  ShipMethod.ShipBase (number) -- Minimum shipping charge.
+  dim  ShipMethod.ShipRate (number) -- Shipping charge per pound.
+  dim  ShipMethod.rowguid (string) -- Uniquely identifying the record. Used to support a merge replication sample. Default: newid()
+  dim  ShipMethod.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas ShipMethod.count (count)
+  meas ShipMethod.sum_ShipBase (sum)
+  meas ShipMethod.avg_ShipBase (avg)
+  meas ShipMethod.min_ShipBase (min)
+  meas ShipMethod.max_ShipBase (max)
+  meas ShipMethod.sum_ShipRate (sum)
+  meas ShipMethod.avg_ShipRate (avg)
+  meas ShipMethod.min_ShipRate (min)
+  meas ShipMethod.max_ShipRate (max)
+cube SpecialOffer
+  dim  SpecialOffer.SpecialOfferID (number) -- The unique id number identifying the special offer.
+  dim  SpecialOffer.Description (string) -- Discount description.
+  dim  SpecialOffer.DiscountPct (number) -- Discount percentage.
+  dim  SpecialOffer.Type (string) -- Discount type category.
+  dim  SpecialOffer.Category (string) -- Group the discount applies to such as Reseller or Customer.
+  dim  SpecialOffer.StartDate (time) -- Discount start date.
+  dim  SpecialOffer.EndDate (time) -- Discount end date. promotion date = EndDate - StartDate
+  dim  SpecialOffer.MinQty (number) -- Minimum discount percent allowed.
+  dim  SpecialOffer.MaxQty (number) -- Maximum discount percent allowed.
+  dim  SpecialOffer.rowguid (string) -- Uniquely identifying the record. Used to support a merge replication sample. Default: newid()
+  dim  SpecialOffer.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas SpecialOffer.count (count)
+  meas SpecialOffer.sum_DiscountPct (sum)
+  meas SpecialOffer.avg_DiscountPct (avg)
+  meas SpecialOffer.min_DiscountPct (min)
+  meas SpecialOffer.max_DiscountPct (max)
+  meas SpecialOffer.sum_MinQty (sum)
+  meas SpecialOffer.avg_MinQty (avg)
+  meas SpecialOffer.min_MinQty (min)
+  meas SpecialOffer.max_MinQty (max)
+  meas SpecialOffer.sum_MaxQty (sum)
+  meas SpecialOffer.avg_MaxQty (avg)
+  meas SpecialOffer.min_MaxQty (min)
+  meas SpecialOffer.max_MaxQty (max)
+cube BusinessEntityAddress
+  dim  BusinessEntityAddress.row_key (string)
+  dim  BusinessEntityAddress.BusinessEntityID (number) -- Number identifying the business entity.
+  dim  BusinessEntityAddress.AddressID (number) -- Number identifying the address.
+  dim  BusinessEntityAddress.AddressTypeID (number) -- Number identifying the address type.
+  dim  BusinessEntityAddress.rowguid (string) -- Uniquely identifying the record. Used to support a merge replication sample. Default: newid()
+  dim  BusinessEntityAddress.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas BusinessEntityAddress.count (count)
+cube SalesTaxRate
+  dim  SalesTaxRate.SalesTaxRateID (number) -- Unique id number identifying sales tax records.
+  dim  SalesTaxRate.StateProvinceID (number) -- id number identifying state province.
+  dim  SalesTaxRate.TaxType (number) -- Tax Type 1 = Tax applied to retail transactions, 2 = Tax applied to wholesale transactions, 3 = Tax applied to all sales (retail and wholesale) transactions
+  dim  SalesTaxRate.TaxRate (number) -- Tax rate amount
+  dim  SalesTaxRate.Name (string) -- Tax rate description if there's "+" in the value, it means this sales are charged by multiple types of tax.
+  dim  SalesTaxRate.rowguid (string) -- Uniquely identifying the record. Used to support a merge replication sample. Default: newid()
+  dim  SalesTaxRate.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas SalesTaxRate.count (count)
+  meas SalesTaxRate.sum_TaxType (sum)
+  meas SalesTaxRate.avg_TaxType (avg)
+  meas SalesTaxRate.min_TaxType (min)
+  meas SalesTaxRate.max_TaxType (max)
+  meas SalesTaxRate.sum_TaxRate (sum)
+  meas SalesTaxRate.avg_TaxRate (avg)
+  meas SalesTaxRate.min_TaxRate (min)
+  meas SalesTaxRate.max_TaxRate (max)
+cube Store
+  dim  Store.BusinessEntityID (number) -- The unique number identifying business entity.
+  dim  Store.Name (string) -- Name of the store.
+  dim  Store.SalesPersonID (number) -- ID of the sales person assigned to the customer.
+  dim  Store.Demographics (string) -- Demographic information about the store such as the number of employees, annual sales and store type.
+  dim  Store.rowguid (string) -- Uniquely identifying the record. Used to support a merge replication sample. Default: newid()
+  dim  Store.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas Store.count (count)
+cube SalesOrderHeaderSalesReason
+  dim  SalesOrderHeaderSalesReason.row_key (string)
+  dim  SalesOrderHeaderSalesReason.SalesOrderID (number) -- The id number of sales order.
+  dim  SalesOrderHeaderSalesReason.SalesReasonID (number) -- The id number for sales reasons.
+  dim  SalesOrderHeaderSalesReason.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas SalesOrderHeaderSalesReason.count (count)
+cube TransactionHistoryArchive
+  dim  TransactionHistoryArchive.TransactionID (number) -- The unique id number identifying TransactionHistory records.
+  dim  TransactionHistoryArchive.ProductID (number) -- Product identification number.
+  dim  TransactionHistoryArchive.ReferenceOrderID (number) -- Purchase order, sales order, or work order identification number.
+  dim  TransactionHistoryArchive.ReferenceOrderLineID (number) -- Line number associated with the purchase order, sales order, or work order.
+  dim  TransactionHistoryArchive.TransactionDate (time) -- Date and time of the transaction.
+  dim  TransactionHistoryArchive.TransactionType (string) -- Type of transaction records. W = WorkOrder, S = SalesOrder, P = PurchaseOrder
+  dim  TransactionHistoryArchive.Quantity (number) -- Product quantity.
+  dim  TransactionHistoryArchive.ActualCost (number) -- Product cost.
+  dim  TransactionHistoryArchive.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas TransactionHistoryArchive.count (count)
+  meas TransactionHistoryArchive.sum_Quantity (sum)
+  meas TransactionHistoryArchive.avg_Quantity (avg)
+  meas TransactionHistoryArchive.min_Quantity (min)
+  meas TransactionHistoryArchive.max_Quantity (max)
+  meas TransactionHistoryArchive.sum_ActualCost (sum)
+  meas TransactionHistoryArchive.avg_ActualCost (avg)
+  meas TransactionHistoryArchive.min_ActualCost (min)
+  meas TransactionHistoryArchive.max_ActualCost (max)
+cube UnitMeasure
+  dim  UnitMeasure.UnitMeasureCode (string) -- The unique identifying numbers for measure.
+  dim  UnitMeasure.Name (string) -- Unit of measure description.
+  dim  UnitMeasure.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas UnitMeasure.count (count)
+cube ProductCostHistory
+  dim  ProductCostHistory.row_key (string)
+  dim  ProductCostHistory.ProductID (number) -- The id number identifying the product.
+  dim  ProductCostHistory.StartDate (time) -- Product cost start date
+  dim  ProductCostHistory.EndDate (time) -- Product cost end date
+  dim  ProductCostHistory.StandardCost (number) -- Standard cost of the product.
+  dim  ProductCostHistory.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas ProductCostHistory.count (count)
+  meas ProductCostHistory.sum_StandardCost (sum)
+  meas ProductCostHistory.avg_StandardCost (avg)
+  meas ProductCostHistory.min_StandardCost (min)
+  meas ProductCostHistory.max_StandardCost (max)
+cube ProductDocument
+  dim  ProductDocument.row_key (string)
+  dim  ProductDocument.ProductID (number) -- The id number identifying the product.
+  dim  ProductDocument.DocumentNode (string) -- The hierarchy id number identifying the Document node. Document identification number
+  dim  ProductDocument.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas ProductDocument.count (count)
+cube ProductInventory
+  dim  ProductInventory.row_key (string)
+  dim  ProductInventory.ProductID (number) -- Product identification number.
+  dim  ProductInventory.LocationID (number) -- Inventory location identification number. Document identification number
+  dim  ProductInventory.Shelf (string) -- Storage compartment within an inventory location.
+  dim  ProductInventory.Bin (number) -- Storage container on a shelf in an inventory location.
+  dim  ProductInventory.Quantity (number) -- Quantity of products in the inventory location. Default: 0
+  dim  ProductInventory.rowguid (string) -- Uniquely identifying the record. Used to support a merge replication sample. Default: newid()
+  dim  ProductInventory.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas ProductInventory.count (count)
+  meas ProductInventory.sum_Bin (sum)
+  meas ProductInventory.avg_Bin (avg)
+  meas ProductInventory.min_Bin (min)
+  meas ProductInventory.max_Bin (max)
+  meas ProductInventory.sum_Quantity (sum)
+  meas ProductInventory.avg_Quantity (avg)
+  meas ProductInventory.min_Quantity (min)
+  meas ProductInventory.max_Quantity (max)
+cube ProductProductPhoto
+  dim  ProductProductPhoto.row_key (string)
+  dim  ProductProductPhoto.ProductID (number) -- Product identification number.
+  dim  ProductProductPhoto.ProductPhotoID (number) -- Product photo identification number.
+  dim  ProductProductPhoto.Primary (number) -- Whether this photo is the principal image or not. 0 = Photo is not the principal image. 1 = Photo is the principal image. staff can mention "principal" in the question in order to make the question more realistic.
+  dim  ProductProductPhoto.ModifiedDate (time)
+  meas ProductProductPhoto.count (count)
+  meas ProductProductPhoto.sum_Primary (sum)
+  meas ProductProductPhoto.avg_Primary (avg)
+  meas ProductProductPhoto.min_Primary (min)
+  meas ProductProductPhoto.max_Primary (max)
+cube ProductReview
+  dim  ProductReview.ProductReviewID (number) -- The unique id numbers identifying product reviews.
+  dim  ProductReview.ProductID (number) -- Product identification number.
+  dim  ProductReview.ReviewerName (string) -- The name of reviewer.
+  dim  ProductReview.ReviewDate (time) -- Date review was submitted. Default: getdate()
+  dim  ProductReview.EmailAddress (string) -- Reviewer's e-mail address.
+  dim  ProductReview.Rating (number) -- Product rating given by the reviewer. Scale is 1 to 5 with 5 as the highest rating.
+  dim  ProductReview.Comments (string)
+  dim  ProductReview.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas ProductReview.count (count)
+  meas ProductReview.sum_Rating (sum)
+  meas ProductReview.avg_Rating (avg)
+  meas ProductReview.min_Rating (min)
+  meas ProductReview.max_Rating (max)
+cube ShoppingCartItem
+  dim  ShoppingCartItem.ShoppingCartItemID (number) -- The unique id number identifying the shopping cart item records.
+  dim  ShoppingCartItem.ShoppingCartID (string) -- Shopping cart identification number.
+  dim  ShoppingCartItem.Quantity (number) -- Product quantity ordered. Default: 1
+  dim  ShoppingCartItem.ProductID (number) -- Product ordered.
+  dim  ShoppingCartItem.DateCreated (time) -- Date the time the record was created. Default: getdate()
+  dim  ShoppingCartItem.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas ShoppingCartItem.count (count)
+  meas ShoppingCartItem.sum_Quantity (sum)
+  meas ShoppingCartItem.avg_Quantity (avg)
+  meas ShoppingCartItem.min_Quantity (min)
+  meas ShoppingCartItem.max_Quantity (max)
+cube SpecialOfferProduct
+  dim  SpecialOfferProduct.row_key (string)
+  dim  SpecialOfferProduct.SpecialOfferID (number) -- The id for SpecialOfferProduct records
+  dim  SpecialOfferProduct.ProductID (number) -- Product identification number.
+  dim  SpecialOfferProduct.rowguid (string) -- Uniquely identifying the record. Used to support a merge replication sample. Default: newid()
+  dim  SpecialOfferProduct.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas SpecialOfferProduct.count (count)
+cube SalesOrderDetail
+  dim  SalesOrderDetail.SalesOrderID (number)
+  dim  SalesOrderDetail.SalesOrderDetailID (number)
+  dim  SalesOrderDetail.CarrierTrackingNumber (string)
+  dim  SalesOrderDetail.OrderQty (number)
+  dim  SalesOrderDetail.ProductID (number)
+  dim  SalesOrderDetail.SpecialOfferID (number)
+  dim  SalesOrderDetail.UnitPrice (number)
+  dim  SalesOrderDetail.UnitPriceDiscount (number)
+  dim  SalesOrderDetail.LineTotal (number)
+  dim  SalesOrderDetail.rowguid (string)
+  dim  SalesOrderDetail.ModifiedDate (time) -- modified date Date and time the record was last updated.
+  meas SalesOrderDetail.count (count)
+  meas SalesOrderDetail.sum_OrderQty (sum)
+  meas SalesOrderDetail.avg_OrderQty (avg)
+  meas SalesOrderDetail.min_OrderQty (min)
+  meas SalesOrderDetail.max_OrderQty (max)
+  meas SalesOrderDetail.sum_UnitPrice (sum)
+  meas SalesOrderDetail.avg_UnitPrice (avg)
+  meas SalesOrderDetail.min_UnitPrice (min)
+  meas SalesOrderDetail.max_UnitPrice (max)
+  meas SalesOrderDetail.sum_UnitPriceDiscount (sum)
+  meas SalesOrderDetail.avg_UnitPriceDiscount (avg)
+  meas SalesOrderDetail.min_UnitPriceDiscount (min)
+  meas SalesOrderDetail.max_UnitPriceDiscount (max)
+  meas SalesOrderDetail.sum_LineTotal (sum)
+  meas SalesOrderDetail.avg_LineTotal (avg)
+  meas SalesOrderDetail.min_LineTotal (min)
+  meas SalesOrderDetail.max_LineTotal (max)
+cube TransactionHistory
+  dim  TransactionHistory.TransactionID (number) -- The unique id number identifying TransactionHistory records.
+  dim  TransactionHistory.ProductID (number) -- Product identification number.
+  dim  TransactionHistory.ReferenceOrderID (number) -- Purchase order, sales order, or work order identification number.
+  dim  TransactionHistory.ReferenceOrderLineID (number) -- Line number associated with the purchase order, sales order, or work order.
+  dim  TransactionHistory.TransactionDate (time) -- Date and time of the transaction.
+  dim  TransactionHistory.TransactionType (string) -- Type of transaction records. W = WorkOrder, S = SalesOrder, P = PurchaseOrder
+  dim  TransactionHistory.Quantity (number) -- Product quantity.
+  dim  TransactionHistory.ActualCost (number) -- Product cost.
+  dim  TransactionHistory.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas TransactionHistory.count (count)
+  meas TransactionHistory.sum_Quantity (sum)
+  meas TransactionHistory.avg_Quantity (avg)
+  meas TransactionHistory.min_Quantity (min)
+  meas TransactionHistory.max_Quantity (max)
+  meas TransactionHistory.sum_ActualCost (sum)
+  meas TransactionHistory.avg_ActualCost (avg)
+  meas TransactionHistory.min_ActualCost (min)
+  meas TransactionHistory.max_ActualCost (max)
+cube Vendor
+  dim  Vendor.BusinessEntityID (number) -- The unique number identifying Vendor records.
+  dim  Vendor.AccountNumber (string) -- Vendor account (identification) number.
+  dim  Vendor.Name (string) -- Company name.
+  dim  Vendor.CreditRating (number) -- Rating of credit. 1 = Superior, 2 = Excellent, 3 = Above average, 4 = Average, 5 = Below average. 1, 2, 3 can represent good credit, 4 is average credit, 5 is bad credit.
+  dim  Vendor.PreferredVendorStatus (number) -- Preferred Vendor Status 0 = Do not use if another vendor is available. 1 = Preferred over other vendors supplying the same product.
+  dim  Vendor.ActiveFlag (number) -- Vendor URL 0 = Vendor no longer used. 1 = Vendor is actively used. Default: 1
+  dim  Vendor.PurchasingWebServiceURL (string) -- Purchasing Web Service URL
+  dim  Vendor.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas Vendor.count (count)
+  meas Vendor.sum_CreditRating (sum)
+  meas Vendor.avg_CreditRating (avg)
+  meas Vendor.min_CreditRating (min)
+  meas Vendor.max_CreditRating (max)
+  meas Vendor.sum_PreferredVendorStatus (sum)
+  meas Vendor.avg_PreferredVendorStatus (avg)
+  meas Vendor.min_PreferredVendorStatus (min)
+  meas Vendor.max_PreferredVendorStatus (max)
+  meas Vendor.sum_ActiveFlag (sum)
+  meas Vendor.avg_ActiveFlag (avg)
+  meas Vendor.min_ActiveFlag (min)
+  meas Vendor.max_ActiveFlag (max)
+cube ProductVendor
+  dim  ProductVendor.row_key (string)
+  dim  ProductVendor.ProductID (number) -- The id number identifying the products.
+  dim  ProductVendor.BusinessEntityID (number) -- The id number identifying the business entities.
+  dim  ProductVendor.AverageLeadTime (number) -- The average span of time between placing an order with the vendor and receiving the purchased product. in days
+  dim  ProductVendor.StandardPrice (number) -- The vendor's usual selling price.
+  dim  ProductVendor.LastReceiptCost (number) -- The selling price when last purchased. profit on net can be computed by LastReceiptCost - StandardPrice
+  dim  ProductVendor.LastReceiptDate (time) -- Date the product was last received by the vendor.
+  dim  ProductVendor.MinOrderQty (number) -- The maximum quantity that should be ordered.
+  dim  ProductVendor.MaxOrderQty (number) -- The minimum quantity that should be ordered.
+  dim  ProductVendor.OnOrderQty (number) -- The quantity currently on order. if it's equal to 0, it means "out of stock"
+  dim  ProductVendor.UnitMeasureCode (string) -- The product's unit of measure.
+  dim  ProductVendor.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas ProductVendor.count (count)
+  meas ProductVendor.sum_AverageLeadTime (sum)
+  meas ProductVendor.avg_AverageLeadTime (avg)
+  meas ProductVendor.min_AverageLeadTime (min)
+  meas ProductVendor.max_AverageLeadTime (max)
+  meas ProductVendor.sum_StandardPrice (sum)
+  meas ProductVendor.avg_StandardPrice (avg)
+  meas ProductVendor.min_StandardPrice (min)
+  meas ProductVendor.max_StandardPrice (max)
+  meas ProductVendor.sum_LastReceiptCost (sum)
+  meas ProductVendor.avg_LastReceiptCost (avg)
+  meas ProductVendor.min_LastReceiptCost (min)
+  meas ProductVendor.max_LastReceiptCost (max)
+  meas ProductVendor.sum_MinOrderQty (sum)
+  meas ProductVendor.avg_MinOrderQty (avg)
+  meas ProductVendor.min_MinOrderQty (min)
+  meas ProductVendor.max_MinOrderQty (max)
+  meas ProductVendor.sum_MaxOrderQty (sum)
+  meas ProductVendor.avg_MaxOrderQty (avg)
+  meas ProductVendor.min_MaxOrderQty (min)
+  meas ProductVendor.max_MaxOrderQty (max)
+  meas ProductVendor.sum_OnOrderQty (sum)
+  meas ProductVendor.avg_OnOrderQty (avg)
+  meas ProductVendor.min_OnOrderQty (min)
+  meas ProductVendor.max_OnOrderQty (max)
+cube PurchaseOrderHeader
+  dim  PurchaseOrderHeader.PurchaseOrderID (number) -- The unique id number identifying purchase order.
+  dim  PurchaseOrderHeader.RevisionNumber (number) -- Incremental number to track changes to the purchase order over time.
+  dim  PurchaseOrderHeader.Status (number) -- Order current status. 1 = Pending; 2 = Approved; 3 = Rejected; 4 = Complete Default: 1
+  dim  PurchaseOrderHeader.EmployeeID (number) -- Employee who created the purchase order.
+  dim  PurchaseOrderHeader.VendorID (number) -- Vendor with whom the purchase order is placed.
+  dim  PurchaseOrderHeader.ShipMethodID (number) -- Shipping method
+  dim  PurchaseOrderHeader.OrderDate (time) -- Purchase order creation date Default: getdate()
+  dim  PurchaseOrderHeader.ShipDate (time) -- Estimated shipment date from the vendor.
+  dim  PurchaseOrderHeader.SubTotal (number) -- Purchase order subtotal Computed as SUM (PurchaseOrderDetail.LineTotal)for the appropriate PurchaseOrderID
+  dim  PurchaseOrderHeader.TaxAmt (number) -- Tax amount
+  dim  PurchaseOrderHeader.Freight (number) -- Shipping cost
+  dim  PurchaseOrderHeader.TotalDue (number) -- Total due to vendor Computed as Subtotal + TaxAmt + Freight. Computed: isnull(([SubTotal]+[TaxAmt])+[Freight],(0))
+  dim  PurchaseOrderHeader.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas PurchaseOrderHeader.count (count)
+  meas PurchaseOrderHeader.sum_RevisionNumber (sum)
+  meas PurchaseOrderHeader.avg_RevisionNumber (avg)
+  meas PurchaseOrderHeader.min_RevisionNumber (min)
+  meas PurchaseOrderHeader.max_RevisionNumber (max)
+  meas PurchaseOrderHeader.sum_Status (sum)
+  meas PurchaseOrderHeader.avg_Status (avg)
+  meas PurchaseOrderHeader.min_Status (min)
+  meas PurchaseOrderHeader.max_Status (max)
+  meas PurchaseOrderHeader.sum_SubTotal (sum)
+  meas PurchaseOrderHeader.avg_SubTotal (avg)
+  meas PurchaseOrderHeader.min_SubTotal (min)
+  meas PurchaseOrderHeader.max_SubTotal (max)
+  meas PurchaseOrderHeader.sum_TaxAmt (sum)
+  meas PurchaseOrderHeader.avg_TaxAmt (avg)
+  meas PurchaseOrderHeader.min_TaxAmt (min)
+  meas PurchaseOrderHeader.max_TaxAmt (max)
+  meas PurchaseOrderHeader.sum_Freight (sum)
+  meas PurchaseOrderHeader.avg_Freight (avg)
+  meas PurchaseOrderHeader.min_Freight (min)
+  meas PurchaseOrderHeader.max_Freight (max)
+  meas PurchaseOrderHeader.sum_TotalDue (sum)
+  meas PurchaseOrderHeader.avg_TotalDue (avg)
+  meas PurchaseOrderHeader.min_TotalDue (min)
+  meas PurchaseOrderHeader.max_TotalDue (max)
+cube PurchaseOrderDetail
+  dim  PurchaseOrderDetail.PurchaseOrderID (number) -- Purchase order number.
+  dim  PurchaseOrderDetail.PurchaseOrderDetailID (number) -- Unique purchase detail order.
+  dim  PurchaseOrderDetail.DueDate (time) -- Date the product is expected to be received.
+  dim  PurchaseOrderDetail.OrderQty (number) -- Quantity ordered.
+  dim  PurchaseOrderDetail.ProductID (number) -- The id number identifying products.
+  dim  PurchaseOrderDetail.UnitPrice (number) -- Vendor's selling price of a single product.
+  dim  PurchaseOrderDetail.LineTotal (number) -- Per product subtotal Computed as OrderQty * UnitPrice. Computed: isnull([OrderQty]*[UnitPrice],(0.00))
+  dim  PurchaseOrderDetail.ReceivedQty (number) -- Quantity actually received from the vendor.
+  dim  PurchaseOrderDetail.RejectedQty (number)
+  dim  PurchaseOrderDetail.StockedQty (number)
+  dim  PurchaseOrderDetail.ModifiedDate (time)
+  meas PurchaseOrderDetail.count (count)
+  meas PurchaseOrderDetail.sum_OrderQty (sum)
+  meas PurchaseOrderDetail.avg_OrderQty (avg)
+  meas PurchaseOrderDetail.min_OrderQty (min)
+  meas PurchaseOrderDetail.max_OrderQty (max)
+  meas PurchaseOrderDetail.sum_UnitPrice (sum)
+  meas PurchaseOrderDetail.avg_UnitPrice (avg)
+  meas PurchaseOrderDetail.min_UnitPrice (min)
+  meas PurchaseOrderDetail.max_UnitPrice (max)
+  meas PurchaseOrderDetail.sum_LineTotal (sum)
+  meas PurchaseOrderDetail.avg_LineTotal (avg)
+  meas PurchaseOrderDetail.min_LineTotal (min)
+  meas PurchaseOrderDetail.max_LineTotal (max)
+  meas PurchaseOrderDetail.sum_ReceivedQty (sum)
+  meas PurchaseOrderDetail.avg_ReceivedQty (avg)
+  meas PurchaseOrderDetail.min_ReceivedQty (min)
+  meas PurchaseOrderDetail.max_ReceivedQty (max)
+  meas PurchaseOrderDetail.sum_RejectedQty (sum)
+  meas PurchaseOrderDetail.avg_RejectedQty (avg)
+  meas PurchaseOrderDetail.min_RejectedQty (min)
+  meas PurchaseOrderDetail.max_RejectedQty (max)
+  meas PurchaseOrderDetail.sum_StockedQty (sum)
+  meas PurchaseOrderDetail.avg_StockedQty (avg)
+  meas PurchaseOrderDetail.min_StockedQty (min)
+  meas PurchaseOrderDetail.max_StockedQty (max)
+cube WorkOrder
+  dim  WorkOrder.WorkOrderID (number) -- The unique id number identifying work order.
+  dim  WorkOrder.ProductID (number) -- Product identification number.
+  dim  WorkOrder.OrderQty (number) -- Product quantity to build.
+  dim  WorkOrder.StockedQty (number) -- Quantity built and put in inventory. Computed: isnull([OrderQty]-[ScrappedQty],(0))
+  dim  WorkOrder.ScrappedQty (number) -- Quantity that failed inspection.
+  dim  WorkOrder.StartDate (time) -- Work order start date.
+  dim  WorkOrder.EndDate (time) -- Work order end date.
+  dim  WorkOrder.DueDate (time) -- Work order due date.
+  dim  WorkOrder.ScrapReasonID (number) -- Reason for inspection failure.
+  dim  WorkOrder.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas WorkOrder.count (count)
+  meas WorkOrder.sum_OrderQty (sum)
+  meas WorkOrder.avg_OrderQty (avg)
+  meas WorkOrder.min_OrderQty (min)
+  meas WorkOrder.max_OrderQty (max)
+  meas WorkOrder.sum_StockedQty (sum)
+  meas WorkOrder.avg_StockedQty (avg)
+  meas WorkOrder.min_StockedQty (min)
+  meas WorkOrder.max_StockedQty (max)
+  meas WorkOrder.sum_ScrappedQty (sum)
+  meas WorkOrder.avg_ScrappedQty (avg)
+  meas WorkOrder.min_ScrappedQty (min)
+  meas WorkOrder.max_ScrappedQty (max)
+cube WorkOrderRouting
+  dim  WorkOrderRouting.row_key (string)
+  dim  WorkOrderRouting.WorkOrderID (number) -- The id number of work order.
+  dim  WorkOrderRouting.ProductID (number) -- The id number identifying products.
+  dim  WorkOrderRouting.OperationSequence (number) -- Indicates the manufacturing process sequence.
+  dim  WorkOrderRouting.LocationID (number) -- Manufacturing location where the part is processed.
+  dim  WorkOrderRouting.ScheduledStartDate (time) -- Planned manufacturing start date.
+  dim  WorkOrderRouting.ScheduledEndDate (time) -- Planned manufacturing end date.
+  dim  WorkOrderRouting.ActualStartDate (time) -- Actual start date.
+  dim  WorkOrderRouting.ActualEndDate (time) -- Actual end date.
+  dim  WorkOrderRouting.ActualResourceHrs (number) -- Number of manufacturing hours used.
+  dim  WorkOrderRouting.PlannedCost (number) -- Estimated manufacturing cost.
+  dim  WorkOrderRouting.ActualCost (number) -- Actual manufacturing cost.
+  dim  WorkOrderRouting.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas WorkOrderRouting.count (count)
+  meas WorkOrderRouting.sum_ActualResourceHrs (sum)
+  meas WorkOrderRouting.avg_ActualResourceHrs (avg)
+  meas WorkOrderRouting.min_ActualResourceHrs (min)
+  meas WorkOrderRouting.max_ActualResourceHrs (max)
+  meas WorkOrderRouting.sum_PlannedCost (sum)
+  meas WorkOrderRouting.avg_PlannedCost (avg)
+  meas WorkOrderRouting.min_PlannedCost (min)
+  meas WorkOrderRouting.max_PlannedCost (max)
+  meas WorkOrderRouting.sum_ActualCost (sum)
+  meas WorkOrderRouting.avg_ActualCost (avg)
+  meas WorkOrderRouting.min_ActualCost (min)
+  meas WorkOrderRouting.max_ActualCost (max)
+cube Customer
+  dim  Customer.CustomerID (number) -- The unique id number identifying the customer.
+  dim  Customer.PersonID (number) -- The id number identifying the person.
+  dim  Customer.StoreID (number) -- The id number identifying the store / bussiness entity.
+  dim  Customer.TerritoryID (number) -- ID of the territory in which the customer is located.
+  dim  Customer.AccountNumber (string) -- Unique number identifying the customer assigned by the accounting system. Computed: isnull('AW'+[ufnLeadingZeros]([CustomerID]),'')
+  dim  Customer.rowguid (string) -- Uniquely identifying the record. Used to support a merge replication sample. Default: newid()
+  dim  Customer.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas Customer.count (count)
+cube ProductListPriceHistory
+  dim  ProductListPriceHistory.row_key (string)
+  dim  ProductListPriceHistory.ProductID (number) -- Product identification number.
+  dim  ProductListPriceHistory.StartDate (time) -- List price start date.
+  dim  ProductListPriceHistory.EndDate (time) -- List price end date.
+  dim  ProductListPriceHistory.ListPrice (number) -- Product list price.
+  dim  ProductListPriceHistory.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas ProductListPriceHistory.count (count)
+  meas ProductListPriceHistory.sum_ListPrice (sum)
+  meas ProductListPriceHistory.avg_ListPrice (avg)
+  meas ProductListPriceHistory.min_ListPrice (min)
+  meas ProductListPriceHistory.max_ListPrice (max)
+cube Address
+  dim  Address.AddressID (number) -- Unique id number identifying the address. Primary key for Address records. Identity / Auto increment column.
+  dim  Address.AddressLine1 (string) -- First street address line.
+  dim  Address.AddressLine2 (string) -- Second street address line. 1. total address = (AddressLine1+AddressLine2) 2. if AddressLine2 is not null, it means the address is too long
+  dim  Address.City (string) -- Name of the city.
+  dim  Address.StateProvinceID (number) -- Identification number for the state or province.
+  dim  Address.PostalCode (string) -- Postal code for the street address.
+  dim  Address.SpatialLocation (string) -- Latitude and longitude of this address.
+  dim  Address.rowguid (string) -- Uniquely identifying the record. Used to support a merge replication sample. Default: newid()
+  dim  Address.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas Address.count (count)
+cube AddressType
+  dim  AddressType.AddressTypeID (number) -- Unique numbers identifying address type records. Primary key for AddressType records. Identity / Auto increment column.
+  dim  AddressType.Name (string) -- Address type description.
+  dim  AddressType.rowguid (string) -- Uniquely identifying the record. Used to support a merge replication sample. Default: newid()
+  dim  AddressType.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas AddressType.count (count)
+cube BillOfMaterials
+  dim  BillOfMaterials.BillOfMaterialsID (number) -- The unique number identifying bill of materials. Primary key for BillOfMaterials records. Identity / Auto increment column.
+  dim  BillOfMaterials.ProductAssemblyID (number) -- Parent product identification number.
+  dim  BillOfMaterials.ComponentID (number) -- Component identification number.
+  dim  BillOfMaterials.StartDate (time) -- Date the component started being used in the assembly item.
+  dim  BillOfMaterials.EndDate (time) -- Date the component stopped being used in the assembly item. 1. assembly item duration = (EndDate - StartDate) 2. if EndDate is null, it means the assembly item doesn't finish (still going on).
+  dim  BillOfMaterials.UnitMeasureCode (string) -- Standard code identifying the unit of measure for the quantity.
+  dim  BillOfMaterials.BOMLevel (number) -- Indicates the depth the component is from its parent (column2)(AssemblyID).
+  dim  BillOfMaterials.PerAssemblyQty (number) -- Quantity of the component needed to create the assembly.
+  dim  BillOfMaterials.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas BillOfMaterials.count (count)
+  meas BillOfMaterials.sum_BOMLevel (sum)
+  meas BillOfMaterials.avg_BOMLevel (avg)
+  meas BillOfMaterials.min_BOMLevel (min)
+  meas BillOfMaterials.max_BOMLevel (max)
+  meas BillOfMaterials.sum_PerAssemblyQty (sum)
+  meas BillOfMaterials.avg_PerAssemblyQty (avg)
+  meas BillOfMaterials.min_PerAssemblyQty (min)
+  meas BillOfMaterials.max_PerAssemblyQty (max)
+cube BusinessEntity
+  dim  BusinessEntity.BusinessEntityID (number) -- Unique number of identifying business entity. Primary key for all customers, vendors, and employees. Identity / Auto increment column
+  dim  BusinessEntity.rowguid (string) -- Uniquely identifying the record. Used to support a merge replication sample. Default: newid()
+  dim  BusinessEntity.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas BusinessEntity.count (count)
+cube ContactType
+  dim  ContactType.ContactTypeID (number) -- The unique id number identifying the contact type ID.
+  dim  ContactType.Name (string) -- Contact type description.
+  dim  ContactType.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas ContactType.count (count)
+cube CurrencyRate
+  dim  CurrencyRate.CurrencyRateID (number) -- The unique id number identifying the currency rate record.
+  dim  CurrencyRate.CurrencyRateDate (time) -- Date and time the exchange rate was obtained.
+  dim  CurrencyRate.FromCurrencyCode (string) -- Exchange rate was converted from this currency code.
+  dim  CurrencyRate.ToCurrencyCode (string) -- Exchange rate was converted to this currency code.
+  dim  CurrencyRate.AverageRate (number) -- Average exchange rate for the day.
+  dim  CurrencyRate.EndOfDayRate (number) -- Final exchange rate for the day.
+  dim  CurrencyRate.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas CurrencyRate.count (count)
+  meas CurrencyRate.sum_AverageRate (sum)
+  meas CurrencyRate.avg_AverageRate (avg)
+  meas CurrencyRate.min_AverageRate (min)
+  meas CurrencyRate.max_AverageRate (max)
+  meas CurrencyRate.sum_EndOfDayRate (sum)
+  meas CurrencyRate.avg_EndOfDayRate (avg)
+  meas CurrencyRate.min_EndOfDayRate (min)
+  meas CurrencyRate.max_EndOfDayRate (max)
+cube Department
+  dim  Department.DepartmentID (number) -- The unique id number identifying the department.
+  dim  Department.Name (string) -- Name of the department.
+  dim  Department.GroupName (string) -- Name of the group to which the department belongs.
+  dim  Department.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas Department.count (count)
+cube EmployeeDepartmentHistory
+  dim  EmployeeDepartmentHistory.row_key (string)
+  dim  EmployeeDepartmentHistory.BusinessEntityID (number) -- Employee identification number.
+  dim  EmployeeDepartmentHistory.DepartmentID (number) -- Department in which the employee worked including currently.
+  dim  EmployeeDepartmentHistory.ShiftID (number) -- Identifies which 8-hour shift the employee works.
+  dim  EmployeeDepartmentHistory.StartDate (time) -- Date the employee started working in the department.
+  dim  EmployeeDepartmentHistory.EndDate (time) -- Date the employee ended working in the department.
+  dim  EmployeeDepartmentHistory.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas EmployeeDepartmentHistory.count (count)
+cube EmployeePayHistory
+  dim  EmployeePayHistory.row_key (string)
+  dim  EmployeePayHistory.BusinessEntityID (number) -- Employee identification number.
+  dim  EmployeePayHistory.RateChangeDate (time) -- Date the change in pay is effective.
+  dim  EmployeePayHistory.Rate (number) -- Salary hourly rate.
+  dim  EmployeePayHistory.PayFrequency (number) -- Pay Frequency. 1 = Salary received monthly, 2 = Salary received biweekly
+  dim  EmployeePayHistory.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas EmployeePayHistory.count (count)
+  meas EmployeePayHistory.sum_Rate (sum)
+  meas EmployeePayHistory.avg_Rate (avg)
+  meas EmployeePayHistory.min_Rate (min)
+  meas EmployeePayHistory.max_Rate (max)
+  meas EmployeePayHistory.sum_PayFrequency (sum)
+  meas EmployeePayHistory.avg_PayFrequency (avg)
+  meas EmployeePayHistory.min_PayFrequency (min)
+  meas EmployeePayHistory.max_PayFrequency (max)
+cube JobCandidate
+  dim  JobCandidate.JobCandidateID (number) -- The unique id number identifying the job candidates.
+  dim  JobCandidate.BusinessEntityID (number) -- Employee identification number if applicant was hired.
+  dim  JobCandidate.Resume (string) -- Résumé in XML format.
+  dim  JobCandidate.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas JobCandidate.count (count)
+cube Location
+  dim  Location.LocationID (number) -- The unique id number identifying the job candidates.
+  dim  Location.Name (string) -- Location description.
+  dim  Location.CostRate (number) -- Standard hourly cost of the manufacturing location. Default: 0.00
+  dim  Location.Availability (number) -- Work capacity (in hours) of the manufacturing location. Default: 0.00
+  dim  Location.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas Location.count (count)
+  meas Location.sum_CostRate (sum)
+  meas Location.avg_CostRate (avg)
+  meas Location.min_CostRate (min)
+  meas Location.max_CostRate (max)
+  meas Location.sum_Availability (sum)
+  meas Location.avg_Availability (avg)
+  meas Location.min_Availability (min)
+  meas Location.max_Availability (max)
+cube PhoneNumberType
+  dim  PhoneNumberType.PhoneNumberTypeID (number) -- The id number identifying the telephone number type records.
+  dim  PhoneNumberType.Name (string) -- Name of the telephone number type.
+  dim  PhoneNumberType.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas PhoneNumberType.count (count)
+cube Product
+  dim  Product.ProductID (number) -- The unique id number identifying the product.
+  dim  Product.Name (string) -- Name of the product.
+  dim  Product.ProductNumber (string) -- The unique product identification number.
+  dim  Product.MakeFlag (number) -- The source of product make. 0 = Product is purchased, 1 = Product is manufactured in-house. Default: 1
+  dim  Product.FinishedGoodsFlag (number) -- Whether the product is salable or not. 0 = Product is not a salable item. 1 = Product is salable. Default: 1
+  dim  Product.Color (string) -- Color Product color.
+  dim  Product.SafetyStockLevel (number) -- The minimum inventory quantity.
+  dim  Product.ReorderPoint (number) -- Inventory level that triggers a purchase order or work order.
+  dim  Product.StandardCost (number) -- Standard cost of the product.
+  dim  Product.ListPrice (number) -- Selling price profit = ListPrice - StandardCost
+  dim  Product.Size (string) -- Product size
+  dim  Product.SizeUnitMeasureCode (string) -- Unit of measure for Size column.
+  dim  Product.WeightUnitMeasureCode (string) -- Unit of measure for Weight column.
+  dim  Product.Weight (number) -- Product weight
+  dim  Product.DaysToManufacture (number) -- Number of days required to manufacture the product.
+  dim  Product.ProductLine (string) -- Product Routine R = Road, M = Mountain, T = Touring, S = Standard
+  dim  Product.Class (string) -- Product quality class H = High, M = Medium, L = Low
+  dim  Product.Style (string) -- Style W = Womens, M = Mens, U = Universal
+  dim  Product.ProductSubcategoryID (number) -- Product is a member of this product subcategory.
+  dim  Product.ProductModelID (number) -- Product is a member of this product model.
+  dim  Product.SellStartDate (time) -- Date the product was available for sale.
+  dim  Product.SellEndDate (time) -- Date the product was no longer available for sale.
+  dim  Product.DiscontinuedDate (time) -- Date the product was discontinued.
+  dim  Product.rowguid (string) -- Uniquely identifying the record. Used to support a merge replication sample. Default: newid()
+  dim  Product.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas Product.count (count)
+  meas Product.sum_MakeFlag (sum)
+  meas Product.avg_MakeFlag (avg)
+  meas Product.min_MakeFlag (min)
+  meas Product.max_MakeFlag (max)
+  meas Product.sum_FinishedGoodsFlag (sum)
+  meas Product.avg_FinishedGoodsFlag (avg)
+  meas Product.min_FinishedGoodsFlag (min)
+  meas Product.max_FinishedGoodsFlag (max)
+  meas Product.sum_SafetyStockLevel (sum)
+  meas Product.avg_SafetyStockLevel (avg)
+  meas Product.min_SafetyStockLevel (min)
+  meas Product.max_SafetyStockLevel (max)
+  meas Product.sum_ReorderPoint (sum)
+  meas Product.avg_ReorderPoint (avg)
+  meas Product.min_ReorderPoint (min)
+  meas Product.max_ReorderPoint (max)
+  meas Product.sum_StandardCost (sum)
+  meas Product.avg_StandardCost (avg)
+  meas Product.min_StandardCost (min)
+  meas Product.max_StandardCost (max)
+  meas Product.sum_ListPrice (sum)
+  meas Product.avg_ListPrice (avg)
+  meas Product.min_ListPrice (min)
+  meas Product.max_ListPrice (max)
+  meas Product.sum_Weight (sum)
+  meas Product.avg_Weight (avg)
+  meas Product.min_Weight (min)
+  meas Product.max_Weight (max)
+  meas Product.sum_DaysToManufacture (sum)
+  meas Product.avg_DaysToManufacture (avg)
+  meas Product.min_DaysToManufacture (min)
+  meas Product.max_DaysToManufacture (max)
+cube Document
+  dim  Document.DocumentNode (string) -- The unique hierarchy id identifying the document nodes.
+  dim  Document.DocumentLevel (number) -- Depth in the document hierarchy. Computed: [DocumentNode].[GetLevel]()
+  dim  Document.Title (string) -- Title of the document.
+  dim  Document.Owner (number) -- Employee who controls the document.
+  dim  Document.FolderFlag (number) -- The type of the folders. 0 = This is a folder, 1 = This is a document. Default: 0
+  dim  Document.FileName (string) -- Uniquely identifying the record. Used to support a merge replication sample. File name of the document
+  dim  Document.FileExtension (string) -- File extension indicating the document type.
+  dim  Document.Revision (string) -- Revision number of the document.
+  dim  Document.ChangeNumber (number) -- Engineering change approval number.
+  dim  Document.Status (number) -- Status of document processing. 1 = Pending approval, 2 = Approved, 3 = Obsolete
+  dim  Document.DocumentSummary (string) -- Document abstract. if no document Summary: it means this document is private
+  dim  Document.Document (string) -- Complete document.
+  dim  Document.rowguid (string) -- Uniquely identifying the record. Used to support a merge replication sample. Default: newid()
+  dim  Document.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas Document.count (count)
+  meas Document.sum_DocumentLevel (sum)
+  meas Document.avg_DocumentLevel (avg)
+  meas Document.min_DocumentLevel (min)
+  meas Document.max_DocumentLevel (max)
+  meas Document.sum_Owner (sum)
+  meas Document.avg_Owner (avg)
+  meas Document.min_Owner (min)
+  meas Document.max_Owner (max)
+  meas Document.sum_FolderFlag (sum)
+  meas Document.avg_FolderFlag (avg)
+  meas Document.min_FolderFlag (min)
+  meas Document.max_FolderFlag (max)
+  meas Document.sum_ChangeNumber (sum)
+  meas Document.avg_ChangeNumber (avg)
+  meas Document.min_ChangeNumber (min)
+  meas Document.max_ChangeNumber (max)
+  meas Document.sum_Status (sum)
+  meas Document.avg_Status (avg)
+  meas Document.min_Status (min)
+  meas Document.max_Status (max)
+cube StateProvince
+  dim  StateProvince.StateProvinceID (number) -- The unique number for StateProvince records.
+  dim  StateProvince.StateProvinceCode (string) -- ISO standard state or province code.
+  dim  StateProvince.CountryRegionCode (string) -- ISO standard country or region code.
+  dim  StateProvince.IsOnlyStateProvinceFlag (number) -- 0 = StateProvinceCode exists. 1 = StateProvinceCode unavailable, using CountryRegionCode. Default: 1. To ask whether the StateProvinceCode exists or not.
+  dim  StateProvince.Name (string) -- State or province description.
+  dim  StateProvince.TerritoryID (number) -- ID of the territory in which the state or province is located.
+  dim  StateProvince.rowguid (string) -- Uniquely identifying the record. Used to support a merge replication sample. Default: newid()
+  dim  StateProvince.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas StateProvince.count (count)
+  meas StateProvince.sum_IsOnlyStateProvinceFlag (sum)
+  meas StateProvince.avg_IsOnlyStateProvinceFlag (avg)
+  meas StateProvince.min_IsOnlyStateProvinceFlag (min)
+  meas StateProvince.max_IsOnlyStateProvinceFlag (max)
+cube CreditCard
+  dim  CreditCard.CreditCardID (number) -- The unique id number identifying the credit card.
+  dim  CreditCard.CardType (string) -- Credit card name.
+  dim  CreditCard.CardNumber (string) -- Credit card number.
+  dim  CreditCard.ExpMonth (number) -- Credit card expiration month.
+  dim  CreditCard.ExpYear (number) -- Credit card expiration year.
+  dim  CreditCard.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas CreditCard.count (count)
+  meas CreditCard.sum_ExpMonth (sum)
+  meas CreditCard.avg_ExpMonth (avg)
+  meas CreditCard.min_ExpMonth (min)
+  meas CreditCard.max_ExpMonth (max)
+  meas CreditCard.sum_ExpYear (sum)
+  meas CreditCard.avg_ExpYear (avg)
+  meas CreditCard.min_ExpYear (min)
+  meas CreditCard.max_ExpYear (max)
+cube SalesOrderHeader
+  dim  SalesOrderHeader.SalesOrderID (number) -- The id number of sales order.
+  dim  SalesOrderHeader.RevisionNumber (number)
+  dim  SalesOrderHeader.OrderDate (time)
+  dim  SalesOrderHeader.DueDate (time)
+  dim  SalesOrderHeader.ShipDate (time) -- Estimated shipment date from the vendor
+  dim  SalesOrderHeader.Status (number) -- Order current status 1 = Pending; 2 = Approved; 3 = Rejected; 4 = Complete Default: 1
+  dim  SalesOrderHeader.OnlineOrderFlag (number)
+  dim  SalesOrderHeader.SalesOrderNumber (string)
+  dim  SalesOrderHeader.PurchaseOrderNumber (string)
+  dim  SalesOrderHeader.AccountNumber (string)
+  dim  SalesOrderHeader.CustomerID (number)
+  dim  SalesOrderHeader.SalesPersonID (number)
+  dim  SalesOrderHeader.TerritoryID (number)
+  dim  SalesOrderHeader.BillToAddressID (number)
+  dim  SalesOrderHeader.ShipToAddressID (number)
+  dim  SalesOrderHeader.ShipMethodID (number) -- Shipping method
+  dim  SalesOrderHeader.CreditCardID (number)
+  dim  SalesOrderHeader.CreditCardApprovalCode (string)
+  dim  SalesOrderHeader.CurrencyRateID (number)
+  dim  SalesOrderHeader.SubTotal (number)
+  dim  SalesOrderHeader.TaxAmt (number) -- Tax amount
+  dim  SalesOrderHeader.Freight (number) -- Shipping cost
+  dim  SalesOrderHeader.TotalDue (number) -- Total due to vendor
+  dim  SalesOrderHeader.Comment (string)
+  dim  SalesOrderHeader.rowguid (string)
+  dim  SalesOrderHeader.ModifiedDate (time) -- Date and time the record was last updated. Default: getdate()
+  meas SalesOrderHeader.count (count)
+  meas SalesOrderHeader.sum_RevisionNumber (sum)
+  meas SalesOrderHeader.avg_RevisionNumber (avg)
+  meas SalesOrderHeader.min_RevisionNumber (min)
+  meas SalesOrderHeader.max_RevisionNumber (max)
+  meas SalesOrderHeader.sum_Status (sum)
+  meas SalesOrderHeader.avg_Status (avg)
+  meas SalesOrderHeader.min_Status (min)
+  meas SalesOrderHeader.max_Status (max)
+  meas SalesOrderHeader.sum_OnlineOrderFlag (sum)
+  meas SalesOrderHeader.avg_OnlineOrderFlag (avg)
+  meas SalesOrderHeader.min_OnlineOrderFlag (min)
+  meas SalesOrderHeader.max_OnlineOrderFlag (max)
+  meas SalesOrderHeader.sum_SubTotal (sum)
+  meas SalesOrderHeader.avg_SubTotal (avg)
+  meas SalesOrderHeader.min_SubTotal (min)
+  meas SalesOrderHeader.max_SubTotal (max)
+  meas SalesOrderHeader.sum_TaxAmt (sum)
+  meas SalesOrderHeader.avg_TaxAmt (avg)
+  meas SalesOrderHeader.min_TaxAmt (min)
+  meas SalesOrderHeader.max_TaxAmt (max)
+  meas SalesOrderHeader.sum_Freight (sum)
+  meas SalesOrderHeader.avg_Freight (avg)
+  meas SalesOrderHeader.min_Freight (min)
+  meas SalesOrderHeader.max_Freight (max)
+  meas SalesOrderHeader.sum_TotalDue (sum)
+  meas SalesOrderHeader.avg_TotalDue (avg)
+  meas SalesOrderHeader.min_TotalDue (min)
+  meas SalesOrderHeader.max_TotalDue (max)

@@ -1,0 +1,396 @@
+cube borders
+  dim  borders.row_key (string)
+  dim  borders.Country1 (string) -- a country code
+  dim  borders.Country2 (string) -- a country code
+  dim  borders.Length (number) -- length of the border between country1 and country2
+  meas borders.count (count)
+  meas borders.sum_Length (sum)
+  meas borders.avg_Length (avg)
+  meas borders.min_Length (min)
+  meas borders.max_Length (max)
+cube city
+  dim  city.row_key (string)
+  dim  city.Name (string) -- name of city
+  dim  city.Country (string) -- the code of the country where it belongs to
+  dim  city.Province (string) -- the name of the province where it belongs to
+  dim  city.Population (number) -- population of the city
+  dim  city.Longitude (number) -- geographic longitude
+  dim  city.Latitude (number) -- geographic latitude
+  meas city.count (count)
+  meas city.sum_Population (sum)
+  meas city.avg_Population (avg)
+  meas city.min_Population (min)
+  meas city.max_Population (max)
+  meas city.sum_Longitude (sum)
+  meas city.avg_Longitude (avg)
+  meas city.min_Longitude (min)
+  meas city.max_Longitude (max)
+  meas city.sum_Latitude (sum)
+  meas city.avg_Latitude (avg)
+  meas city.min_Latitude (min)
+  meas city.max_Latitude (max)
+cube continent
+  dim  continent.Name (string) -- name of the continent
+  dim  continent.Area (number) -- total area of the continent.
+  meas continent.count (count)
+  meas continent.sum_Area (sum)
+  meas continent.avg_Area (avg)
+  meas continent.min_Area (min)
+  meas continent.max_Area (max)
+cube country
+  dim  country.Name (string) -- the country name
+  dim  country.Code (string) -- country code
+  dim  country.Capital (string) -- the name of the capital,
+  dim  country.Province (string) -- the province where the capital belongs to,
+  dim  country.Area (number) -- the total area,
+  dim  country.Population (number) -- the population number.
+  meas country.count (count)
+  meas country.sum_Area (sum)
+  meas country.avg_Area (avg)
+  meas country.min_Area (min)
+  meas country.max_Area (max)
+  meas country.sum_Population (sum)
+  meas country.avg_Population (avg)
+  meas country.min_Population (min)
+  meas country.max_Population (max)
+cube desert
+  dim  desert.Name (string) -- the name of the desert
+  dim  desert.Area (number) -- the total area of the desert
+  dim  desert.Longitude (number) -- Longitude
+  dim  desert.Latitude (number) -- Latitude coordinate: (Longitude, Latitude)
+  meas desert.count (count)
+  meas desert.sum_Area (sum)
+  meas desert.avg_Area (avg)
+  meas desert.min_Area (min)
+  meas desert.max_Area (max)
+  meas desert.sum_Longitude (sum)
+  meas desert.avg_Longitude (avg)
+  meas desert.min_Longitude (min)
+  meas desert.max_Longitude (max)
+  meas desert.sum_Latitude (sum)
+  meas desert.avg_Latitude (avg)
+  meas desert.min_Latitude (min)
+  meas desert.max_Latitude (max)
+cube economy
+  dim  economy.Country (string) -- the country code
+  dim  economy.GDP (number) -- gross domestic product
+  dim  economy.Agriculture (number) -- percentage of agriculture of the GDP
+  dim  economy.Service (number) -- percentage of services of the GDP,
+  dim  economy.Industry (number) -- percentage of industry of the GDP
+  dim  economy.Inflation (number) -- inflation rate (per annum),
+  meas economy.count (count)
+  meas economy.sum_GDP (sum)
+  meas economy.avg_GDP (avg)
+  meas economy.min_GDP (min)
+  meas economy.max_GDP (max)
+  meas economy.sum_Agriculture (sum)
+  meas economy.avg_Agriculture (avg)
+  meas economy.min_Agriculture (min)
+  meas economy.max_Agriculture (max)
+  meas economy.sum_Service (sum)
+  meas economy.avg_Service (avg)
+  meas economy.min_Service (min)
+  meas economy.max_Service (max)
+  meas economy.sum_Industry (sum)
+  meas economy.avg_Industry (avg)
+  meas economy.min_Industry (min)
+  meas economy.max_Industry (max)
+  meas economy.sum_Inflation (sum)
+  meas economy.avg_Inflation (avg)
+  meas economy.min_Inflation (min)
+  meas economy.max_Inflation (max)
+cube encompasses
+  dim  encompasses.row_key (string)
+  dim  encompasses.Country (string) -- a country code
+  dim  encompasses.Continent (string) -- the continent name.
+  dim  encompasses.Percentage (number) -- how much of the area of a country belongs to the continent %
+  meas encompasses.count (count)
+  meas encompasses.sum_Percentage (sum)
+  meas encompasses.avg_Percentage (avg)
+  meas encompasses.min_Percentage (min)
+  meas encompasses.max_Percentage (max)
+cube ethnicGroup
+  dim  ethnicGroup.row_key (string)
+  dim  ethnicGroup.Country (string) -- the country code
+  dim  ethnicGroup.Name (string) -- name of the language
+  dim  ethnicGroup.Percentage (number) -- percentage of the language in this country. %
+  meas ethnicGroup.count (count)
+  meas ethnicGroup.sum_Percentage (sum)
+  meas ethnicGroup.avg_Percentage (avg)
+  meas ethnicGroup.min_Percentage (min)
+  meas ethnicGroup.max_Percentage (max)
+cube geo_desert
+  dim  geo_desert.row_key (string)
+  dim  geo_desert.Desert (string) -- the name of the desert
+  dim  geo_desert.Country (string) -- the country code where it is located
+  dim  geo_desert.Province (string) -- the province of this country
+  meas geo_desert.count (count)
+cube geo_estuary
+  dim  geo_estuary.row_key (string)
+  dim  geo_estuary.River (string) -- the name of the river
+  dim  geo_estuary.Country (string) -- the country code where it is located
+  dim  geo_estuary.Province (string) -- the province of this country
+  meas geo_estuary.count (count)
+cube geo_island
+  dim  geo_island.row_key (string)
+  dim  geo_island.Island (string) -- the name of the island
+  dim  geo_island.Country (string) -- the country code where it is located
+  dim  geo_island.Province (string) -- the province of this country
+  meas geo_island.count (count)
+cube geo_lake
+  dim  geo_lake.row_key (string)
+  dim  geo_lake.Lake (string) -- the name of the lake
+  dim  geo_lake.Country (string) -- the country code where it is located
+  dim  geo_lake.Province (string) -- the province of this country
+  meas geo_lake.count (count)
+cube geo_mountain
+  dim  geo_mountain.row_key (string)
+  dim  geo_mountain.Mountain (string) -- the name of the mountain
+  dim  geo_mountain.Country (string) -- the country code where it is located
+  dim  geo_mountain.Province (string) -- the province of this country
+  meas geo_mountain.count (count)
+cube geo_river
+  dim  geo_river.row_key (string)
+  dim  geo_river.River (string) -- the name of the river
+  dim  geo_river.Country (string) -- the country code where it is located
+  dim  geo_river.Province (string) -- the province of this country
+  meas geo_river.count (count)
+cube geo_sea
+  dim  geo_sea.row_key (string)
+  dim  geo_sea.Sea (string) -- the name of the sea
+  dim  geo_sea.Country (string) -- the country code where it is located
+  dim  geo_sea.Province (string) -- the province of this country
+  meas geo_sea.count (count)
+cube geo_source
+  dim  geo_source.row_key (string)
+  dim  geo_source.River (string) -- the name of the river
+  dim  geo_source.Country (string) -- the country code where it is located
+  dim  geo_source.Province (string) -- the province of this country
+  meas geo_source.count (count)
+cube island
+  dim  island.Name (string) -- the name of the island
+  dim  island.Islands (string) -- the group of islands where it belongs to
+  dim  island.Area (number) -- the area of the island
+  dim  island.Height (number) -- the maximal elevation of the island
+  dim  island.Type (string) -- the type of the island
+  dim  island.Longitude (number) -- Longitude
+  dim  island.Latitude (number) -- Latitude
+  meas island.count (count)
+  meas island.sum_Area (sum)
+  meas island.avg_Area (avg)
+  meas island.min_Area (min)
+  meas island.max_Area (max)
+  meas island.sum_Height (sum)
+  meas island.avg_Height (avg)
+  meas island.min_Height (min)
+  meas island.max_Height (max)
+  meas island.sum_Longitude (sum)
+  meas island.avg_Longitude (avg)
+  meas island.min_Longitude (min)
+  meas island.max_Longitude (max)
+  meas island.sum_Latitude (sum)
+  meas island.avg_Latitude (avg)
+  meas island.min_Latitude (min)
+  meas island.max_Latitude (max)
+cube islandIn
+  dim  islandIn.row_key (string)
+  dim  islandIn.Island (string)
+  dim  islandIn.Sea (string)
+  dim  islandIn.Lake (string)
+  dim  islandIn.River (string)
+  meas islandIn.count (count)
+cube isMember
+  dim  isMember.row_key (string)
+  dim  isMember.Country (string)
+  dim  isMember.Organization (string)
+  dim  isMember.Type (string)
+  meas isMember.count (count)
+cube lake
+  dim  lake.Name (string) -- the name of the lake
+  dim  lake.Area (number) -- the total area of the lake
+  dim  lake.Depth (number) -- the depth of the lake
+  dim  lake.Altitude (number) -- the altitude (above sea level) of the lake
+  dim  lake.Type (string) -- the type of the lake
+  dim  lake.River (string) -- the river that flows out of the lake
+  dim  lake.Longitude (number) -- longitude of lake
+  dim  lake.Latitude (number) -- latitude of lake
+  meas lake.count (count)
+  meas lake.sum_Area (sum)
+  meas lake.avg_Area (avg)
+  meas lake.min_Area (min)
+  meas lake.max_Area (max)
+  meas lake.sum_Depth (sum)
+  meas lake.avg_Depth (avg)
+  meas lake.min_Depth (min)
+  meas lake.max_Depth (max)
+  meas lake.sum_Altitude (sum)
+  meas lake.avg_Altitude (avg)
+  meas lake.min_Altitude (min)
+  meas lake.max_Altitude (max)
+  meas lake.sum_Longitude (sum)
+  meas lake.avg_Longitude (avg)
+  meas lake.min_Longitude (min)
+  meas lake.max_Longitude (max)
+  meas lake.sum_Latitude (sum)
+  meas lake.avg_Latitude (avg)
+  meas lake.min_Latitude (min)
+  meas lake.max_Latitude (max)
+cube language
+  dim  language.row_key (string)
+  dim  language.Country (string) -- the country code
+  dim  language.Name (string) -- name of the language
+  dim  language.Percentage (number) -- percentage of the language in this country %
+  meas language.count (count)
+  meas language.sum_Percentage (sum)
+  meas language.avg_Percentage (avg)
+  meas language.min_Percentage (min)
+  meas language.max_Percentage (max)
+cube located
+  dim  located.row_key (string)
+  dim  located.City (string) -- the name of the city
+  dim  located.Province (string) -- the province where the city belongs to
+  dim  located.Country (string) -- the country code where the city belongs to
+  dim  located.River (string) -- the river where it is located at
+  dim  located.Lake (string) -- the lake where it is located at
+  dim  located.Sea (string) -- the sea where it is located at Note that for a given city, there can be several lakes/seas/rivers where it is located at.
+  meas located.count (count)
+cube locatedOn
+  dim  locatedOn.row_key (string)
+  dim  locatedOn.City (string) -- the name of the city
+  dim  locatedOn.Province (string) -- the province where the city belongs to
+  dim  locatedOn.Country (string) -- the country code where the city belongs to
+  dim  locatedOn.Island (string) -- the island it is (maybe only partially) located on
+  meas locatedOn.count (count)
+cube mergesWith
+  dim  mergesWith.row_key (string)
+  dim  mergesWith.Sea1 (string)
+  dim  mergesWith.Sea2 (string)
+  meas mergesWith.count (count)
+cube mountain
+  dim  mountain.Name (string) -- the name of the mountain
+  dim  mountain.Mountains (string) -- the mountains where it belongs to
+  dim  mountain.Height (number) -- the maximal elevation of the summit of the mountain
+  dim  mountain.Type (string) -- the sea where it finally flows to (note that at most one out of (river,lake,sea) can be non-null
+  dim  mountain.Longitude (number) -- the length of the river
+  dim  mountain.Latitude (number) -- the longitude of its source
+  meas mountain.count (count)
+  meas mountain.sum_Height (sum)
+  meas mountain.avg_Height (avg)
+  meas mountain.min_Height (min)
+  meas mountain.max_Height (max)
+  meas mountain.sum_Longitude (sum)
+  meas mountain.avg_Longitude (avg)
+  meas mountain.min_Longitude (min)
+  meas mountain.max_Longitude (max)
+  meas mountain.sum_Latitude (sum)
+  meas mountain.avg_Latitude (avg)
+  meas mountain.min_Latitude (min)
+  meas mountain.max_Latitude (max)
+cube mountainOnIsland
+  dim  mountainOnIsland.row_key (string)
+  dim  mountainOnIsland.Mountain (string)
+  dim  mountainOnIsland.Island (string)
+  meas mountainOnIsland.count (count)
+cube organization
+  dim  organization.Abbreviation (string) -- its abbreviation
+  dim  organization.Name (string) -- the full name of the organization
+  dim  organization.City (string) -- the city where the headquarters are located
+  dim  organization.Country (string) -- the code of the country where the headquarters are located
+  dim  organization.Province (string) -- the name of the province where the headquarters are located,
+  dim  organization.Established (time) -- date of establishment
+  meas organization.count (count)
+cube politics
+  dim  politics.Country (string) -- the country code
+  dim  politics.Independence (time) -- date of independence if the value is null or empty, it means this country is not independent
+  dim  politics.Dependent (string) -- the country code where the area belongs to
+  dim  politics.Government (string) -- type of government
+  meas politics.count (count)
+cube population
+  dim  population.Country (string) -- the country code
+  dim  population.Population_Growth (number) -- population growth rate per annum
+  dim  population.Infant_Mortality (number) -- infant mortality per thousand
+  meas population.count (count)
+  meas population.sum_Population_Growth (sum)
+  meas population.avg_Population_Growth (avg)
+  meas population.min_Population_Growth (min)
+  meas population.max_Population_Growth (max)
+  meas population.sum_Infant_Mortality (sum)
+  meas population.avg_Infant_Mortality (avg)
+  meas population.min_Infant_Mortality (min)
+  meas population.max_Infant_Mortality (max)
+cube province
+  dim  province.row_key (string)
+  dim  province.Name (string) -- the name of the administrative division
+  dim  province.Country (string) -- the country code where it belongs to
+  dim  province.Population (number) -- the population of the province
+  dim  province.Area (number) -- the total area of the province,
+  dim  province.Capital (string) -- the name of the capital if null, doesn't have capital
+  dim  province.CapProv (string) -- the name of the province where the capital belongs to note that capprov is not necessarily equal to name
+  meas province.count (count)
+  meas province.sum_Population (sum)
+  meas province.avg_Population (avg)
+  meas province.min_Population (min)
+  meas province.max_Population (max)
+  meas province.sum_Area (sum)
+  meas province.avg_Area (avg)
+  meas province.min_Area (min)
+  meas province.max_Area (max)
+cube religion
+  dim  religion.row_key (string)
+  dim  religion.Country (string) -- the country code
+  dim  religion.Name (string) -- name of the religion
+  dim  religion.Percentage (number) -- percentage of the language in this country %
+  meas religion.count (count)
+  meas religion.sum_Percentage (sum)
+  meas religion.avg_Percentage (avg)
+  meas religion.min_Percentage (min)
+  meas religion.max_Percentage (max)
+cube river
+  dim  river.Name (string) -- the name of the river
+  dim  river.River (string) -- the river where it finally flows to
+  dim  river.Lake (string) -- the lake where it finally flows to
+  dim  river.Sea (string) -- the sea where it finally flows to (note that at most one out of (river,lake,sea) can be non-null
+  dim  river.Length (number) -- the length of the river
+  dim  river.SourceLongitude (number) -- the longitude of its source
+  dim  river.SourceLatitude (number) -- the latitude of its source
+  dim  river.Mountains (string) -- the mountains where its source is located
+  dim  river.SourceAltitude (number) -- the elevation (above sea level) of its source
+  dim  river.EstuaryLongitude (number) -- the coordinates of its estuary
+  dim  river.EstuaryLatitude (number) -- the latitude of its estuary
+  meas river.count (count)
+  meas river.sum_Length (sum)
+  meas river.avg_Length (avg)
+  meas river.min_Length (min)
+  meas river.max_Length (max)
+  meas river.sum_SourceLongitude (sum)
+  meas river.avg_SourceLongitude (avg)
+  meas river.min_SourceLongitude (min)
+  meas river.max_SourceLongitude (max)
+  meas river.sum_SourceLatitude (sum)
+  meas river.avg_SourceLatitude (avg)
+  meas river.min_SourceLatitude (min)
+  meas river.max_SourceLatitude (max)
+  meas river.sum_SourceAltitude (sum)
+  meas river.avg_SourceAltitude (avg)
+  meas river.min_SourceAltitude (min)
+  meas river.max_SourceAltitude (max)
+  meas river.sum_EstuaryLongitude (sum)
+  meas river.avg_EstuaryLongitude (avg)
+  meas river.min_EstuaryLongitude (min)
+  meas river.max_EstuaryLongitude (max)
+  meas river.sum_EstuaryLatitude (sum)
+  meas river.avg_EstuaryLatitude (avg)
+  meas river.min_EstuaryLatitude (min)
+  meas river.max_EstuaryLatitude (max)
+cube sea
+  dim  sea.Name (string) -- the name of the sea
+  dim  sea.Depth (number) -- the maximal depth of the sea
+  meas sea.count (count)
+  meas sea.sum_Depth (sum)
+  meas sea.avg_Depth (avg)
+  meas sea.min_Depth (min)
+  meas sea.max_Depth (max)
+cube target
+  dim  target.Country (string)
+  dim  target.Target (string)
+  meas target.count (count)

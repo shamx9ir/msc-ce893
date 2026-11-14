@@ -1,0 +1,43 @@
+cube chapters
+  dim  chapters.id (number) -- unique id number identifying the chapter
+  dim  chapters.Act (number) -- An act is a major division of a theatre work, including a play, film, opera, or musical theatre An act can consist of one or more scenes
+  dim  chapters.Scene (number) -- A scene is a dramatic part of a story, at a specific time and place, between specific characters.
+  dim  chapters.Description (string) -- textual description of the chapter.
+  dim  chapters.work_id (number) -- id number identifying the work
+  meas chapters.count (count)
+  meas chapters.sum_Act (sum)
+  meas chapters.avg_Act (avg)
+  meas chapters.min_Act (min)
+  meas chapters.max_Act (max)
+  meas chapters.sum_Scene (sum)
+  meas chapters.avg_Scene (avg)
+  meas chapters.min_Scene (min)
+  meas chapters.max_Scene (max)
+cube characters
+  dim  characters.id (number) -- unique id number identifying the characters
+  dim  characters.CharName (string) -- character name
+  dim  characters.Abbrev (string) -- abbreviation. An abbreviation is a shortened form of a word or phrase.
+  dim  characters.Description (string) -- description of the character.
+  meas characters.count (count)
+cube paragraphs
+  dim  paragraphs.id (number) -- unique id number identifying the paragraphs
+  dim  paragraphs.ParagraphNum (number) -- unique id number identifying the paragraph number
+  dim  paragraphs.PlainText (string) -- main content of the paragraphs
+  dim  paragraphs.character_id (number) -- unique id number identifying the mentioned character
+  dim  paragraphs.chapter_id (number) -- unique id number identifying the related chapter if number of the paragraphs is > 150, then it means this is a long chapter
+  meas paragraphs.count (count)
+  meas paragraphs.sum_ParagraphNum (sum)
+  meas paragraphs.avg_ParagraphNum (avg)
+  meas paragraphs.min_ParagraphNum (min)
+  meas paragraphs.max_ParagraphNum (max)
+cube works
+  dim  works.id (number) -- unique id number identifying the work
+  dim  works.Title (string) -- title of the work the short title or abbreviated title
+  dim  works.LongTitle (string) -- full title of the work
+  dim  works.Date (number) -- date of the work
+  dim  works.GenreType (string) -- the type of the genere
+  meas works.count (count)
+  meas works.sum_Date (sum)
+  meas works.avg_Date (avg)
+  meas works.min_Date (min)
+  meas works.max_Date (max)

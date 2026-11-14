@@ -1,0 +1,53 @@
+cube businesses
+  dim  businesses.business_id (number) -- the unique id of the business
+  dim  businesses.name (string) -- the name of the eatery
+  dim  businesses.address (string) -- the eatery address
+  dim  businesses.city (string) -- the city where the eatery is located in
+  dim  businesses.postal_code (string) -- the postal code of the eatery
+  dim  businesses.latitude (number) -- the latitude of the position
+  dim  businesses.longitude (number) -- the longitude of the position the distance between eatery A and eatery B = sqrt((latitude_A-latitude_B)^2 + (longitude_A-longitude_B)^2)
+  dim  businesses.phone_number (number) -- the phone number of the eatery
+  dim  businesses.tax_code (string) -- the tax code of the eatery
+  dim  businesses.business_certificate (number) -- the business certificate number
+  dim  businesses.application_date (time) -- the application date of the eatery
+  dim  businesses.owner_name (string) -- the owner's name
+  dim  businesses.owner_address (string) -- the owner's address
+  dim  businesses.owner_city (string) -- the city where the owner is located
+  dim  businesses.owner_state (string) -- the state where the owner is located
+  dim  businesses.owner_zip (string) -- the zip code of the owner
+  meas businesses.count (count)
+  meas businesses.sum_latitude (sum)
+  meas businesses.avg_latitude (avg)
+  meas businesses.min_latitude (min)
+  meas businesses.max_latitude (max)
+  meas businesses.sum_longitude (sum)
+  meas businesses.avg_longitude (avg)
+  meas businesses.min_longitude (min)
+  meas businesses.max_longitude (max)
+  meas businesses.sum_phone_number (sum)
+  meas businesses.avg_phone_number (avg)
+  meas businesses.min_phone_number (min)
+  meas businesses.max_phone_number (max)
+  meas businesses.sum_business_certificate (sum)
+  meas businesses.avg_business_certificate (avg)
+  meas businesses.min_business_certificate (min)
+  meas businesses.max_business_certificate (max)
+cube inspections
+  dim  inspections.row_key (string)
+  dim  inspections.business_id (number) -- the unique id of the business
+  dim  inspections.score (number) -- the inspection score The scores range from 1 to 100, where 100 means that the establishment meets all required standards.
+  dim  inspections.date (time) -- the inspection date
+  dim  inspections.type (string) -- the inspection type
+  meas inspections.count (count)
+  meas inspections.sum_score (sum)
+  meas inspections.avg_score (avg)
+  meas inspections.min_score (min)
+  meas inspections.max_score (max)
+cube violations
+  dim  violations.row_key (string)
+  dim  violations.business_id (number) -- the unique id of the business
+  dim  violations.date (time) -- the date of the violation
+  dim  violations.violation_type_id (string) -- the unique type id of the violation
+  dim  violations.risk_category (string) -- risk category High / Moderate / Low risk High risks have more safety and health hazards than low risks
+  dim  violations.description (string) -- the description of the violation
+  meas violations.count (count)

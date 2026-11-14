@@ -1,0 +1,72 @@
+cube course
+  dim  course.course_id (number) -- unique id representing the course
+  dim  course.name (string) -- name of the course
+  dim  course.credit (number) -- credit of the course higher means more important
+  dim  course.diff (number) -- difficulty of the course higher --> more difficult smaller --> less difficult
+  meas course.count (count)
+  meas course.sum_credit (sum)
+  meas course.avg_credit (avg)
+  meas course.min_credit (min)
+  meas course.max_credit (max)
+  meas course.sum_diff (sum)
+  meas course.avg_diff (avg)
+  meas course.min_diff (min)
+  meas course.max_diff (max)
+cube prof
+  dim  prof.prof_id (number) -- unique id for professors
+  dim  prof.gender (string) -- gender of the professor
+  dim  prof.first_name (string) -- the first name of the professor
+  dim  prof.last_name (string) -- the last name of the professor full name: first name, last name
+  dim  prof.email (string) -- email of the professor
+  dim  prof.popularity (number) -- popularity of the professor higher --> more popular
+  dim  prof.teachingability (number) -- the teaching ability of the professor higher --> more teaching ability, his / her lectures may have better quality
+  dim  prof.graduate_from (string) -- the school where the professor graduated from
+  meas prof.count (count)
+  meas prof.sum_popularity (sum)
+  meas prof.avg_popularity (avg)
+  meas prof.min_popularity (min)
+  meas prof.max_popularity (max)
+  meas prof.sum_teachingability (sum)
+  meas prof.avg_teachingability (avg)
+  meas prof.min_teachingability (min)
+  meas prof.max_teachingability (max)
+cube RA
+  dim  RA.row_key (string)
+  dim  RA.student_id (number) -- the id numbe representing each student
+  dim  RA.capability (number) -- the capability of student on research (Evaluated by the professor) higher --> higher research ability / capability
+  dim  RA.prof_id (number) -- professor who advises this student this value may be repetitive since one professor may advise many students in this semester if a professor advise > 2 students in this semester, it means this professor's research work is heavy or: this professor's popularity on research is higher
+  dim  RA.salary (string) -- the salary of this student. med: average salary high: higher salary than others low: lower salary free: unpaid RA
+  meas RA.count (count)
+  meas RA.sum_capability (sum)
+  meas RA.avg_capability (avg)
+  meas RA.min_capability (min)
+  meas RA.max_capability (max)
+cube registration
+  dim  registration.row_key (string)
+  dim  registration.course_id (number) -- the id of courses
+  dim  registration.student_id (number) -- the id of students
+  dim  registration.grade (string) -- the grades that the students acquire in this course  A: excellent -- 4  B: good -- 3  C: fair -- 2  D: poorly pass -- 1  null or empty: this student fails to pass this course  gpa of students for this semester = sum (credits x grade) / sum (credits)
+  dim  registration.sat (number) -- student satisfaction with the course
+  meas registration.count (count)
+  meas registration.sum_sat (sum)
+  meas registration.avg_sat (avg)
+  meas registration.min_sat (min)
+  meas registration.max_sat (max)
+cube student
+  dim  student.student_id (number) -- the unique id to identify students
+  dim  student.f_name (string) -- the first name of the student
+  dim  student.l_name (string) -- the last name of the student full name: f_name, l_name
+  dim  student.phone_number (string) -- phone number
+  dim  student.email (string) -- email
+  dim  student.intelligence (number) -- intelligence of the student higher --> more intelligent
+  dim  student.gpa (number) -- gpa
+  dim  student.type (string) -- type of the student  TPG: taught postgraduate student(master)  RPG: research postgraduate student (master)  UG: undergraduate student(bachelor) both TPG and RPG are students pursuing a masters degree; UG are students pursuing the bachelor degree
+  meas student.count (count)
+  meas student.sum_intelligence (sum)
+  meas student.avg_intelligence (avg)
+  meas student.min_intelligence (min)
+  meas student.max_intelligence (max)
+  meas student.sum_gpa (sum)
+  meas student.avg_gpa (avg)
+  meas student.min_gpa (min)
+  meas student.max_gpa (max)

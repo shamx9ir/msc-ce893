@@ -1,0 +1,154 @@
+cube authors
+  dim  authors.au_id (string) -- unique number identifying authors
+  dim  authors.au_lname (string) -- author last name
+  dim  authors.au_fname (string) -- author first name
+  dim  authors.phone (string) -- phone number
+  dim  authors.address (string) -- address
+  dim  authors.city (string) -- city
+  dim  authors.state (string) -- state
+  dim  authors.zip (string) -- zip code
+  dim  authors.contract (string) -- contract status 0: not on the contract 1: on the contract
+  meas authors.count (count)
+cube jobs
+  dim  jobs.job_id (number) -- unique id number identifying the jobs
+  dim  jobs.job_desc (string) -- job description staff should be mentioned
+  dim  jobs.min_lvl (number) -- min job level
+  dim  jobs.max_lvl (number) -- max job level level range for jobs mentioned in job_desc is (min_lvl, max_lvl)
+  meas jobs.count (count)
+  meas jobs.sum_min_lvl (sum)
+  meas jobs.avg_min_lvl (avg)
+  meas jobs.min_min_lvl (min)
+  meas jobs.max_min_lvl (max)
+  meas jobs.sum_max_lvl (sum)
+  meas jobs.avg_max_lvl (avg)
+  meas jobs.min_max_lvl (min)
+  meas jobs.max_max_lvl (max)
+cube publishers
+  dim  publishers.pub_id (string) -- unique id number identifying publisher
+  dim  publishers.pub_name (string) -- publisher name
+  dim  publishers.city (string) -- city
+  dim  publishers.state (string) -- state
+  dim  publishers.country (string) -- country
+  meas publishers.count (count)
+cube employee
+  dim  employee.emp_id (string) -- unique number identifying employees
+  dim  employee.fname (string) -- first name of employees
+  dim  employee.minit (string) -- middle name
+  dim  employee.lname (string) -- last name
+  dim  employee.job_id (number) -- number identifying jobs
+  dim  employee.job_lvl (number) -- job level higher value means job level is higher
+  dim  employee.pub_id (string) -- id number identifying publishers
+  dim  employee.hire_date (time) -- hire date
+  meas employee.count (count)
+  meas employee.sum_job_lvl (sum)
+  meas employee.avg_job_lvl (avg)
+  meas employee.min_job_lvl (min)
+  meas employee.max_job_lvl (max)
+cube pub_info
+  dim  pub_info.pub_id (string) -- unique id number identifying publications
+  dim  pub_info.logo (string) -- logo of publications
+  dim  pub_info.pr_info (string) -- publisher's information
+  meas pub_info.count (count)
+cube stores
+  dim  stores.stor_id (string) -- unique id number of stores
+  dim  stores.stor_name (string)
+  dim  stores.stor_address (string)
+  dim  stores.city (string) -- city name
+  dim  stores.state (string) -- state code
+  dim  stores.zip (string) -- zip code
+  meas stores.count (count)
+cube discounts
+  dim  discounts.row_key (string)
+  dim  discounts.discounttype (string) -- discount type
+  dim  discounts.stor_id (string) -- store id
+  dim  discounts.lowqty (number) -- low quantity (quantity floor) The minimum quantity to enjoy the discount
+  dim  discounts.highqty (number) -- high quantity (max quantity) The maximum quantity to enjoy the discount
+  dim  discounts.discount (number) -- discount
+  meas discounts.count (count)
+  meas discounts.sum_lowqty (sum)
+  meas discounts.avg_lowqty (avg)
+  meas discounts.min_lowqty (min)
+  meas discounts.max_lowqty (max)
+  meas discounts.sum_highqty (sum)
+  meas discounts.avg_highqty (avg)
+  meas discounts.min_highqty (min)
+  meas discounts.max_highqty (max)
+  meas discounts.sum_discount (sum)
+  meas discounts.avg_discount (avg)
+  meas discounts.min_discount (min)
+  meas discounts.max_discount (max)
+cube titles
+  dim  titles.title_id (string) -- title id
+  dim  titles.title (string) -- title
+  dim  titles.type (string) -- type of titles
+  dim  titles.pub_id (string) -- publisher id
+  dim  titles.price (number) -- price
+  dim  titles.advance (number) -- pre-paid amount
+  dim  titles.royalty (number) -- royalty
+  dim  titles.ytd_sales (number) -- year to date sales
+  dim  titles.notes (string) -- notes if any had better understand notes contents and put some of them into questions if any
+  dim  titles.pubdate (time) -- publication date
+  meas titles.count (count)
+  meas titles.sum_price (sum)
+  meas titles.avg_price (avg)
+  meas titles.min_price (min)
+  meas titles.max_price (max)
+  meas titles.sum_advance (sum)
+  meas titles.avg_advance (avg)
+  meas titles.min_advance (min)
+  meas titles.max_advance (max)
+  meas titles.sum_royalty (sum)
+  meas titles.avg_royalty (avg)
+  meas titles.min_royalty (min)
+  meas titles.max_royalty (max)
+  meas titles.sum_ytd_sales (sum)
+  meas titles.avg_ytd_sales (avg)
+  meas titles.min_ytd_sales (min)
+  meas titles.max_ytd_sales (max)
+cube roysched
+  dim  roysched.row_key (string)
+  dim  roysched.title_id (string) -- unique id number identifying title
+  dim  roysched.lorange (number) -- low range
+  dim  roysched.hirange (number) -- high range
+  dim  roysched.royalty (number) -- royalty
+  meas roysched.count (count)
+  meas roysched.sum_lorange (sum)
+  meas roysched.avg_lorange (avg)
+  meas roysched.min_lorange (min)
+  meas roysched.max_lorange (max)
+  meas roysched.sum_hirange (sum)
+  meas roysched.avg_hirange (avg)
+  meas roysched.min_hirange (min)
+  meas roysched.max_hirange (max)
+  meas roysched.sum_royalty (sum)
+  meas roysched.avg_royalty (avg)
+  meas roysched.min_royalty (min)
+  meas roysched.max_royalty (max)
+cube sales
+  dim  sales.row_key (string)
+  dim  sales.stor_id (string) -- id number identifying stores
+  dim  sales.ord_num (string) -- id number identifying the orders
+  dim  sales.ord_date (time) -- the date of the order
+  dim  sales.qty (number) -- quantity of sales
+  dim  sales.payterms (string) -- payments
+  dim  sales.title_id (string) -- id number identifying titles
+  meas sales.count (count)
+  meas sales.sum_qty (sum)
+  meas sales.avg_qty (avg)
+  meas sales.min_qty (min)
+  meas sales.max_qty (max)
+cube titleauthor
+  dim  titleauthor.row_key (string)
+  dim  titleauthor.au_id (string) -- author id
+  dim  titleauthor.title_id (string) -- title id
+  dim  titleauthor.au_ord (number) -- author ordering
+  dim  titleauthor.royaltyper (number) -- royaltyper
+  meas titleauthor.count (count)
+  meas titleauthor.sum_au_ord (sum)
+  meas titleauthor.avg_au_ord (avg)
+  meas titleauthor.min_au_ord (min)
+  meas titleauthor.max_au_ord (max)
+  meas titleauthor.sum_royaltyper (sum)
+  meas titleauthor.avg_royaltyper (avg)
+  meas titleauthor.min_royaltyper (min)
+  meas titleauthor.max_royaltyper (max)

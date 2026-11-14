@@ -1,0 +1,113 @@
+cube Dish
+  dim  Dish.id (number) -- unique id number indicating the dishes
+  dim  Dish.name (string) -- the name of the dish
+  dim  Dish.description (string) -- description of the dish (no value)
+  dim  Dish.menus_appeared (number) -- how many menus have this dish
+  dim  Dish.times_appeared (number) -- how many times this dish appears in the menu if times_appeared > menus_appeard: this dish appeared in a menu more than once
+  dim  Dish.first_appeared (number) -- the year that this dish appears first 1. the year outside of [1851, 2012], it means this data is not correct 2. if this dish lasts longer (last_appeared - first_appeard), it means its history is long or historical / classical
+  dim  Dish.last_appeared (number) -- the year that this dish appears the last time 1. the year outside of [1851, 2012], it means this data is not correct 2. if this dish lasts longer (last_appeared - first_appeard), it means its history is long or historical / classical
+  dim  Dish.lowest_price (number) -- the lowest price of the dish 0: for free
+  dim  Dish.highest_price (number) -- the highest price of the dish
+  meas Dish.count (count)
+  meas Dish.sum_menus_appeared (sum)
+  meas Dish.avg_menus_appeared (avg)
+  meas Dish.min_menus_appeared (min)
+  meas Dish.max_menus_appeared (max)
+  meas Dish.sum_times_appeared (sum)
+  meas Dish.avg_times_appeared (avg)
+  meas Dish.min_times_appeared (min)
+  meas Dish.max_times_appeared (max)
+  meas Dish.sum_first_appeared (sum)
+  meas Dish.avg_first_appeared (avg)
+  meas Dish.min_first_appeared (min)
+  meas Dish.max_first_appeared (max)
+  meas Dish.sum_last_appeared (sum)
+  meas Dish.avg_last_appeared (avg)
+  meas Dish.min_last_appeared (min)
+  meas Dish.max_last_appeared (max)
+  meas Dish.sum_lowest_price (sum)
+  meas Dish.avg_lowest_price (avg)
+  meas Dish.min_lowest_price (min)
+  meas Dish.max_lowest_price (max)
+  meas Dish.sum_highest_price (sum)
+  meas Dish.avg_highest_price (avg)
+  meas Dish.min_highest_price (min)
+  meas Dish.max_highest_price (max)
+cube Menu
+  dim  Menu.id (number) -- the unique number identifying the menu
+  dim  Menu.name (string) -- the name of the menu if the value is not null or empty, it means this menu has special dishes. otherwise, this menu is general and nothing special
+  dim  Menu.sponsor (string) -- the sponsor of this menu if the value is null or empyt, it means this meanu is DIY by the restaurant.
+  dim  Menu.event (string) -- the event that the menu was created for
+  dim  Menu.venue (string) -- the venue that the menu was created for
+  dim  Menu.place (string) -- the location that the menu was used the location that the menu was used
+  dim  Menu.physical_description (string) -- physical description of the menu
+  dim  Menu.occasion (string) -- occasion of the menu
+  dim  Menu.notes (string) -- notes
+  dim  Menu.call_number (string) -- call number if null: not support for taking out or booking in advance
+  dim  Menu.keywords (string) -- keywords not useful
+  dim  Menu.language (string) -- language not useful
+  dim  Menu.date (time) -- the date that this menu was created
+  dim  Menu.location (string) -- the location that the menu was used
+  dim  Menu.location_type (string) -- not useful
+  dim  Menu.currency (string) -- the currency that the menu was used
+  dim  Menu.currency_symbol (string) -- the currency symbol
+  dim  Menu.status (string) -- status of the menu
+  dim  Menu.page_count (number) -- the number of pages of this menu
+  dim  Menu.dish_count (number) -- the number of dishes of this menu
+  meas Menu.count (count)
+  meas Menu.sum_page_count (sum)
+  meas Menu.avg_page_count (avg)
+  meas Menu.min_page_count (min)
+  meas Menu.max_page_count (max)
+  meas Menu.sum_dish_count (sum)
+  meas Menu.avg_dish_count (avg)
+  meas Menu.min_dish_count (min)
+  meas Menu.max_dish_count (max)
+cube MenuPage
+  dim  MenuPage.id (number) -- the unique id number indentifying the menupage
+  dim  MenuPage.menu_id (number) -- the id of the menu
+  dim  MenuPage.page_number (number) -- the page number
+  dim  MenuPage.image_id (number) -- the id of the image
+  dim  MenuPage.full_height (number) -- full height of the menu page (mm)
+  dim  MenuPage.full_width (number) -- full width of the menu page (mm)
+  dim  MenuPage.uuid (string)
+  meas MenuPage.count (count)
+  meas MenuPage.sum_page_number (sum)
+  meas MenuPage.avg_page_number (avg)
+  meas MenuPage.min_page_number (min)
+  meas MenuPage.max_page_number (max)
+  meas MenuPage.sum_full_height (sum)
+  meas MenuPage.avg_full_height (avg)
+  meas MenuPage.min_full_height (min)
+  meas MenuPage.max_full_height (max)
+  meas MenuPage.sum_full_width (sum)
+  meas MenuPage.avg_full_width (avg)
+  meas MenuPage.min_full_width (min)
+  meas MenuPage.max_full_width (max)
+cube MenuItem
+  dim  MenuItem.id (number) -- the unique id representing the menu item
+  dim  MenuItem.menu_page_id (number) -- the id of menu page
+  dim  MenuItem.price (number) -- the price of this dish (menu item)
+  dim  MenuItem.high_price (number) -- high price of this dish
+  dim  MenuItem.dish_id (number) -- the id of the dish
+  dim  MenuItem.created_at (string) -- the dates when the item was created
+  dim  MenuItem.updated_at (string) -- the dates when the item was updated
+  dim  MenuItem.xpos (number) -- x-axis position of the dish in this menu page
+  dim  MenuItem.ypos (number) -- y-axis position of the dish in this menu page
+  meas MenuItem.count (count)
+  meas MenuItem.sum_price (sum)
+  meas MenuItem.avg_price (avg)
+  meas MenuItem.min_price (min)
+  meas MenuItem.max_price (max)
+  meas MenuItem.sum_high_price (sum)
+  meas MenuItem.avg_high_price (avg)
+  meas MenuItem.min_high_price (min)
+  meas MenuItem.max_high_price (max)
+  meas MenuItem.sum_xpos (sum)
+  meas MenuItem.avg_xpos (avg)
+  meas MenuItem.min_xpos (min)
+  meas MenuItem.max_xpos (max)
+  meas MenuItem.sum_ypos (sum)
+  meas MenuItem.avg_ypos (avg)
+  meas MenuItem.min_ypos (min)
+  meas MenuItem.max_ypos (max)

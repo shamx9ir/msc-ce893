@@ -1,0 +1,93 @@
+cube Customers
+  dim  Customers.CustomerID (number) -- unique id number indicating which customer
+  dim  Customers.Customer_Names (string) -- the name of the customer
+  meas Customers.count (count)
+cube Products
+  dim  Products.ProductID (number) -- unique id number representing each product
+  dim  Products.Product_Name (string) -- name of the product
+  meas Products.count (count)
+cube Regions
+  dim  Regions.StateCode (string) -- the unique code identifying the state
+  dim  Regions.State (string) -- full state name
+  dim  Regions.Region (string) -- the region where the state is located in
+  meas Regions.count (count)
+cube Sales_Team
+  dim  Sales_Team.SalesTeamID (number) -- unique sales team id
+  dim  Sales_Team.Sales_Team (string) -- sales team names
+  dim  Sales_Team.Region (string) -- the region where the state is located in
+  meas Sales_Team.count (count)
+cube Store_Locations
+  dim  Store_Locations.StoreID (number) -- unique store id
+  dim  Store_Locations.City_Name (string) -- City Name
+  dim  Store_Locations.County (string) -- full county name
+  dim  Store_Locations.StateCode (string) -- state code
+  dim  Store_Locations.State (string) -- full state name
+  dim  Store_Locations.Type (string) -- type of the store City Town CDP (customer data platform) Unified Government Consolidated Government Other Township Urban County Borough Metropolitan Government
+  dim  Store_Locations.Latitude (number) -- Latitude
+  dim  Store_Locations.Longitude (number) -- Longitude coordinates or detailed position: (Latitude, Longitude)
+  dim  Store_Locations.AreaCode (number)
+  dim  Store_Locations.Population (number) -- Population
+  dim  Store_Locations.Household_Income (number) -- Household Income
+  dim  Store_Locations.Median_Income (number) -- Median Income
+  dim  Store_Locations.Land_Area (number) -- Land Area
+  dim  Store_Locations.Water_Area (number) -- Water Area
+  dim  Store_Locations.Time_Zone (string) -- Time Zone
+  meas Store_Locations.count (count)
+  meas Store_Locations.sum_Latitude (sum)
+  meas Store_Locations.avg_Latitude (avg)
+  meas Store_Locations.min_Latitude (min)
+  meas Store_Locations.max_Latitude (max)
+  meas Store_Locations.sum_Longitude (sum)
+  meas Store_Locations.avg_Longitude (avg)
+  meas Store_Locations.min_Longitude (min)
+  meas Store_Locations.max_Longitude (max)
+  meas Store_Locations.sum_AreaCode (sum)
+  meas Store_Locations.avg_AreaCode (avg)
+  meas Store_Locations.min_AreaCode (min)
+  meas Store_Locations.max_AreaCode (max)
+  meas Store_Locations.sum_Population (sum)
+  meas Store_Locations.avg_Population (avg)
+  meas Store_Locations.min_Population (min)
+  meas Store_Locations.max_Population (max)
+  meas Store_Locations.sum_Household_Income (sum)
+  meas Store_Locations.avg_Household_Income (avg)
+  meas Store_Locations.min_Household_Income (min)
+  meas Store_Locations.max_Household_Income (max)
+  meas Store_Locations.sum_Median_Income (sum)
+  meas Store_Locations.avg_Median_Income (avg)
+  meas Store_Locations.min_Median_Income (min)
+  meas Store_Locations.max_Median_Income (max)
+  meas Store_Locations.sum_Land_Area (sum)
+  meas Store_Locations.avg_Land_Area (avg)
+  meas Store_Locations.min_Land_Area (min)
+  meas Store_Locations.max_Land_Area (max)
+  meas Store_Locations.sum_Water_Area (sum)
+  meas Store_Locations.avg_Water_Area (avg)
+  meas Store_Locations.min_Water_Area (min)
+  meas Store_Locations.max_Water_Area (max)
+cube Sales_Orders
+  dim  Sales_Orders.OrderNumber (string) -- the unique number identifying the order
+  dim  Sales_Orders.Sales_Channel (string) -- Sales Channel  In-Store  Online  Distributor  Wholesale
+  dim  Sales_Orders.WarehouseCode (string) -- Warehouse Code if the warehouse code is the same, it means this product is shipped from the same ware house
+  dim  Sales_Orders.ProcuredDate (string) -- Procured Date date: month/date/year, 17--> 2017
+  dim  Sales_Orders.OrderDate (string) -- Order Date
+  dim  Sales_Orders.ShipDate (string) -- Ship Date
+  dim  Sales_Orders.DeliveryDate (string) -- Delivery Date the difference "DeliveryDate - OrderDate" is smaller, it means faster delivery
+  dim  Sales_Orders.CurrencyCode (string) -- Currency Code USD
+  dim  Sales_Orders.SalesTeamID (number) -- Sales Team ID
+  dim  Sales_Orders.CustomerID (number) -- _Customer ID
+  dim  Sales_Orders.StoreID (number) -- _Store ID
+  dim  Sales_Orders.ProductID (number) -- _Product ID
+  dim  Sales_Orders.Order_Quantity (number) -- Order Quantity 1 - 8: higher means order quantity is higher or customer needs more
+  dim  Sales_Orders.Discount_Applied (number) -- Discount Applied 0.2: 20% discount
+  dim  Sales_Orders.Unit_Price (string)
+  dim  Sales_Orders.Unit_Cost (string) -- net profit = Unit Price - Unit Cost
+  meas Sales_Orders.count (count)
+  meas Sales_Orders.sum_Order_Quantity (sum)
+  meas Sales_Orders.avg_Order_Quantity (avg)
+  meas Sales_Orders.min_Order_Quantity (min)
+  meas Sales_Orders.max_Order_Quantity (max)
+  meas Sales_Orders.sum_Discount_Applied (sum)
+  meas Sales_Orders.avg_Discount_Applied (avg)
+  meas Sales_Orders.min_Discount_Applied (min)
+  meas Sales_Orders.max_Discount_Applied (max)

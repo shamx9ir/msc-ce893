@@ -1,0 +1,62 @@
+cube actor
+  dim  actor.ActorID (number) -- the unique id for the actor
+  dim  actor.Name (string) -- actor's name
+  dim  actor.Date_of_Birth (time) -- actor's birth date
+  dim  actor.Birth_City (string) -- actor's birth city
+  dim  actor.Birth_Country (string) -- actor's birth country
+  dim  actor.Height_Inches (number) -- actor's height the unit is inch
+  dim  actor.Biography (string) -- actor's biography
+  dim  actor.Gender (string) -- actor's gender
+  dim  actor.Ethnicity (string) -- actor's ethnicity
+  dim  actor.NetWorth (string) -- actor's networth The actor with more networth is richer.
+  meas actor.count (count)
+  meas actor.sum_Height_Inches (sum)
+  meas actor.avg_Height_Inches (avg)
+  meas actor.min_Height_Inches (min)
+  meas actor.max_Height_Inches (max)
+cube movie
+  dim  movie.MovieID (number) -- the unique id for the movie
+  dim  movie.Title (string) -- the title of the movie
+  dim  movie.MPAA_Rating (string) -- MPAA rating of the movie MPAA rating is the movie rating for parents to use as a guide to determine the appropriateness of a film's content for children and teenagers.  rated G: General audiences  All ages admitted  rated PG: Parental guidance suggested  Some material may not be suitable for pre-teenagers  rated R: Restricted  Under 17 requires accompanying parent or adult guardian  rated X
+  dim  movie.Budget (number) -- the budget of the movie the unit is dollar
+  dim  movie.Gross (number) -- the gross of the movie
+  dim  movie.Release_Date (time) -- release date yyyy-mm-dd
+  dim  movie.Genre (string) -- the genre of the movie
+  dim  movie.Runtime (number) -- the runtime of the movie
+  dim  movie.Rating (number) -- the rating of the movie 0.0 - 10.0 Higher ratings mean higher quality and better response.
+  dim  movie.Rating_Count (number) -- the number of the ratings
+  dim  movie.Summary (string) -- the summary of the movie
+  meas movie.count (count)
+  meas movie.sum_Budget (sum)
+  meas movie.avg_Budget (avg)
+  meas movie.min_Budget (min)
+  meas movie.max_Budget (max)
+  meas movie.sum_Gross (sum)
+  meas movie.avg_Gross (avg)
+  meas movie.min_Gross (min)
+  meas movie.max_Gross (max)
+  meas movie.sum_Runtime (sum)
+  meas movie.avg_Runtime (avg)
+  meas movie.min_Runtime (min)
+  meas movie.max_Runtime (max)
+  meas movie.sum_Rating (sum)
+  meas movie.avg_Rating (avg)
+  meas movie.min_Rating (min)
+  meas movie.max_Rating (max)
+  meas movie.sum_Rating_Count (sum)
+  meas movie.avg_Rating_Count (avg)
+  meas movie.min_Rating_Count (min)
+  meas movie.max_Rating_Count (max)
+cube characters
+  dim  characters.row_key (string)
+  dim  characters.MovieID (number) -- the unique id for the movie
+  dim  characters.ActorID (number) -- the unique id for the actor
+  dim  characters.Character_Name (string) -- the name of the character
+  dim  characters.creditOrder (number) -- order of the character in the credit list
+  dim  characters.pay (string) -- the salary of the character
+  dim  characters.screentime (string) -- the screentime of the character Screentime is directly proportional to the importance of the characters.
+  meas characters.count (count)
+  meas characters.sum_creditOrder (sum)
+  meas characters.avg_creditOrder (avg)
+  meas characters.min_creditOrder (min)
+  meas characters.max_creditOrder (max)

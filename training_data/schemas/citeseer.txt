@@ -1,0 +1,14 @@
+cube cites
+  dim  cites.row_key (string)
+  dim  cites.cited_paper_id (string) -- cited_paper_id is the ID of the paper being cited cited_paper_id is the ID of the paper being cited
+  dim  cites.citing_paper_id (string) -- citing_paper_id stands for the paper which contains the citation citing_paper_id stands for the paper which contains the citation
+  meas cites.count (count)
+cube paper
+  dim  paper.paper_id (string) -- unique string ID of the paper unique string ID of the paper
+  dim  paper.class_label (string)
+  meas paper.count (count)
+cube content
+  dim  content.row_key (string)
+  dim  content.paper_id (string) -- unique string ID of the paper unique string ID of the paper
+  dim  content.word_cited_id (string) -- rtype whether each word in the vocabulary is present (indicated by 1) or absent (indicated by 0) in the paper
+  meas content.count (count)

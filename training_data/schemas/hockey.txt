@@ -1,0 +1,704 @@
+cube AwardsMisc
+  dim  AwardsMisc.name (string) -- unique name of awards unique name of awards
+  dim  AwardsMisc.ID (string) -- id number of players or coaches, etc.
+  dim  AwardsMisc.award (string) -- awarder not useful
+  dim  AwardsMisc.year (number) -- year of the award
+  dim  AwardsMisc.lgID (string) -- league abbreviated name
+  dim  AwardsMisc.note (string) -- note if needed noted information
+  meas AwardsMisc.count (count)
+  meas AwardsMisc.sum_year (sum)
+  meas AwardsMisc.avg_year (avg)
+  meas AwardsMisc.min_year (min)
+  meas AwardsMisc.max_year (max)
+cube HOF
+  dim  HOF.year (number) -- year of hall of fame
+  dim  HOF.hofID (string) -- hall of fame id
+  dim  HOF.name (string) -- name
+  dim  HOF.category (string) -- category
+  meas HOF.count (count)
+  meas HOF.sum_year (sum)
+  meas HOF.avg_year (avg)
+  meas HOF.min_year (min)
+  meas HOF.max_year (max)
+cube Teams
+  dim  Teams.row_key (string)
+  dim  Teams.year (number) -- year
+  dim  Teams.lgID (string) -- league ID number
+  dim  Teams.tmID (string) -- team ID
+  dim  Teams.franchID (string) -- Franchise ID
+  dim  Teams.confID (string) -- Conference ID see abbrev.csv for details
+  dim  Teams.divID (string) -- Division ID see abbrev.csv for details
+  dim  Teams.rank (number) -- Final standing
+  dim  Teams.playoff (string) -- playoff results
+  dim  Teams.G (number) -- games
+  dim  Teams.W (number) -- wins
+  dim  Teams.L (number) -- loses
+  dim  Teams.T (number) -- ties
+  dim  Teams.OTL (string) -- Overtime losses
+  dim  Teams.Pts (number) -- points
+  dim  Teams.SoW (string) -- Shootout wins
+  dim  Teams.SoL (string) -- Shootout loses
+  dim  Teams.GF (number) -- Goals for
+  dim  Teams.GA (number) -- goals against
+  dim  Teams.name (string) -- Full team name
+  dim  Teams.PIM (string) -- Penalty minutes
+  dim  Teams.BenchMinor (string) -- Bench minors (minutes) A bench minor penalty is a minor penalty committed by a player or coach that is not on the ice. It is like a minor penalty in that it calls for the offending player to serve two minutes in the penalty box.
+  dim  Teams.PPG (string) -- Power play goals
+  dim  Teams.PPC (string) -- Power play chances power play percentage (PP%) = PPG / PPC
+  dim  Teams.SHA (string) -- Shorthanded goals against
+  dim  Teams.PKG (string) -- Power play goals against
+  dim  Teams.PKC (string) -- Penalty kill chances
+  dim  Teams.SHF (string) -- Shorthanded goals for
+  meas Teams.count (count)
+  meas Teams.sum_rank (sum)
+  meas Teams.avg_rank (avg)
+  meas Teams.min_rank (min)
+  meas Teams.max_rank (max)
+  meas Teams.sum_G (sum)
+  meas Teams.avg_G (avg)
+  meas Teams.min_G (min)
+  meas Teams.max_G (max)
+  meas Teams.sum_W (sum)
+  meas Teams.avg_W (avg)
+  meas Teams.min_W (min)
+  meas Teams.max_W (max)
+  meas Teams.sum_L (sum)
+  meas Teams.avg_L (avg)
+  meas Teams.min_L (min)
+  meas Teams.max_L (max)
+  meas Teams.sum_T (sum)
+  meas Teams.avg_T (avg)
+  meas Teams.min_T (min)
+  meas Teams.max_T (max)
+  meas Teams.sum_Pts (sum)
+  meas Teams.avg_Pts (avg)
+  meas Teams.min_Pts (min)
+  meas Teams.max_Pts (max)
+  meas Teams.sum_GF (sum)
+  meas Teams.avg_GF (avg)
+  meas Teams.min_GF (min)
+  meas Teams.max_GF (max)
+  meas Teams.sum_GA (sum)
+  meas Teams.avg_GA (avg)
+  meas Teams.min_GA (min)
+  meas Teams.max_GA (max)
+cube Coaches
+  dim  Coaches.row_key (string)
+  dim  Coaches.coachID (string) -- number identifying coaches number identifying coaches
+  dim  Coaches.year (number) -- In which year did the coach teach this team
+  dim  Coaches.tmID (string) -- team abbreviated name
+  dim  Coaches.lgID (string) -- league abbreviated name
+  dim  Coaches.stint (number) -- stint
+  dim  Coaches.notes (string) -- note if needed noted information
+  dim  Coaches.g (number) -- number of games
+  dim  Coaches.w (number) -- number of wins winning rates = wins / (wins + loses)
+  dim  Coaches.l (number) -- number of loses
+  dim  Coaches.t (number) -- number of ties
+  dim  Coaches.postg (string) -- number of post-season games
+  dim  Coaches.postw (string) -- number of post-season wins
+  dim  Coaches.postl (string) -- number of post-season loses
+  dim  Coaches.postt (string) -- number of post-season ties
+  meas Coaches.count (count)
+  meas Coaches.sum_g (sum)
+  meas Coaches.avg_g (avg)
+  meas Coaches.min_g (min)
+  meas Coaches.max_g (max)
+  meas Coaches.sum_w (sum)
+  meas Coaches.avg_w (avg)
+  meas Coaches.min_w (min)
+  meas Coaches.max_w (max)
+  meas Coaches.sum_l (sum)
+  meas Coaches.avg_l (avg)
+  meas Coaches.min_l (min)
+  meas Coaches.max_l (max)
+  meas Coaches.sum_t (sum)
+  meas Coaches.avg_t (avg)
+  meas Coaches.min_t (min)
+  meas Coaches.max_t (max)
+cube AwardsCoaches
+  dim  AwardsCoaches.row_key (string)
+  dim  AwardsCoaches.coachID (string) -- string ID of the coach
+  dim  AwardsCoaches.award (string) -- awards that the coach achieve
+  dim  AwardsCoaches.year (number) -- year of award
+  dim  AwardsCoaches.lgID (string) -- league abbreviated name
+  dim  AwardsCoaches.note (string)
+  meas AwardsCoaches.count (count)
+  meas AwardsCoaches.sum_year (sum)
+  meas AwardsCoaches.avg_year (avg)
+  meas AwardsCoaches.min_year (min)
+  meas AwardsCoaches.max_year (max)
+cube Master
+  dim  Master.row_key (string)
+  dim  Master.playerID (string) -- id number identifying the player
+  dim  Master.coachID (string) -- coach id number if a person has both playerID and coachID, it means this person becomes coach after retirement.
+  dim  Master.hofID (string) -- hall of fame id
+  dim  Master.firstName (string) -- first name
+  dim  Master.lastName (string) -- last name
+  dim  Master.nameNote (string) -- note about name
+  dim  Master.nameGiven (string) -- Given name
+  dim  Master.nameNick (string) -- Nickname (multiple entries separated by "/")
+  dim  Master.height (string) -- height
+  dim  Master.weight (string) -- weight
+  dim  Master.shootCatch (string) -- Shooting hand (or catching hand for goalies) Shooting hand (or catching hand for goalies) L: left hand R: right hand if null or 'empty', it means this player is good at both left and right hand
+  dim  Master.legendsID (string) -- ID at Legends Of Hockey
+  dim  Master.ihdbID (string) -- ID at the Internet Hockey Database
+  dim  Master.hrefID (string) -- ID at Hockey-Reference.com
+  dim  Master.firstNHL (string) -- First NHL season
+  dim  Master.lastNHL (string) -- Last NHL season
+  dim  Master.firstWHA (string) -- First WHA season
+  dim  Master.lastWHA (string) -- Last WHA season
+  dim  Master.pos (string) -- LW: left winger RW: right winger C: center G: goalie D: defenseman W: winger F: forward the player with W (winger) means he can play the role as both LW (left winger) and RW (right winger) some players have two positions, which will be shown as "L/D". It means that LW + D --> left winger and defenseman
+  dim  Master.birthYear (string) -- birth Year
+  dim  Master.birthMon (string) -- birth Month
+  dim  Master.birthDay (string) -- birth Day the entire / detail birth date in this table is "year" / "month" / "date"
+  dim  Master.birthCountry (string) -- birth Country
+  dim  Master.birthState (string) -- birth State
+  dim  Master.birthCity (string) -- birth city
+  dim  Master.deathYear (string) -- death year
+  dim  Master.deathMon (string) -- death month
+  dim  Master.deathDay (string) -- death day
+  dim  Master.deathCountry (string) -- death country
+  dim  Master.deathState (string) -- death state
+  dim  Master.deathCity (string) -- death city
+  meas Master.count (count)
+cube AwardsPlayers
+  dim  AwardsPlayers.row_key (string)
+  dim  AwardsPlayers.playerID (string) -- string ID of players unique string ID of the player
+  dim  AwardsPlayers.award (string) -- award name
+  dim  AwardsPlayers.year (number) -- year of award
+  dim  AwardsPlayers.lgID (string) -- league abbreviated name
+  dim  AwardsPlayers.note (string) -- note if needed
+  dim  AwardsPlayers.pos (string) -- position of players LW: left winger RW: right winger C: center G: goalie D: defenseman W: winger F: forward the player with W (winger) means he can play the role as both LW (left winger) and RW (right winger)
+  meas AwardsPlayers.count (count)
+cube CombinedShutouts
+  dim  CombinedShutouts.row_key (string)
+  dim  CombinedShutouts.year (number) -- year
+  dim  CombinedShutouts.month (number) -- month
+  dim  CombinedShutouts.date (number) -- day the entire date in this table is "year" / "month" / "date"
+  dim  CombinedShutouts.tmID (string) -- team abbreviated name
+  dim  CombinedShutouts.oppID (string) -- Team ID of opponent
+  dim  CombinedShutouts.R_P (string) -- regular / postseason R" for regular season, or "P" for postseason
+  dim  CombinedShutouts.IDgoalie1 (string) -- ID of first goalie
+  dim  CombinedShutouts.IDgoalie2 (string) -- ID of second goalie
+  meas CombinedShutouts.count (count)
+  meas CombinedShutouts.sum_year (sum)
+  meas CombinedShutouts.avg_year (avg)
+  meas CombinedShutouts.min_year (min)
+  meas CombinedShutouts.max_year (max)
+  meas CombinedShutouts.sum_month (sum)
+  meas CombinedShutouts.avg_month (avg)
+  meas CombinedShutouts.min_month (min)
+  meas CombinedShutouts.max_month (max)
+  meas CombinedShutouts.sum_date (sum)
+  meas CombinedShutouts.avg_date (avg)
+  meas CombinedShutouts.min_date (min)
+  meas CombinedShutouts.max_date (max)
+cube Goalies
+  dim  Goalies.row_key (string)
+  dim  Goalies.playerID (string) -- id number identifying the player number identifying players
+  dim  Goalies.year (number) -- year 2005-06 listed as "2005"
+  dim  Goalies.stint (number) -- order of appearance in a season the entire date in this table is "year" / "month" / "date"
+  dim  Goalies.tmID (string) -- team abbreviated name
+  dim  Goalies.lgID (string) -- league abbreviated name
+  dim  Goalies.GP (string) -- Games played
+  dim  Goalies.Min (string) -- Minutes of appearance
+  dim  Goalies.W (string) -- wins
+  dim  Goalies.L (string) -- loses
+  dim  Goalies.T_OL (string) -- Ties / overtime losses
+  dim  Goalies.ENG (string) -- Empty net goals An empty net goal happens when a team scores against their opponent who has pulled their goalie. Since there is no goalie in the net, the net is considered empty"
+  dim  Goalies.SHO (string) -- Shutouts In ice hockey, a shutout (SHO) is credited to a goaltender who successfully stops the other team from scoring during the entire game.
+  dim  Goalies.GA (string) -- Goals against Goals Against are the number of goals recorded while the goalie is on the ice. Include all goals against during regulation and overtime play.
+  dim  Goalies.SA (string) -- Shots against Shot Against are the number of shots recorded while the goalie is on the ice
+  dim  Goalies.PostGP (string) -- Postseason games played
+  dim  Goalies.PostMin (string) -- Postseason minutes
+  dim  Goalies.PostW (string) -- Postseason wins
+  dim  Goalies.PostL (string) -- Postseason loses
+  dim  Goalies.PostT (string) -- Postseason ties
+  dim  Goalies.PostENG (string) -- Postseason empty net goals An empty net goal happens when a team scores against their opponent who has pulled their goalie. Since there is no goalie in the net, the net is considered empty"
+  dim  Goalies.PostSHO (string) -- Postseason Shutouts In ice hockey, a shutout (SHO) is credited to a goaltender who successfully stops the other team from scoring during the entire game.
+  dim  Goalies.PostGA (string) -- Postseason Goals against Goals Against are the number of goals recorded while the goalie is on the ice. Include all goals against during regulation and overtime play.
+  dim  Goalies.PostSA (string) -- Postseason Shots against Shot Against are the number of shots recorded while the goalie is on the ice.
+  meas Goalies.count (count)
+cube GoaliesSC
+  dim  GoaliesSC.row_key (string)
+  dim  GoaliesSC.playerID (string) -- id number identifying the player number identifying players
+  dim  GoaliesSC.year (number) -- year 2005-06 listed as "2005"
+  dim  GoaliesSC.tmID (string) -- team abbreviated name
+  dim  GoaliesSC.lgID (string) -- league abbreviated name
+  dim  GoaliesSC.GP (number) -- Games played
+  dim  GoaliesSC.Min (number) -- Minutes of appearance
+  dim  GoaliesSC.W (number) -- Wins
+  dim  GoaliesSC.L (number) -- Loses
+  dim  GoaliesSC.T (number) -- Ties
+  dim  GoaliesSC.SHO (number) -- Shutouts In ice hockey, a shutout (SHO) is credited to a goaltender who successfully stops the other team from scoring during the entire game.
+  dim  GoaliesSC.GA (number) -- Goals against Goals Against are the number of goals recorded while the goalie is on the ice. Include all goals against during regulation and overtime play.
+  meas GoaliesSC.count (count)
+  meas GoaliesSC.sum_GP (sum)
+  meas GoaliesSC.avg_GP (avg)
+  meas GoaliesSC.min_GP (min)
+  meas GoaliesSC.max_GP (max)
+  meas GoaliesSC.sum_Min (sum)
+  meas GoaliesSC.avg_Min (avg)
+  meas GoaliesSC.min_Min (min)
+  meas GoaliesSC.max_Min (max)
+  meas GoaliesSC.sum_W (sum)
+  meas GoaliesSC.avg_W (avg)
+  meas GoaliesSC.min_W (min)
+  meas GoaliesSC.max_W (max)
+  meas GoaliesSC.sum_L (sum)
+  meas GoaliesSC.avg_L (avg)
+  meas GoaliesSC.min_L (min)
+  meas GoaliesSC.max_L (max)
+  meas GoaliesSC.sum_T (sum)
+  meas GoaliesSC.avg_T (avg)
+  meas GoaliesSC.min_T (min)
+  meas GoaliesSC.max_T (max)
+  meas GoaliesSC.sum_SHO (sum)
+  meas GoaliesSC.avg_SHO (avg)
+  meas GoaliesSC.min_SHO (min)
+  meas GoaliesSC.max_SHO (max)
+  meas GoaliesSC.sum_GA (sum)
+  meas GoaliesSC.avg_GA (avg)
+  meas GoaliesSC.min_GA (min)
+  meas GoaliesSC.max_GA (max)
+cube GoaliesShootout
+  dim  GoaliesShootout.row_key (string)
+  dim  GoaliesShootout.playerID (string)
+  dim  GoaliesShootout.year (number) -- year 2005-06 listed as "2005"
+  dim  GoaliesShootout.stint (number) -- stint
+  dim  GoaliesShootout.tmID (string) -- team abbreviated name
+  dim  GoaliesShootout.W (number) -- Wins
+  dim  GoaliesShootout.L (number) -- Loses
+  dim  GoaliesShootout.SA (number) -- Shots against Shot Against are the number of shots recorded while the goalie is on the ice.
+  dim  GoaliesShootout.GA (number) -- Goals against Goals Against are the number of goals recorded while the goalie is on the ice. Include all goals against during regulation and overtime play.
+  meas GoaliesShootout.count (count)
+  meas GoaliesShootout.sum_stint (sum)
+  meas GoaliesShootout.avg_stint (avg)
+  meas GoaliesShootout.min_stint (min)
+  meas GoaliesShootout.max_stint (max)
+  meas GoaliesShootout.sum_W (sum)
+  meas GoaliesShootout.avg_W (avg)
+  meas GoaliesShootout.min_W (min)
+  meas GoaliesShootout.max_W (max)
+  meas GoaliesShootout.sum_L (sum)
+  meas GoaliesShootout.avg_L (avg)
+  meas GoaliesShootout.min_L (min)
+  meas GoaliesShootout.max_L (max)
+  meas GoaliesShootout.sum_SA (sum)
+  meas GoaliesShootout.avg_SA (avg)
+  meas GoaliesShootout.min_SA (min)
+  meas GoaliesShootout.max_SA (max)
+  meas GoaliesShootout.sum_GA (sum)
+  meas GoaliesShootout.avg_GA (avg)
+  meas GoaliesShootout.min_GA (min)
+  meas GoaliesShootout.max_GA (max)
+cube Scoring
+  dim  Scoring.row_key (string)
+  dim  Scoring.playerID (string) -- player ID
+  dim  Scoring.year (number) -- play year
+  dim  Scoring.stint (number) -- Stint (order of appearance in a season)
+  dim  Scoring.tmID (string) -- team id
+  dim  Scoring.lgID (string) -- league id
+  dim  Scoring.pos (string) -- position LW: left winger RW: right winger C: center G: goalie D: defenseman W: winger F: forward the player with W (winger) means he can play the role as both LW (left winger) and RW (right winger) some players have two positions, which will be shown as "L/D". It means that LW + D --> left winger and defenseman
+  dim  Scoring.GP (number) -- game played
+  dim  Scoring.G (number) -- goals
+  dim  Scoring.A (number) -- assists
+  dim  Scoring.Pts (number) -- points
+  dim  Scoring.PIM (number) -- Penalty minutes
+  dim  Scoring.col (string) -- Plus / minus The plus minus stat is used to determine how often a player is on the ice when a goal is scored for the team versus against the team. A positive plus minus means that the player has been on for more goals scored than against, while a negative number means they have been on for more against. In another words, higher "+ / -" means more importance to the team, lower means less importance
+  dim  Scoring.PPG (string) -- Power play goals When a team with more players on the ice scores a goal it is known as a power play goal. Many goals are scored in power play situations as the team is able to keep possession of the puck and have more scoring chances.
+  dim  Scoring.PPA (string) -- Power play assists
+  dim  Scoring.SHG (string) -- Shorthanded goals Sometimes the team with fewer players on the ice known as the short-handed team will score a goal.
+  dim  Scoring.SHA (string) -- Shorthanded assists
+  dim  Scoring.GWG (string) -- Game-winning goals A game-winning goal (GWG) is the goal scored to put the winning team in excess of the losing team's final score. if a player gets more GWG, it means this player is more trustworthy in the critical moment.
+  dim  Scoring.GTG (string) -- Game-tying goals A game-tying goal (GWG) is the goal scored to put the winning team in the ties of the losing team's final score
+  dim  Scoring.SOG (string) -- Shots on goal a shot that enters the goal or would have entered the goal if it had not been blocked by the goalkeeper or another defensive player.
+  dim  Scoring.PostGP (string) -- Postseason games played
+  dim  Scoring.PostG (string) -- Postseason goals
+  dim  Scoring.PostA (string) -- Postseason assists
+  dim  Scoring.PostPts (string) -- Postseason points
+  dim  Scoring.PostPIM (string) -- Postseason penalty minutes
+  dim  Scoring.Post (string) -- Postseason Plus / minus
+  dim  Scoring.PostPPG (string) -- Postseason power play goals
+  dim  Scoring.PostPPA (string) -- Postseason power play assists
+  dim  Scoring.PostSHG (string) -- Postseason Shorthanded goals
+  dim  Scoring.PostSHA (string) -- Postseason Shorthanded assists
+  dim  Scoring.PostGWG (string) -- Postseason game-winning goals
+  dim  Scoring.PostSOG (string) -- Postseason shots on goal
+  meas Scoring.count (count)
+  meas Scoring.sum_stint (sum)
+  meas Scoring.avg_stint (avg)
+  meas Scoring.min_stint (min)
+  meas Scoring.max_stint (max)
+  meas Scoring.sum_GP (sum)
+  meas Scoring.avg_GP (avg)
+  meas Scoring.min_GP (min)
+  meas Scoring.max_GP (max)
+  meas Scoring.sum_G (sum)
+  meas Scoring.avg_G (avg)
+  meas Scoring.min_G (min)
+  meas Scoring.max_G (max)
+  meas Scoring.sum_A (sum)
+  meas Scoring.avg_A (avg)
+  meas Scoring.min_A (min)
+  meas Scoring.max_A (max)
+  meas Scoring.sum_Pts (sum)
+  meas Scoring.avg_Pts (avg)
+  meas Scoring.min_Pts (min)
+  meas Scoring.max_Pts (max)
+  meas Scoring.sum_PIM (sum)
+  meas Scoring.avg_PIM (avg)
+  meas Scoring.min_PIM (min)
+  meas Scoring.max_PIM (max)
+cube ScoringSC
+  dim  ScoringSC.row_key (string)
+  dim  ScoringSC.playerID (string) -- id number identifying the player number identifying the player
+  dim  ScoringSC.year (number) -- year 2005-06 listed as "2005"
+  dim  ScoringSC.tmID (string) -- team abbreviated name
+  dim  ScoringSC.lgID (string) -- league abbreviated name
+  dim  ScoringSC.pos (string) -- position
+  dim  ScoringSC.GP (number) -- Games played
+  dim  ScoringSC.G (number) -- goals
+  dim  ScoringSC.A (number) -- assists
+  dim  ScoringSC.Pts (number) -- points
+  dim  ScoringSC.PIM (number) -- Penalty minutes
+  meas ScoringSC.count (count)
+  meas ScoringSC.sum_GP (sum)
+  meas ScoringSC.avg_GP (avg)
+  meas ScoringSC.min_GP (min)
+  meas ScoringSC.max_GP (max)
+  meas ScoringSC.sum_G (sum)
+  meas ScoringSC.avg_G (avg)
+  meas ScoringSC.min_G (min)
+  meas ScoringSC.max_G (max)
+  meas ScoringSC.sum_A (sum)
+  meas ScoringSC.avg_A (avg)
+  meas ScoringSC.min_A (min)
+  meas ScoringSC.max_A (max)
+  meas ScoringSC.sum_Pts (sum)
+  meas ScoringSC.avg_Pts (avg)
+  meas ScoringSC.min_Pts (min)
+  meas ScoringSC.max_Pts (max)
+  meas ScoringSC.sum_PIM (sum)
+  meas ScoringSC.avg_PIM (avg)
+  meas ScoringSC.min_PIM (min)
+  meas ScoringSC.max_PIM (max)
+cube ScoringShootout
+  dim  ScoringShootout.row_key (string)
+  dim  ScoringShootout.playerID (string) -- id number identifying the player number identifying the player
+  dim  ScoringShootout.year (number) -- year 2005-06 listed as "2005"
+  dim  ScoringShootout.stint (number) -- stint
+  dim  ScoringShootout.tmID (string) -- team abbreviated name
+  dim  ScoringShootout.S (number) -- shots
+  dim  ScoringShootout.G (number) -- goals
+  dim  ScoringShootout.GDG (number) -- game deciding goals
+  meas ScoringShootout.count (count)
+  meas ScoringShootout.sum_stint (sum)
+  meas ScoringShootout.avg_stint (avg)
+  meas ScoringShootout.min_stint (min)
+  meas ScoringShootout.max_stint (max)
+  meas ScoringShootout.sum_S (sum)
+  meas ScoringShootout.avg_S (avg)
+  meas ScoringShootout.min_S (min)
+  meas ScoringShootout.max_S (max)
+  meas ScoringShootout.sum_G (sum)
+  meas ScoringShootout.avg_G (avg)
+  meas ScoringShootout.min_G (min)
+  meas ScoringShootout.max_G (max)
+  meas ScoringShootout.sum_GDG (sum)
+  meas ScoringShootout.avg_GDG (avg)
+  meas ScoringShootout.min_GDG (min)
+  meas ScoringShootout.max_GDG (max)
+cube ScoringSup
+  dim  ScoringSup.row_key (string)
+  dim  ScoringSup.playerID (string) -- string ID of players unique string ID of the player
+  dim  ScoringSup.year (number)
+  dim  ScoringSup.PPA (string) -- Power play assists
+  dim  ScoringSup.SHA (string) -- Shorthanded assists
+  meas ScoringSup.count (count)
+  meas ScoringSup.sum_year (sum)
+  meas ScoringSup.avg_year (avg)
+  meas ScoringSup.min_year (min)
+  meas ScoringSup.max_year (max)
+cube SeriesPost
+  dim  SeriesPost.row_key (string)
+  dim  SeriesPost.year (number) -- year
+  dim  SeriesPost.round (string) -- round see abbrev.csv for details
+  dim  SeriesPost.series (string) -- series used for the NHL designations
+  dim  SeriesPost.tmIDWinner (string) -- Team ID of winner
+  dim  SeriesPost.lgIDWinner (string) -- League ID of winner
+  dim  SeriesPost.tmIDLoser (string) -- Team ID of winner
+  dim  SeriesPost.lgIDLoser (string) -- league id of loser
+  dim  SeriesPost.W (number) -- wins
+  dim  SeriesPost.L (number) -- loses
+  dim  SeriesPost.T (number) -- ties
+  dim  SeriesPost.GoalsWinner (number) -- goals for winner
+  dim  SeriesPost.GoalsLoser (number) -- goals for loser
+  dim  SeriesPost.note (string) -- note Note: EX = exhibition, ND = no decision, TG = total-goals series
+  meas SeriesPost.count (count)
+  meas SeriesPost.sum_W (sum)
+  meas SeriesPost.avg_W (avg)
+  meas SeriesPost.min_W (min)
+  meas SeriesPost.max_W (max)
+  meas SeriesPost.sum_L (sum)
+  meas SeriesPost.avg_L (avg)
+  meas SeriesPost.min_L (min)
+  meas SeriesPost.max_L (max)
+  meas SeriesPost.sum_T (sum)
+  meas SeriesPost.avg_T (avg)
+  meas SeriesPost.min_T (min)
+  meas SeriesPost.max_T (max)
+  meas SeriesPost.sum_GoalsWinner (sum)
+  meas SeriesPost.avg_GoalsWinner (avg)
+  meas SeriesPost.min_GoalsWinner (min)
+  meas SeriesPost.max_GoalsWinner (max)
+  meas SeriesPost.sum_GoalsLoser (sum)
+  meas SeriesPost.avg_GoalsLoser (avg)
+  meas SeriesPost.min_GoalsLoser (min)
+  meas SeriesPost.max_GoalsLoser (max)
+cube TeamSplits
+  dim  TeamSplits.row_key (string)
+  dim  TeamSplits.year (number) -- year
+  dim  TeamSplits.lgID (string) -- league ID number
+  dim  TeamSplits.tmID (string) -- team ID
+  dim  TeamSplits.hW (number) -- home wins
+  dim  TeamSplits.hL (number) -- home loses
+  dim  TeamSplits.hT (number) -- home ties
+  dim  TeamSplits.hOTL (string) -- Home overtime losses
+  dim  TeamSplits.rW (number) -- Road wins
+  dim  TeamSplits.rL (number) -- Road loses
+  dim  TeamSplits.rT (number) -- Road ties
+  dim  TeamSplits.rOTL (string) -- road overtime loses
+  dim  TeamSplits.SepW (string) -- September wins
+  dim  TeamSplits.SepL (string) -- September loses
+  dim  TeamSplits.SepT (string) -- September ties
+  dim  TeamSplits.SepOL (string) -- September overtime loses
+  dim  TeamSplits.OctW (string) -- October wins
+  dim  TeamSplits.OctL (string) -- October loses
+  dim  TeamSplits.OctT (string) -- October ties
+  dim  TeamSplits.OctOL (string) -- October overtime loses
+  dim  TeamSplits.NovW (string) -- November wins
+  dim  TeamSplits.NovL (string) -- November loses
+  dim  TeamSplits.NovT (string) -- November ties
+  dim  TeamSplits.NovOL (string) -- November overtime loses
+  dim  TeamSplits.DecW (string) -- December wins
+  dim  TeamSplits.DecL (string) -- December loses
+  dim  TeamSplits.DecT (string) -- December ties
+  dim  TeamSplits.DecOL (string) -- December overtime loses
+  dim  TeamSplits.JanW (number) -- January wins
+  dim  TeamSplits.JanL (number) -- January loses
+  dim  TeamSplits.JanT (number) -- January ties
+  dim  TeamSplits.JanOL (string) -- January overtime loses
+  dim  TeamSplits.FebW (number) -- February wins
+  dim  TeamSplits.FebL (number) -- February loses
+  dim  TeamSplits.FebT (number) -- February ties
+  dim  TeamSplits.FebOL (string) -- February overtime loses
+  dim  TeamSplits.MarW (string) -- March wins
+  dim  TeamSplits.MarL (string) -- March loses
+  dim  TeamSplits.MarT (string) -- March ties
+  dim  TeamSplits.MarOL (string) -- March overtime loses
+  dim  TeamSplits.AprW (string) -- April wins
+  dim  TeamSplits.AprL (string) -- April loses
+  dim  TeamSplits.AprT (string) -- April ties
+  dim  TeamSplits.AprOL (string) -- April overtime loses
+  meas TeamSplits.count (count)
+  meas TeamSplits.sum_hW (sum)
+  meas TeamSplits.avg_hW (avg)
+  meas TeamSplits.min_hW (min)
+  meas TeamSplits.max_hW (max)
+  meas TeamSplits.sum_hL (sum)
+  meas TeamSplits.avg_hL (avg)
+  meas TeamSplits.min_hL (min)
+  meas TeamSplits.max_hL (max)
+  meas TeamSplits.sum_hT (sum)
+  meas TeamSplits.avg_hT (avg)
+  meas TeamSplits.min_hT (min)
+  meas TeamSplits.max_hT (max)
+  meas TeamSplits.sum_rW (sum)
+  meas TeamSplits.avg_rW (avg)
+  meas TeamSplits.min_rW (min)
+  meas TeamSplits.max_rW (max)
+  meas TeamSplits.sum_rL (sum)
+  meas TeamSplits.avg_rL (avg)
+  meas TeamSplits.min_rL (min)
+  meas TeamSplits.max_rL (max)
+  meas TeamSplits.sum_rT (sum)
+  meas TeamSplits.avg_rT (avg)
+  meas TeamSplits.min_rT (min)
+  meas TeamSplits.max_rT (max)
+  meas TeamSplits.sum_JanW (sum)
+  meas TeamSplits.avg_JanW (avg)
+  meas TeamSplits.min_JanW (min)
+  meas TeamSplits.max_JanW (max)
+  meas TeamSplits.sum_JanL (sum)
+  meas TeamSplits.avg_JanL (avg)
+  meas TeamSplits.min_JanL (min)
+  meas TeamSplits.max_JanL (max)
+  meas TeamSplits.sum_JanT (sum)
+  meas TeamSplits.avg_JanT (avg)
+  meas TeamSplits.min_JanT (min)
+  meas TeamSplits.max_JanT (max)
+  meas TeamSplits.sum_FebW (sum)
+  meas TeamSplits.avg_FebW (avg)
+  meas TeamSplits.min_FebW (min)
+  meas TeamSplits.max_FebW (max)
+  meas TeamSplits.sum_FebL (sum)
+  meas TeamSplits.avg_FebL (avg)
+  meas TeamSplits.min_FebL (min)
+  meas TeamSplits.max_FebL (max)
+  meas TeamSplits.sum_FebT (sum)
+  meas TeamSplits.avg_FebT (avg)
+  meas TeamSplits.min_FebT (min)
+  meas TeamSplits.max_FebT (max)
+cube TeamVsTeam
+  dim  TeamVsTeam.row_key (string)
+  dim  TeamVsTeam.year (number) -- year
+  dim  TeamVsTeam.lgID (string) -- league ID number
+  dim  TeamVsTeam.tmID (string) -- team ID
+  dim  TeamVsTeam.oppID (string) -- opponent ID
+  dim  TeamVsTeam.W (number) -- wins
+  dim  TeamVsTeam.L (number) -- loses
+  dim  TeamVsTeam.T (number) -- ties
+  dim  TeamVsTeam.OTL (string) -- overtime loses
+  meas TeamVsTeam.count (count)
+  meas TeamVsTeam.sum_W (sum)
+  meas TeamVsTeam.avg_W (avg)
+  meas TeamVsTeam.min_W (min)
+  meas TeamVsTeam.max_W (max)
+  meas TeamVsTeam.sum_L (sum)
+  meas TeamVsTeam.avg_L (avg)
+  meas TeamVsTeam.min_L (min)
+  meas TeamVsTeam.max_L (max)
+  meas TeamVsTeam.sum_T (sum)
+  meas TeamVsTeam.avg_T (avg)
+  meas TeamVsTeam.min_T (min)
+  meas TeamVsTeam.max_T (max)
+cube TeamsHalf
+  dim  TeamsHalf.row_key (string)
+  dim  TeamsHalf.year (number) -- year
+  dim  TeamsHalf.lgID (string) -- league ID number
+  dim  TeamsHalf.tmID (string) -- team ID
+  dim  TeamsHalf.half (number) -- First or second half of season
+  dim  TeamsHalf.rank (number) -- Final standing for the half
+  dim  TeamsHalf.G (number) -- Games
+  dim  TeamsHalf.W (number) -- wins
+  dim  TeamsHalf.L (number) -- loses
+  dim  TeamsHalf.T (number) -- ties
+  dim  TeamsHalf.GF (number) -- goals for
+  dim  TeamsHalf.GA (number) -- goal against
+  meas TeamsHalf.count (count)
+  meas TeamsHalf.sum_rank (sum)
+  meas TeamsHalf.avg_rank (avg)
+  meas TeamsHalf.min_rank (min)
+  meas TeamsHalf.max_rank (max)
+  meas TeamsHalf.sum_G (sum)
+  meas TeamsHalf.avg_G (avg)
+  meas TeamsHalf.min_G (min)
+  meas TeamsHalf.max_G (max)
+  meas TeamsHalf.sum_W (sum)
+  meas TeamsHalf.avg_W (avg)
+  meas TeamsHalf.min_W (min)
+  meas TeamsHalf.max_W (max)
+  meas TeamsHalf.sum_L (sum)
+  meas TeamsHalf.avg_L (avg)
+  meas TeamsHalf.min_L (min)
+  meas TeamsHalf.max_L (max)
+  meas TeamsHalf.sum_T (sum)
+  meas TeamsHalf.avg_T (avg)
+  meas TeamsHalf.min_T (min)
+  meas TeamsHalf.max_T (max)
+  meas TeamsHalf.sum_GF (sum)
+  meas TeamsHalf.avg_GF (avg)
+  meas TeamsHalf.min_GF (min)
+  meas TeamsHalf.max_GF (max)
+  meas TeamsHalf.sum_GA (sum)
+  meas TeamsHalf.avg_GA (avg)
+  meas TeamsHalf.min_GA (min)
+  meas TeamsHalf.max_GA (max)
+cube TeamsPost
+  dim  TeamsPost.row_key (string)
+  dim  TeamsPost.year (number) -- year
+  dim  TeamsPost.lgID (string) -- league ID number
+  dim  TeamsPost.tmID (string) -- team ID
+  dim  TeamsPost.G (number) -- Games
+  dim  TeamsPost.W (number) -- wins
+  dim  TeamsPost.L (number) -- loses
+  dim  TeamsPost.T (number) -- ties
+  dim  TeamsPost.GF (number) -- goals for
+  dim  TeamsPost.GA (number) -- goals against
+  dim  TeamsPost.PIM (string) -- penalty minutes
+  dim  TeamsPost.BenchMinor (string) -- Bench minors (minutes)
+  dim  TeamsPost.PPG (string) -- Power play goals
+  dim  TeamsPost.PPC (string) -- Power play chances
+  dim  TeamsPost.SHA (string) -- Shorthanded goals against
+  dim  TeamsPost.PKG (string) -- Power play goals against
+  dim  TeamsPost.PKC (string) -- Penalty kill chances
+  dim  TeamsPost.SHF (string) -- Shorthanded goals for
+  meas TeamsPost.count (count)
+  meas TeamsPost.sum_G (sum)
+  meas TeamsPost.avg_G (avg)
+  meas TeamsPost.min_G (min)
+  meas TeamsPost.max_G (max)
+  meas TeamsPost.sum_W (sum)
+  meas TeamsPost.avg_W (avg)
+  meas TeamsPost.min_W (min)
+  meas TeamsPost.max_W (max)
+  meas TeamsPost.sum_L (sum)
+  meas TeamsPost.avg_L (avg)
+  meas TeamsPost.min_L (min)
+  meas TeamsPost.max_L (max)
+  meas TeamsPost.sum_T (sum)
+  meas TeamsPost.avg_T (avg)
+  meas TeamsPost.min_T (min)
+  meas TeamsPost.max_T (max)
+  meas TeamsPost.sum_GF (sum)
+  meas TeamsPost.avg_GF (avg)
+  meas TeamsPost.min_GF (min)
+  meas TeamsPost.max_GF (max)
+  meas TeamsPost.sum_GA (sum)
+  meas TeamsPost.avg_GA (avg)
+  meas TeamsPost.min_GA (min)
+  meas TeamsPost.max_GA (max)
+cube TeamsSC
+  dim  TeamsSC.row_key (string)
+  dim  TeamsSC.year (number) -- year
+  dim  TeamsSC.lgID (string) -- league ID number
+  dim  TeamsSC.tmID (string) -- team ID
+  dim  TeamsSC.G (number) -- Games
+  dim  TeamsSC.W (number) -- wins
+  dim  TeamsSC.L (number) -- loses
+  dim  TeamsSC.T (number) -- ties
+  dim  TeamsSC.GF (number) -- goals for
+  dim  TeamsSC.GA (number) -- goals against
+  dim  TeamsSC.PIM (string) -- penalty minutes
+  meas TeamsSC.count (count)
+  meas TeamsSC.sum_G (sum)
+  meas TeamsSC.avg_G (avg)
+  meas TeamsSC.min_G (min)
+  meas TeamsSC.max_G (max)
+  meas TeamsSC.sum_W (sum)
+  meas TeamsSC.avg_W (avg)
+  meas TeamsSC.min_W (min)
+  meas TeamsSC.max_W (max)
+  meas TeamsSC.sum_L (sum)
+  meas TeamsSC.avg_L (avg)
+  meas TeamsSC.min_L (min)
+  meas TeamsSC.max_L (max)
+  meas TeamsSC.sum_T (sum)
+  meas TeamsSC.avg_T (avg)
+  meas TeamsSC.min_T (min)
+  meas TeamsSC.max_T (max)
+  meas TeamsSC.sum_GF (sum)
+  meas TeamsSC.avg_GF (avg)
+  meas TeamsSC.min_GF (min)
+  meas TeamsSC.max_GF (max)
+  meas TeamsSC.sum_GA (sum)
+  meas TeamsSC.avg_GA (avg)
+  meas TeamsSC.min_GA (min)
+  meas TeamsSC.max_GA (max)
+cube abbrev
+  dim  abbrev.row_key (string)
+  dim  abbrev.Type (string) -- type of hockey games
+  dim  abbrev.Code (string) -- abbreviated codes
+  dim  abbrev.Fullname (string) -- full names of code
+  meas abbrev.count (count)

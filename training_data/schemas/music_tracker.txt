@@ -1,0 +1,22 @@
+cube torrents
+  dim  torrents.groupName (string) -- release title
+  dim  torrents.totalSnatched (number) -- number of times the release has been downloaded
+  dim  torrents.artist (string) -- artist / group name
+  dim  torrents.groupYear (number) -- release year
+  dim  torrents.releaseType (string) -- release type (e.g., album, single, mixtape)
+  dim  torrents.groupId (number) -- Unique release identifier from What.CD. Used to ensure no releases are duplicates.
+  dim  torrents.id (number) -- unique identifier (essentially an index)
+  meas torrents.count (count)
+  meas torrents.sum_totalSnatched (sum)
+  meas torrents.avg_totalSnatched (avg)
+  meas torrents.min_totalSnatched (min)
+  meas torrents.max_totalSnatched (max)
+  meas torrents.sum_groupYear (sum)
+  meas torrents.avg_groupYear (avg)
+  meas torrents.min_groupYear (min)
+  meas torrents.max_groupYear (max)
+cube tags
+  dim  tags.index (number) -- index
+  dim  tags.id (number) -- release identifier which can be matched with id field in the torrents table
+  dim  tags.tag (string) -- tag
+  meas tags.count (count)

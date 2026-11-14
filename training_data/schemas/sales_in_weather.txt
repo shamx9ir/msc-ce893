@@ -1,0 +1,98 @@
+cube sales_in_weather
+  dim  sales_in_weather.row_key (string)
+  dim  sales_in_weather.date (time) -- the date of sales
+  dim  sales_in_weather.store_nbr (number) -- store number
+  dim  sales_in_weather.item_nbr (number) -- item / product number
+  dim  sales_in_weather.units (number) -- the quantity sold of an item on a given day
+  meas sales_in_weather.count (count)
+  meas sales_in_weather.sum_units (sum)
+  meas sales_in_weather.avg_units (avg)
+  meas sales_in_weather.min_units (min)
+  meas sales_in_weather.max_units (max)
+cube weather
+  dim  weather.row_key (string)
+  dim  weather.station_nbr (number) -- the id of weather stations
+  dim  weather.date (time) -- date
+  dim  weather.tmax (number) -- max temperature
+  dim  weather.tmin (number) -- min temperature temperature range / difference = tmax - tmin
+  dim  weather.tavg (number) -- average temperature
+  dim  weather.depart (number) -- Temperature departure from the normal indicates if the dekadal average temperatures were above or below the 30-year normal. â¢ if null: the temperature is 30-year normal â¢ if the value is positive: the temperature is above the 30-year normal, â¢ if the value is negative: the temperature is below the 30-year normal,
+  dim  weather.dewpoint (number) -- The dew point is the temperature to which air must be cooled to become saturated with water vapor, assuming constant air pressure and water content.
+  dim  weather.wetbulb (number) -- â¢ The wet-bulb temperature (WBT) is the temperature read by a thermometer covered in water-soaked (water at ambient temperature) cloth (a wet-bulb thermometer) over which air is passed. â¢ At 100% relative humidity, the wet-bulb temperature is equal to the air temperature (dry-bulb temperature); â¢ at lower humidity the wet-bulb temperature is lower than dry-bulb temperature because of evapora
+  dim  weather.heat (number) -- calculated heating degree
+  dim  weather.cool (number) -- calculated cooling degree
+  dim  weather.sunrise (string) -- calculated sunrise
+  dim  weather.sunset (string) -- calculated sunset
+  dim  weather.codesum (string) -- code summarization for the weather â¢ PY SPRAY â¢ SQ SQUALL â¢ DR LOW DRIFTING â¢ SH SHOWER â¢ FZ FREEZING â¢ MI SHALLOW â¢ PR PARTIAL â¢ BC PATCHES â¢ BL BLOWING â¢ VC VICINITY â¢ - LIGHT â¢ + HEAVY â¢ "NO SIGN" MODERATE
+  dim  weather.snowfall (number) -- snowfall snowfall (inches AND tenths)
+  dim  weather.preciptotal (number) -- precipitation total inches (240hr period ending at indicated local standard time)
+  dim  weather.stnpressure (number) -- station pressure
+  dim  weather.sealevel (number) -- sea level
+  dim  weather.resultspeed (number) -- resultant wind speed
+  dim  weather.resultdir (number) -- resultant wind direction who degree
+  dim  weather.avgspeed (number) -- average wind speed if avgspeed is larger: much more wind
+  meas weather.count (count)
+  meas weather.sum_tmax (sum)
+  meas weather.avg_tmax (avg)
+  meas weather.min_tmax (min)
+  meas weather.max_tmax (max)
+  meas weather.sum_tmin (sum)
+  meas weather.avg_tmin (avg)
+  meas weather.min_tmin (min)
+  meas weather.max_tmin (max)
+  meas weather.sum_tavg (sum)
+  meas weather.avg_tavg (avg)
+  meas weather.min_tavg (min)
+  meas weather.max_tavg (max)
+  meas weather.sum_depart (sum)
+  meas weather.avg_depart (avg)
+  meas weather.min_depart (min)
+  meas weather.max_depart (max)
+  meas weather.sum_dewpoint (sum)
+  meas weather.avg_dewpoint (avg)
+  meas weather.min_dewpoint (min)
+  meas weather.max_dewpoint (max)
+  meas weather.sum_wetbulb (sum)
+  meas weather.avg_wetbulb (avg)
+  meas weather.min_wetbulb (min)
+  meas weather.max_wetbulb (max)
+  meas weather.sum_heat (sum)
+  meas weather.avg_heat (avg)
+  meas weather.min_heat (min)
+  meas weather.max_heat (max)
+  meas weather.sum_cool (sum)
+  meas weather.avg_cool (avg)
+  meas weather.min_cool (min)
+  meas weather.max_cool (max)
+  meas weather.sum_snowfall (sum)
+  meas weather.avg_snowfall (avg)
+  meas weather.min_snowfall (min)
+  meas weather.max_snowfall (max)
+  meas weather.sum_preciptotal (sum)
+  meas weather.avg_preciptotal (avg)
+  meas weather.min_preciptotal (min)
+  meas weather.max_preciptotal (max)
+  meas weather.sum_stnpressure (sum)
+  meas weather.avg_stnpressure (avg)
+  meas weather.min_stnpressure (min)
+  meas weather.max_stnpressure (max)
+  meas weather.sum_sealevel (sum)
+  meas weather.avg_sealevel (avg)
+  meas weather.min_sealevel (min)
+  meas weather.max_sealevel (max)
+  meas weather.sum_resultspeed (sum)
+  meas weather.avg_resultspeed (avg)
+  meas weather.min_resultspeed (min)
+  meas weather.max_resultspeed (max)
+  meas weather.sum_resultdir (sum)
+  meas weather.avg_resultdir (avg)
+  meas weather.min_resultdir (min)
+  meas weather.max_resultdir (max)
+  meas weather.sum_avgspeed (sum)
+  meas weather.avg_avgspeed (avg)
+  meas weather.min_avgspeed (min)
+  meas weather.max_avgspeed (max)
+cube relation
+  dim  relation.store_nbr (number) -- the id of stores
+  dim  relation.station_nbr (number) -- the id of weather stations
+  meas relation.count (count)
