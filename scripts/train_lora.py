@@ -79,6 +79,12 @@ def make_trainer_class():
     from transformers import Trainer
 
     class LabelledLossTrainer(Trainer):
+        def __init__(self, *a, **k):
+            super().__init__(*a, **k)
+            # compute_loss returns a per-micro-batch mean, so let Trainer divide by grad accumulation
+            # (otherwise it assumes the loss is already normalised by num_items_in_batch).
+            self.model_accepts_loss_kwargs = False
+
         def compute_loss(self, model, inputs, return_outputs=False, num_items_in_batch=None):
             loss = labelled_loss(model, inputs)
             return (loss, None) if return_outputs else loss
