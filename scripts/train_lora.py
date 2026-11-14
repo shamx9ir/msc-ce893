@@ -58,13 +58,39 @@ def encode(tok, row: dict, max_len: int) -> dict | None:
     return {"input_ids": ids, "attention_mask": [1] * len(ids), "labels": labels}
 
 
+def labelled_loss(model, inputs):
+    """Cross-entropy over the labelled (assistant) positions only.
+
+    The usual path builds logits for all positions x 152k vocabulary in fp32, about 2.7 GB per
+    1k tokens, although only ~200 tokens per example carry a label. Applying lm_head to the
+    labelled positions alone gives the same loss for a fraction of the memory."""
+    import torch.nn.functional as F
+    base = model.get_base_model()
+    hidden = base.model(input_ids=inputs["input_ids"], attention_mask=inputs["attention_mask"]).last_hidden_state
+    labels = inputs["labels"][:, 1:]
+    keep = labels != -100
+    logits = base.lm_head(hidden[:, :-1][keep]).float()
+    return F.cross_entropy(logits, labels[keep])
+
+
+def make_trainer_class():
+    from transformers import Trainer
+
+    class LabelledLossTrainer(Trainer):
+        def compute_loss(self, model, inputs, return_outputs=False, num_items_in_batch=None):
+            loss = labelled_loss(model, inputs)
+            return (loss, None) if return_outputs else loss
+
+    return LabelledLossTrainer
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--base", default="Qwen/Qwen2.5-Coder-7B-Instruct")
     ap.add_argument("--data", type=Path, default=Path("data/sft"))
     ap.add_argument("--mode", choices=["tools", "single"], default="tools")
     ap.add_argument("--out", type=Path, required=True)
-    ap.add_argument("--max-len", type=int, default=4096, help="longer examples are dropped (same for 7B and 14B)")
+    ap.add_argument("--max-len", type=int, default=8192, help="longer examples are dropped; 8192 fits the 7B on 16 GB")
     ap.add_argument("--epochs", type=float, default=2)
     ap.add_argument("--lr", type=float, default=2e-4)
     ap.add_argument("--rank", type=int, default=16)
@@ -77,7 +103,8 @@ def main() -> None:
 
     import torch
     from transformers import (AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig,
-                              DataCollatorForSeq2Seq, Trainer, TrainingArguments)
+                              DataCollatorForSeq2Seq, TrainingArguments)
+    LabelledLossTrainer = make_trainer_class()
 
     random.seed(args.seed)
     tok = AutoTokenizer.from_pretrained(args.base)
@@ -99,8 +126,11 @@ def main() -> None:
         quantization_config=BitsAndBytesConfig(load_in_4bit=True, bnb_4bit_quant_type="nf4",
                                                bnb_4bit_compute_dtype=torch.bfloat16,
                                                bnb_4bit_use_double_quant=True))
-    from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
-    model = prepare_model_for_kbit_training(model, use_gradient_checkpointing=True)
+    from peft import LoraConfig, get_peft_model
+    # Not prepare_model_for_kbit_training: it upcasts embeddings and lm_head to fp32 (+2 GB on 7B).
+    model.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
+    model.enable_input_require_grads()
+    model.config.use_cache = False
     model = get_peft_model(model, LoraConfig(
         r=args.rank, lora_alpha=args.alpha, lora_dropout=0.05, task_type="CAUSAL_LM",
         target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]))
@@ -114,9 +144,9 @@ def main() -> None:
         bf16=True, logging_steps=10, eval_strategy="steps", eval_steps=max(10, steps_per_epoch // 2),
         save_strategy="steps", save_steps=max(10, steps_per_epoch // 2), save_total_limit=2,
         load_best_model_at_end=True, metric_for_best_model="eval_loss",
-        gradient_checkpointing=True, gradient_checkpointing_kwargs={"use_reentrant": False},
-        optim="paged_adamw_8bit", group_by_length=True, report_to="none", seed=args.seed)
-    trainer = Trainer(model=model, args=targs, train_dataset=data["train"], eval_dataset=data["val"],
+        optim="paged_adamw_8bit", group_by_length=True, report_to="none", seed=args.seed,
+        prediction_loss_only=True)
+    trainer = LabelledLossTrainer(model=model, args=targs, train_dataset=data["train"], eval_dataset=data["val"],
                       data_collator=DataCollatorForSeq2Seq(tok, padding=True, label_pad_token_id=-100))
     trainer.train()
     final = args.out / "final"

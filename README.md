@@ -145,4 +145,4 @@ python -m harness.evaluate --db formula_1 --db student_club --ids-file splits/te
 ```
 
 The same with `Qwen2.5-Coder-14B-Instruct` / `qwen2.5-coder:14b` for the 14B arm. Both arms use harness v4.2,
-examples up to 4,096 tokens, and Q4_K_M weights in Ollama, so each LoRA model differs from its baseline only by the adapter.
+examples up to 8,192 tokens (7B; the 14B may need --max-len 6144), and Q4_K_M weights in Ollama, so each LoRA model differs from its baseline only by the adapter.
