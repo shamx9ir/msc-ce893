@@ -66,7 +66,9 @@ def labelled_loss(model, inputs):
     labelled positions alone gives the same loss for a fraction of the memory."""
     import torch.nn.functional as F
     base = model.get_base_model()
-    hidden = base.model(input_ids=inputs["input_ids"], attention_mask=inputs["attention_mask"]).last_hidden_state
+    mask = inputs["attention_mask"]
+    mask = None if bool(mask.all()) else mask  # an all-ones mask makes SDPA build the full L x L matrix
+    hidden = base.model(input_ids=inputs["input_ids"], attention_mask=mask).last_hidden_state
     labels = inputs["labels"][:, 1:]
     keep = labels != -100
     logits = base.lm_head(hidden[:, :-1][keep]).float()
