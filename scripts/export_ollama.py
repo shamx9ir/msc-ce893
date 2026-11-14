@@ -10,7 +10,7 @@ when --quantize is given, otherwise by Ollama itself (`ollama create -q q4_K_M`,
         --llama-cpp ..\\llama.cpp --quantize ..\\llama.cpp\\build\\bin\\llama-quantize.exe \\
         --ollama-base qwen2.5-coder:7b --name qwen7b-cube-lora
 
-Merging runs on the CPU in bf16: about 16 GB of RAM for 7B and 30 GB for 14B.
+Merging runs on the CPU one safetensors shard at a time (a few GB of RAM, also for 14B).
 """
 import argparse
 import subprocess
@@ -24,6 +24,52 @@ def run(cmd: list[str]) -> str:
                           encoding="utf-8").stdout
 
 
+def merge_by_shard(base: str, adapter: Path, out: Path) -> None:
+    """W' = W + (alpha / r) * B @ A, one safetensors shard at a time.
+
+    Same result as PeftModel.merge_and_unload(), but only one shard (~4 GB) is in RAM at a
+    time, so a 14B model merges on a 32 GB machine."""
+    import json
+    import shutil
+    import torch
+    from huggingface_hub import snapshot_download
+    from safetensors import safe_open
+    from safetensors.torch import load_file, save_file
+
+    src = Path(snapshot_download(base, allow_patterns=["*.json", "*.safetensors", "*.txt", "*.model"]))
+    cfg = json.loads((adapter / "adapter_config.json").read_text(encoding="utf-8"))
+    scale = cfg["lora_alpha"] / cfg["r"]
+    lora = load_file(str(adapter / "adapter_model.safetensors"))
+    pairs = {}  # base weight name -> (A, B)
+    for k, v in lora.items():
+        if ".lora_A." in k:
+            name = k.replace("base_model.model.", "", 1).replace(".lora_A.weight", ".weight")
+            pairs[name] = (v, lora[k.replace(".lora_A.", ".lora_B.")])
+    out.mkdir(parents=True, exist_ok=True)
+    done = set()
+    for shard in sorted(src.glob("*.safetensors")):
+        tensors = {}
+        with safe_open(str(shard), framework="pt") as f:
+            for name in f.keys():
+                w = f.get_tensor(name)
+                if name in pairs:
+                    a, b = pairs[name]
+                    w = (w.float() + scale * (b.float() @ a.float())).to(w.dtype)
+                    done.add(name)
+                tensors[name] = w
+            meta = f.metadata()
+        save_file(tensors, str(out / shard.name), metadata=meta or {"format": "pt"})
+        print(f"merged {shard.name}", flush=True)
+        del tensors
+    missing = set(pairs) - done
+    if missing:
+        raise SystemExit(f"{len(missing)} LoRA weights had no base weight, e.g. {sorted(missing)[:3]}")
+    for f in src.iterdir():
+        if f.suffix != ".safetensors" and f.is_file():
+            shutil.copy(f, out / f.name)
+    print(f"merged {len(done)} weights (scale {scale}) into {out}")
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--base", required=True)
@@ -34,20 +80,14 @@ def main() -> None:
     ap.add_argument("--ollama-base", required=True, help="the harness-only Ollama model, e.g. qwen2.5-coder:7b")
     ap.add_argument("--name", required=True, help="name of the new Ollama model")
     ap.add_argument("--work", type=Path, default=Path("lora/export"))
+    ap.add_argument("--merged-dir", type=Path, default=None,
+                    help="where the merged bf16 model goes (default <work>/merged); can be on another drive")
     args = ap.parse_args()
 
-    import torch
-    from peft import PeftModel
-    from transformers import AutoModelForCausalLM, AutoTokenizer
-
     work = args.work / args.name
-    merged = work / "merged"
+    merged = args.merged_dir or work / "merged"
     if not (merged / "config.json").exists():
-        model = AutoModelForCausalLM.from_pretrained(args.base, torch_dtype=torch.bfloat16, device_map="cpu")
-        model = PeftModel.from_pretrained(model, args.adapter).merge_and_unload()
-        model.save_pretrained(merged, safe_serialization=True)
-        AutoTokenizer.from_pretrained(args.base).save_pretrained(merged)
-        del model
+        merge_by_shard(args.base, args.adapter, merged)
     f16 = work / "model-f16.gguf"
     q4 = work / "model-Q4_K_M.gguf"
     if not f16.exists():
