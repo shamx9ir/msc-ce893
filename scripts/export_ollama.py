@@ -1,7 +1,8 @@
 """Turn a LoRA adapter into an Ollama model, quantised like the base Ollama model (Q4_K_M), so
 the LoRA arm differs from the harness-only arm only by the adapter.
 
-Needs a llama.cpp checkout (for convert_hf_to_gguf.py and llama-quantize):
+Needs a llama.cpp checkout for convert_hf_to_gguf.py. Quantising to Q4_K_M is done by llama-quantize
+when --quantize is given, otherwise by Ollama itself (`ollama create -q q4_K_M`, same ggml quantiser):
     git clone https://github.com/ggml-org/llama.cpp ..\\llama.cpp
     pip install -r ..\\llama.cpp\\requirements.txt      # plus a llama.cpp release build for llama-quantize
 
@@ -28,7 +29,8 @@ def main() -> None:
     ap.add_argument("--base", required=True)
     ap.add_argument("--adapter", type=Path, required=True)
     ap.add_argument("--llama-cpp", type=Path, required=True)
-    ap.add_argument("--quantize", type=Path, required=True, help="path to the llama-quantize binary")
+    ap.add_argument("--quantize", type=Path, default=None,
+                    help="path to llama-quantize; without it Ollama quantises the f16 GGUF (ollama create -q)")
     ap.add_argument("--ollama-base", required=True, help="the harness-only Ollama model, e.g. qwen2.5-coder:7b")
     ap.add_argument("--name", required=True, help="name of the new Ollama model")
     ap.add_argument("--work", type=Path, default=Path("lora/export"))
@@ -50,17 +52,19 @@ def main() -> None:
     q4 = work / "model-Q4_K_M.gguf"
     if not f16.exists():
         run([sys.executable, args.llama_cpp / "convert_hf_to_gguf.py", merged, "--outtype", "f16", "--outfile", f16])
-    if not q4.exists():
+    if args.quantize and not q4.exists():
         run([args.quantize, f16, q4, "Q4_K_M"])
+    source = q4 if args.quantize else f16
 
     # Same chat template, stop tokens and parameters as the base Ollama model; only the weights change.
     base_modelfile = run(["ollama", "show", "--modelfile", args.ollama_base])
     lines = base_modelfile.splitlines()
     i = next(k for k, l in enumerate(lines) if l.startswith("FROM "))  # first FROM is the model line
-    lines[i] = f"FROM {q4.resolve()}"
+    lines[i] = f"FROM {source.resolve()}"
     modelfile = work / "Modelfile"
     modelfile.write_text("\n".join(lines) + "\n", encoding="utf-8")
-    print(run(["ollama", "create", args.name, "-f", modelfile]))
+    create = ["ollama", "create", args.name, "-f", modelfile]
+    print(run(create if args.quantize else create + ["-q", "q4_K_M"]))
     print(f"done: python -m harness.evaluate ... --model ollama_chat/{args.name}")
 
 
