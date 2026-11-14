@@ -87,7 +87,7 @@ def make_trainer_class():
 
         def compute_loss(self, model, inputs, return_outputs=False, num_items_in_batch=None):
             loss = labelled_loss(model, inputs)
-            return (loss, None) if return_outputs else loss
+            return (loss, {"loss": loss}) if return_outputs else loss  # Trainer.prediction_step indexes outputs
 
     return LabelledLossTrainer
 
@@ -106,6 +106,7 @@ def main() -> None:
     ap.add_argument("--batch", type=int, default=1)
     ap.add_argument("--grad-accum", type=int, default=16)
     ap.add_argument("--seed", type=int, default=7)
+    ap.add_argument("--resume", action="store_true", help="continue from the last checkpoint in --out")
     ap.add_argument("--dry-run", action="store_true", help="tokenise, show one masked example, and stop")
     args = ap.parse_args()
 
@@ -156,7 +157,11 @@ def main() -> None:
         prediction_loss_only=True)
     trainer = LabelledLossTrainer(model=model, args=targs, train_dataset=data["train"], eval_dataset=data["val"],
                       data_collator=DataCollatorForSeq2Seq(tok, padding=True, label_pad_token_id=-100))
-    trainer.train()
+    if not args.resume:
+        # Fail in minutes, not hours, if evaluation or saving is broken; also gives the step-0 val loss.
+        print("eval before training:", trainer.evaluate())
+        trainer.save_model(str(args.out / "smoke"))
+    trainer.train(resume_from_checkpoint=True if args.resume else None)
     final = args.out / "final"
     trainer.model.save_pretrained(final)
     tok.save_pretrained(final)
