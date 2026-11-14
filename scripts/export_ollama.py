@@ -62,9 +62,12 @@ def main() -> None:
     i = next(k for k, l in enumerate(lines) if l.startswith("FROM "))  # first FROM is the model line
     lines[i] = f"FROM {source.resolve()}"
     modelfile = work / "Modelfile"
-    modelfile.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    modelfile.write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")  # no \r in TEMPLATE on Windows
     create = ["ollama", "create", args.name, "-f", modelfile]
     print(run(create if args.quantize else create + ["-q", "q4_K_M"]))
+    tpl = lambda m: run(["ollama", "show", "--template", m])
+    if tpl(args.name) != tpl(args.ollama_base):
+        sys.exit(f"chat template of {args.name} differs from {args.ollama_base}")
     print(f"done: python -m harness.evaluate ... --model ollama_chat/{args.name}")
 
 
