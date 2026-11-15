@@ -24,6 +24,7 @@ interface ModelInfo {
 interface Example {
   question: string;
   hint: string | null;
+  join?: boolean;
 }
 interface Config {
   models: ModelInfo[];
@@ -248,8 +249,12 @@ export class CubeDemoApp extends LitElement {
             />`
           : html`<button type="button" class="link" @click=${() => (this.showHint = true)}>+ Add a hint</button>`}
         <div class="examples">
-          <span class="label">Try</span>
-          ${examples.map(ex => html`<button type="button" class="chip" @click=${() => this.pick(ex)}>${ex.question}</button>`)}
+          <span class="label">One table</span>
+          ${examples.filter(ex => !ex.join).map(ex => html`<button type="button" class="chip" @click=${() => this.pick(ex)}>${ex.question}</button>`)}
+        </div>
+        <div class="examples">
+          <span class="label">Joins across tables</span>
+          ${examples.filter(ex => ex.join).map(ex => html`<button type="button" class="chip" @click=${() => this.pick(ex)}>${ex.question}</button>`)}
         </div>
         ${bird.length
           ? html`<details class="examples">

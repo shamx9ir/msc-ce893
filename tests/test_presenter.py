@@ -86,3 +86,20 @@ def test_measure_used_for_ranking_is_added_for_display():
                          model_label="7B", stats={}, display=(display_query(q, INFO), rows))
     comps = {c["id"]: c for c in msgs[1]["updateComponents"]["components"]}
     assert comps["chart"]["component"] == "HighchartsChart" and "Count" in comps["added_note"]["text"]
+
+
+def test_join_query_lists_cubes_and_sql():
+    from app.presenter import cubes_in
+    q = {"dimensions": ["races.year"], "measures": ["circuits.count"],
+         "filters": [{"member": "races.name", "operator": "contains", "values": ["Grand"]}]}
+    assert cubes_in(q) == ["circuits", "races"]
+    msgs = build_surface("s4", question="q", query=q, rows=[], meta=META, model_label="7B", stats={},
+                         sql="SELECT 1 FROM a LEFT JOIN b")
+    comps = {c["id"]: c for c in msgs[1]["updateComponents"]["components"]}
+    assert "circuits, races (Cube joins them)" in comps["query"]["text"] and "LEFT JOIN" in comps["query"]["text"]
+
+
+def test_two_labels_with_many_values_become_one_bar_per_row():
+    rows = [{"races.name": f"GP{i}", "circuits.country": f"C{i}", "races.count": str(i)} for i in range(12)]
+    c = form({"dimensions": ["races.name", "circuits.country"], "measures": ["races.count"]}, rows)
+    assert c["form"] == "chart" and c["options"]["xAxis"]["categories"][0] == "GP0 C0"

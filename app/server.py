@@ -47,18 +47,22 @@ DATABASES = ["formula_1", "student_club"]
 # Questions that make good charts. BIRD test questions are added from data/bird/dev.json if present.
 CHART_EXAMPLES = {
     "formula_1": [
-        "How many races were held in each year?",
-        "Which 10 countries have the most circuits?",
-        "How many drivers are there of each nationality? Show the top 15.",
-        "Which 10 constructors have scored the most points in total?",
-        "How many races were held each year since 2000?",
+        ("How many races were held in each year?", False),
+        ("How many drivers are there of each nationality? Show the top 15.", False),
+        ("Which 10 drivers have scored the most points in their careers?", True),      # drivers + results
+        ("Which constructors have won the most races? Show the top 10.", True),        # constructors + results
+        ("Which countries have hosted the most races?", True),                         # circuits + races
+        ("How many points did Lewis Hamilton score in each season?", True),            # drivers + results + races
+        ("What are the 10 most common finishing statuses in race results?", True),     # status + results
     ],
     "student_club": [
-        "How much was spent in each budget category?",
-        "How many events of each type are there?",
-        "How many members does each college have?",
-        "What is the total income from each source?",
-        "How many members are there for each t-shirt size?",
+        ("How much was spent in each budget category?", False),
+        ("How many events of each type are there?", False),
+        ("How much did each event spend? Show the top 10.", True),                     # event + budget
+        ("How many event attendances came from each college?", True),                  # attendance + member + major
+        ("Which 10 members have spent the most on expenses?", True),                   # member + expense
+        ("How many attendances did each type of event have?", True),                   # attendance + event
+        ("How much was spent on expenses in each budget category?", True),             # expense + budget
     ],
 }
 
@@ -115,7 +119,8 @@ def create_app(cube_url: str, ollama_url: str, num_ctx: int, max_steps: int,
         return {
             "models": [dict(m, available=None if available is None else available[m["id"]]) for m in MODELS],
             "databases": DATABASES,
-            "examples": {db: [{"question": q, "hint": None} for q in CHART_EXAMPLES[db]] for db in DATABASES},
+            "examples": {db: [{"question": q, "hint": None, "join": j} for q, j in CHART_EXAMPLES[db]]
+                         for db in DATABASES},
             "birdExamples": bird,
             "cube": cube_ok,
             "ollama": available is not None,
@@ -137,7 +142,7 @@ def create_app(cube_url: str, ollama_url: str, num_ctx: int, max_steps: int,
                 res = None
                 err = f"{type(e).__name__}: {e}"
             wall = time.time() - t0
-        rows, error, display = None, None, None
+        rows, error, display, sql = None, None, None, None
         if res is None:
             error = err
         elif res.query is None or res.error:
@@ -148,6 +153,10 @@ def create_app(cube_url: str, ollama_url: str, num_ctx: int, max_steps: int,
                 shown = display_query(res.query, member_info(cube.meta()))
                 if shown is not res.query:
                     display = (shown, cube.load(shown))
+                try:
+                    sql = cube.sql(res.query)
+                except Exception:
+                    sql = None
             except Exception as e:
                 error = f"Cube error: {e}"
         stats = {"steps": res.steps if res else None, "wall_s": wall,
@@ -155,7 +164,8 @@ def create_app(cube_url: str, ollama_url: str, num_ctx: int, max_steps: int,
                  "completion_tokens": res.completion_tokens if res else 0}
         messages = build_surface(surface_id, question=body.question, query=res.query if res else None,
                                  rows=rows, meta=cube.meta(), model_label=model["label"], stats=stats,
-                                 error=error, trace=res.trace if res else None, display=display)
+                                 error=error, trace=res.trace if res else None, display=display,
+                                 sql=sql)
         return {"surfaceId": surface_id, "model": model["id"], "messages": messages,
                 "query": res.query if res else None, "error": error, "stats": stats,
                 "rowCount": None if rows is None else len(rows)}

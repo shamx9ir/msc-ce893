@@ -197,6 +197,13 @@ def choose_chart(query: dict, rows: list[dict], cols: list[dict]) -> dict:
             opts["legend"] = {"enabled": True, "title": {"text": s["title"]}}
             opts["series"] = [{"name": sv, "data": [grid.get((xv, sv)) for xv in xs]} for sv in ss]
             return {"form": "chart", "options": opts}
+        # Too many values to stack (e.g. forename + surname): one bar per row, labels joined.
+        shown = rows[:MAX_CHART_POINTS]
+        opts = _base_options("bar", f"{keys[0]['title']}, {keys[1]['title']}", measures[0]["title"])
+        opts["xAxis"]["categories"] = [f"{_label(r.get(keys[0]['key']))} {_label(r.get(keys[1]['key']))}"
+                                       for r in shown]
+        opts["series"] = [{"name": measures[0]["title"], "data": [_num(r.get(measures[0]["key"])) for r in shown]}]
+        return {"form": "chart", "options": opts, "truncated": len(rows) > len(shown)}
 
     # No measure: a label column plus one numeric column ("list drivers and their points").
     if not measures and len(nums) == 1 and len(cats) >= 1 and 2 <= len(rows):
@@ -234,7 +241,8 @@ def _text(cid: str, text, variant: str = "body") -> dict:
 
 def build_surface(surface_id: str, *, question: str, query: dict | None, rows: list[dict] | None,
                   meta: dict, model_label: str, stats: dict, error: str | None = None,
-                  trace: list | None = None, display: tuple[dict, list[dict]] | None = None) -> list[dict]:
+                  trace: list | None = None, display: tuple[dict, list[dict]] | None = None,
+                  sql: str | None = None) -> list[dict]:
     """All A2UI messages for one answer: createSurface, updateComponents, updateDataModel.
     `display` is (display_query, its rows) when it differs from the answer query."""
     info = member_info(meta)
@@ -303,7 +311,12 @@ def build_surface(surface_id: str, *, question: str, query: dict | None, rows: l
         body = []
 
     if query is not None:
-        comps.append(_text("query", "```json\n" + json.dumps(query, indent=2) + "\n```"))
+        cubes = cubes_in(query)
+        text = ("**Cubes used:** " + ", ".join(cubes) + (" (Cube joins them)" if len(cubes) > 1 else "") +
+                "\n\n```json\n" + json.dumps(query, indent=2) + "\n```")
+        if sql:
+            text += "\n\n**SQL that Cube generated:**\n\n```sql\n" + sql + "\n```"
+        comps.append(_text("query", text))
         tabs.append({"title": "Cube query", "child": "query"})
     if trace:
         comps.append(_text("trace", trace_markdown(trace)))
@@ -321,6 +334,23 @@ def build_surface(surface_id: str, *, question: str, query: dict | None, rows: l
     if data:
         msgs.append(_msg("updateDataModel", {"surfaceId": surface_id, "path": "/", "value": data}))
     return msgs
+
+
+def cubes_in(query: dict) -> list[str]:
+    """The cubes a query touches, in first-use order; more than one means Cube writes a join."""
+    names = list(query.get("measures") or []) + list(query.get("dimensions") or [])
+    names += [t.get("dimension", "") for t in query.get("timeDimensions") or [] if isinstance(t, dict)]
+
+    def walk(fs):
+        for f in fs or []:
+            if isinstance(f, dict):
+                names.append(f.get("member", ""))
+                walk(f.get("or"))
+                walk(f.get("and"))
+    walk(query.get("filters"))
+    order = query.get("order") or {}
+    names += list(order) if isinstance(order, dict) else [o[0] for o in order if o]
+    return list(dict.fromkeys(n.split(".")[0] for n in names if isinstance(n, str) and "." in n))
 
 
 def stats_line(model_label: str, stats: dict, n_rows: int | None) -> str:
