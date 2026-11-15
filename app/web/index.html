@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Text-to-Cube demo</title>
+    <style>
+      /* Colour tokens: categorical slots validated for light and dark (dataviz reference palette). */
+      :root {
+        color-scheme: light;
+        --surface-0: #f4f4f1;
+        --surface-1: #fcfcfb;
+        --surface-2: #ffffff;
+        --text-primary: #0b0b0b;
+        --text-secondary: #52514e;
+        --grid: #e3e2dc;
+        --accent: #2a78d6;
+        --good: #008300;
+        --critical: #c62a2a;
+        --series-1: #2a78d6;
+        --series-2: #eb6834;
+        --series-3: #1baf7a;
+        --series-4: #eda100;
+        --series-5: #e87ba4;
+        --series-6: #008300;
+        --series-7: #6250d6;
+        --series-8: #e34948;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme='light']) {
+          color-scheme: dark;
+          --surface-0: #111110;
+          --surface-1: #1a1a19;
+          --surface-2: #222220;
+          --text-primary: #f0efec;
+          --text-secondary: #c3c2b7;
+          --grid: #3a3936;
+          --accent: #3987e5;
+          --good: #0ca30c;
+          --critical: #e66767;
+          --series-1: #3987e5;
+          --series-2: #d95926;
+          --series-3: #199e70;
+          --series-4: #c98500;
+          --series-5: #d55181;
+          --series-6: #0ca30c;
+          --series-7: #9085e9;
+          --series-8: #e66767;
+        }
+      }
+      html,
+      body {
+        margin: 0;
+        background: var(--surface-0);
+        color: var(--text-primary);
+        font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      * {
+        box-sizing: border-box;
+      }
+    </style>
+  </head>
+  <body>
+    <cube-demo-app></cube-demo-app>
+    <script type="module" src="./src/main.ts"></script>
+  </body>
+</html>
