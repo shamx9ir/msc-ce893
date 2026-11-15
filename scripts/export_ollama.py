@@ -20,8 +20,10 @@ from pathlib import Path
 
 def run(cmd: list[str]) -> str:
     print(">", " ".join(map(str, cmd)), flush=True)
-    return subprocess.run(list(map(str, cmd)), check=True, capture_output=True, text=True,
-                          encoding="utf-8").stdout
+    p = subprocess.run(list(map(str, cmd)), capture_output=True, text=True, encoding="utf-8")
+    if p.returncode:
+        sys.exit(f"failed ({p.returncode}): {' '.join(map(str, cmd))}\n{p.stderr[-4000:]}")
+    return p.stdout
 
 
 def merge_by_shard(base: str, adapter: Path, out: Path) -> None:
@@ -88,6 +90,7 @@ def main() -> None:
     merged = args.merged_dir or work / "merged"
     if not (merged / "config.json").exists():
         merge_by_shard(args.base, args.adapter, merged)
+    work.mkdir(parents=True, exist_ok=True)
     f16 = work / "model-f16.gguf"
     q4 = work / "model-Q4_K_M.gguf"
     if not f16.exists():
