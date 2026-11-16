@@ -49,6 +49,7 @@ CHART_EXAMPLES = {
     "formula_1": [
         ("How many races were held in each year?", False),
         ("How many drivers are there of each nationality? Show the top 15.", False),
+        ("How many drivers are there?", False),                                        # stat tile
         ("Which 10 drivers have scored the most points in their careers?", True),      # drivers + results
         ("Which constructors have won the most races? Show the top 10.", True),        # constructors + results
         ("Which countries have hosted the most races?", True),                         # circuits + races
@@ -58,6 +59,9 @@ CHART_EXAMPLES = {
     "student_club": [
         ("How much was spent in each budget category?", False),
         ("How many events of each type are there?", False),
+        ("How many events of each type are there, split by status?", False),           # stacked bars
+        ("How much income was received each month?", False),                           # line chart
+        ("What is the budgeted amount and the amount spent for each budget category?", False),  # two series
         ("How much did each event spend? Show the top 10.", True),                     # event + budget
         ("How many event attendances came from each college?", True),                  # attendance + member + major
         ("Which 10 members have spent the most on expenses?", True),                   # member + expense

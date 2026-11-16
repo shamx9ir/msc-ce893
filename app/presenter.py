@@ -226,7 +226,17 @@ def display_query(query: dict, info: dict[str, dict]) -> dict:
     keys = list(order) if isinstance(order, dict) else [o[0] for o in order if o]
     extra = [k for k in keys if info.get(k, {}).get("kind") == "measure"
              and k not in (query.get("measures") or [])]
-    return dict(query, measures=list(query.get("measures") or []) + extra) if extra else query
+    # A date listed both as a plain dimension and with a granularity ("each month") gives one row
+    # per day in Cube; for display, group by the granularity only.
+    grained = {t.get("dimension") for t in query.get("timeDimensions") or []
+               if isinstance(t, dict) and t.get("granularity")}
+    dims = [d for d in query.get("dimensions") or [] if d not in grained]
+    if not extra and len(dims) == len(query.get("dimensions") or []):
+        return query
+    shown = dict(query, measures=list(query.get("measures") or []) + extra, dimensions=dims)
+    if isinstance(shown.get("order"), dict):
+        shown["order"] = {k: v for k, v in shown["order"].items() if k not in grained} or None
+    return {k: v for k, v in shown.items() if v not in ([], None)}
 
 
 # ---- A2UI messages -----------------------------------------------------------------------
@@ -300,6 +310,16 @@ def build_surface(surface_id: str, *, question: str, query: dict | None, rows: l
                 main = "chart"
         else:
             main = "table"
+        dropped = [info.get(d, {}).get("title", d) for d in query.get("dimensions") or []
+                   if d not in (shown_q.get("dimensions") or [])]
+        if dropped and main != "table":
+            grain = next((t.get("granularity") for t in query.get("timeDimensions") or []
+                          if isinstance(t, dict) and t.get("granularity")), "period")
+            comps += [_text("grain_note", f"Shown per {grain}. The submitted query also lists "
+                                          f"{', '.join(dropped)} as a plain column, which gives one row per date.",
+                            "caption"),
+                      {"id": "grain_col", "component": "Column", "children": [main, "grain_note"]}]
+            main = "grain_col"
         if added:
             comps += [_text("added_note", f"{', '.join(added)} is shown because the query sorts by it; "
                                           "the submitted answer leaves it out.", "caption"),

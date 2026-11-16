@@ -103,3 +103,21 @@ def test_two_labels_with_many_values_become_one_bar_per_row():
     rows = [{"races.name": f"GP{i}", "circuits.country": f"C{i}", "races.count": str(i)} for i in range(12)]
     c = form({"dimensions": ["races.name", "circuits.country"], "measures": ["races.count"]}, rows)
     assert c["form"] == "chart" and c["options"]["xAxis"]["categories"][0] == "GP0 C0"
+
+
+def test_date_listed_twice_is_charted_by_its_granularity():
+    from app.presenter import display_query
+    q = {"dimensions": ["races.date"], "measures": ["races.count"], "order": {"races.date": "asc"},
+         "timeDimensions": [{"dimension": "races.date", "granularity": "month"}]}
+    shown = display_query(q, INFO)
+    assert "dimensions" not in shown and "order" not in shown and shown["measures"] == ["races.count"]
+    rows = [{"races.date.month": "2009-01-01T00:00:00.000", "races.date": "2009-01-01T00:00:00.000", "races.count": "2"},
+            {"races.date.month": "2009-02-01T00:00:00.000", "races.date": "2009-02-01T00:00:00.000", "races.count": "3"}]
+    msgs = build_surface("s5", question="q", query=q, rows=rows, meta=META, model_label="7B", stats={},
+                         display=(shown, rows))
+    comps = {c["id"]: c for c in msgs[1]["updateComponents"]["components"]}
+    assert msgs[2]["updateDataModel"]["value"]["chart"]["chart"]["type"] == "line"
+    assert "per month" in comps["grain_note"]["text"]
+    for c in comps.values():
+        for ref in c.get("children", []) + [c.get("child")] + [t["child"] for t in c.get("tabs", [])]:
+            assert ref is None or ref in comps, ref
