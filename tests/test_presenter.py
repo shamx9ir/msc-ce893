@@ -121,3 +121,21 @@ def test_date_listed_twice_is_charted_by_its_granularity():
     for c in comps.values():
         for ref in c.get("children", []) + [c.get("child")] + [t["child"] for t in c.get("tabs", [])]:
             assert ref is None or ref in comps, ref
+
+
+def test_two_numbers_per_item_is_a_scatter_plot():
+    meta = {"cubes": [{"name": "circuits", "dimensions": [
+        {"name": "circuits.name", "type": "string", "shortTitle": "Name"},
+        {"name": "circuits.lat", "type": "number", "shortTitle": "Lat"},
+        {"name": "circuits.lng", "type": "number", "shortTitle": "Lng"}],
+        "measures": [{"name": "circuits.count", "shortTitle": "Count"}, {"name": "circuits.avg_alt", "shortTitle": "Avg alt"}]}]}
+    info = member_info(meta)
+    q = {"dimensions": ["circuits.name", "circuits.lat", "circuits.lng"]}
+    rows = [{"circuits.name": f"c{i}", "circuits.lat": str(i), "circuits.lng": str(-i)} for i in range(5)]
+    c = choose_chart(q, rows, columns_for(q, rows, info))
+    assert c["options"]["chart"]["type"] == "scatter"
+    assert c["options"]["series"][0]["data"][1] == {"x": 1, "y": -1, "name": "c1"}
+    q = {"dimensions": ["circuits.name"], "measures": ["circuits.count", "circuits.avg_alt"]}
+    many = [{"circuits.name": f"c{i}", "circuits.count": "1", "circuits.avg_alt": str(i)} for i in range(30)]
+    assert choose_chart(q, many, columns_for(q, many, info))["options"]["chart"]["type"] == "scatter"
+    assert choose_chart(q, many[:5], columns_for(q, many[:5], info))["options"]["chart"]["type"] == "column"

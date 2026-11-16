@@ -51,6 +51,7 @@ CHART_EXAMPLES = {
         ("How many races were held in each year?", False, "Columns"),
         ("How many drivers are there of each nationality? Show the top 15.", False, "Horizontal bars"),
         ("How many races were held in each month of 2009?", False, "Line"),
+        ("Show the latitude and longitude of every circuit, with its name.", False, "Scatter"),
         ("How many drivers are there?", False, "Single number"),
         ("List the names and nationalities of all constructors.", False, "Table"),
         ("Which 10 drivers have scored the most points in their careers?", True, None),      # drivers + results
@@ -64,6 +65,7 @@ CHART_EXAMPLES = {
         ("How many events of each type are there, split by status?", False, "Stacked bars"),
         ("What is the budgeted amount and the amount spent for each budget category?", False, "Two series"),
         ("How much income was received each month?", False, "Line"),
+        ("Compare each event's budgeted amount with the amount it spent.", True, "Scatter"),
         ("How many members are there?", False, "Single number"),
         ("List the members' names and emails.", False, "Table"),
         ("How many events of each type are there?", False, None),

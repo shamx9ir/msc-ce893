@@ -79,6 +79,7 @@ function themeFor(el: Element): Opts {
       column: {borderRadius: 4, borderWidth: 0, pointPadding: 0.08, groupPadding: 0.12},
       bar: {borderRadius: 4, borderWidth: 0, pointPadding: 0.08, groupPadding: 0.12},
       line: {lineWidth: 2, marker: {radius: 4, enabledThreshold: 6}},
+      scatter: {marker: {radius: 4, symbol: 'circle', lineWidth: 1, lineColor: v('--surface-2', '#ffffff')}},
     },
   };
 }

@@ -261,7 +261,7 @@ export class CubeDemoApp extends LitElement {
           : nothing}
         <div class="examples">
           <span class="label">Joins across tables</span>
-          ${examples.filter(ex => ex.join).map(ex => html`<button type="button" class="chip" @click=${() => this.pick(ex)}>${ex.question}</button>`)}
+          ${examples.filter(ex => ex.join && !ex.chart).map(ex => html`<button type="button" class="chip" @click=${() => this.pick(ex)}>${ex.question}</button>`)}
         </div>
         ${bird.length
           ? html`<details class="examples">

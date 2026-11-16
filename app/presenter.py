@@ -7,6 +7,8 @@ whichever model wrote the query:
 
   one row of measures only               -> stat tiles (no chart)
   time dimension + measure(s)            -> line chart, one line per measure or per category
+  two numbers per item                   -> scatter plot (two numeric columns, or two measures
+                                            for more than 15 items)
   one category + measure(s)              -> bar chart (horizontal when labels are long or many)
   two categories + one measure           -> stacked bars, second category as series
   label + one numeric column, no measure -> bar chart of that column
@@ -25,6 +27,8 @@ CATALOG_ID = "https://github.com/shamx9ir/msc-ce893/app/catalog.json"
 
 MAX_CHART_POINTS = 40      # categories on a bar chart (the table keeps all rows)
 MAX_NUMERIC_POINTS = 150  # columns on a numeric axis such as years
+MAX_GROUPED_BARS = 15      # items with two measures: more than this becomes a scatter plot
+MAX_SCATTER_POINTS = 1000
 MAX_SERIES = 8             # categorical palette size; more series go to the table only
 MAX_TABLE_ROWS = 500
 
@@ -162,6 +166,28 @@ def choose_chart(query: dict, rows: list[dict], cols: list[dict]) -> dict:
         opts["series"] = series
         return {"form": "chart", "options": opts}
 
+    # Two numbers per item: a scatter plot. Either two numeric columns with no measure (circuit
+    # latitude and longitude), or two measures for more items than grouped bars can show.
+    pair = None
+    if not measures and len(nums) == 2 and not times and len(rows) >= 3:
+        pair, label_cols = nums, cats
+    elif len(measures) == 2 and len(cats) + len(nums) >= 1 and not times and len(rows) > MAX_GROUPED_BARS:
+        pair, label_cols = measures, cats + nums
+    if pair:
+        xc, yc = pair
+        points = []
+        for r in rows[:MAX_SCATTER_POINTS]:
+            x, y = _num(r.get(xc["key"])), _num(r.get(yc["key"]))
+            if x is not None and y is not None:
+                points.append({"x": x, "y": y,
+                               "name": " ".join(_label(r.get(c["key"])) for c in label_cols)})
+        if len(points) >= 3:
+            opts = _base_options("scatter", xc["title"], yc["title"])
+            opts["tooltip"] = {"headerFormat": "", "pointFormat":
+                               f"<b>{{point.name}}</b><br>{xc['title']}: {{point.x}}<br>{yc['title']}: {{point.y}}"}
+            opts["series"] = [{"name": " / ".join(c["title"] for c in label_cols) or "Rows", "data": points}]
+            return {"form": "chart", "options": opts, "truncated": len(rows) > MAX_SCATTER_POINTS}
+
     # Category (or a numeric dimension used as a category, e.g. a year) + measure(s).
     keys = cats + nums
     if measures and len(keys) == 1 and len(rows) >= 2 and len(measures) <= MAX_SERIES:
@@ -241,6 +267,11 @@ def display_query(query: dict, info: dict[str, dict]) -> dict:
 
 # ---- A2UI messages -----------------------------------------------------------------------
 
+def _n_shown(options: dict) -> int:
+    cats = options["xAxis"].get("categories")
+    return len(cats) if cats else len(options["series"][0]["data"])
+
+
 def _msg(kind: str, body: dict) -> dict:
     return {"version": A2UI_VERSION, kind: body}
 
@@ -302,7 +333,7 @@ def build_surface(surface_id: str, *, question: str, query: dict | None, rows: l
             comps.append({"id": "chart", "component": "HighchartsChart", "options": {"path": "/chart"},
                           "height": 340})
             if choice.get("truncated"):
-                comps += [_text("chart_note", f"The chart shows the first {len(choice['options']['xAxis']['categories'])} rows; "
+                comps += [_text("chart_note", f"The chart shows the first {_n_shown(choice['options'])} rows; "
                                               "the table has all of them.", "caption"),
                           {"id": "chart_col", "component": "Column", "children": ["chart", "chart_note"]}]
                 main = "chart_col"
