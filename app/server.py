@@ -52,6 +52,7 @@ CHART_EXAMPLES = {
         ("How many drivers are there of each nationality? Show the top 15.", False, "Horizontal bars"),
         ("How many races were held in each month of 2009?", False, "Line"),
         ("Show the latitude and longitude of every circuit, with its name.", False, "Scatter"),
+        ("Show the latitude and longitude of every circuit, with its name and number of races held.", True, "Bubble"),
         ("How many drivers are there?", False, "Single number"),
         ("List the names and nationalities of all constructors.", False, "Table"),
         ("Which 10 drivers have scored the most points in their careers?", True, None),      # drivers + results

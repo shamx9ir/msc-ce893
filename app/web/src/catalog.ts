@@ -9,6 +9,7 @@
  */
 import {css, html, nothing, type PropertyValues} from 'lit';
 import Highcharts from 'highcharts';
+import 'highcharts/highcharts-more'; // bubble charts
 import 'highcharts/modules/accessibility';
 import {z} from 'zod';
 
@@ -65,6 +66,7 @@ function themeFor(el: Element): Opts {
     colors,
     chart: {backgroundColor: 'transparent', style: {fontFamily: 'inherit'}, spacing: [8, 8, 8, 8]},
     title: {style: {color: text}},
+    subtitle: {style: {color: muted, fontSize: '12px'}, align: 'left'},
     xAxis: {...axis, gridLineWidth: 0},
     yAxis: {...axis, gridLineWidth: 1},
     legend: {itemStyle: {color: text, fontWeight: '500'}, itemHoverStyle: {color: text}},
@@ -79,6 +81,7 @@ function themeFor(el: Element): Opts {
       column: {borderRadius: 4, borderWidth: 0, pointPadding: 0.08, groupPadding: 0.12},
       bar: {borderRadius: 4, borderWidth: 0, pointPadding: 0.08, groupPadding: 0.12},
       line: {lineWidth: 2, marker: {radius: 4, enabledThreshold: 6}},
+      bubble: {minSize: 6, maxSize: 44, marker: {fillOpacity: 0.55, lineWidth: 1}},
       scatter: {marker: {radius: 4, symbol: 'circle', lineWidth: 1, lineColor: v('--surface-2', '#ffffff')}},
     },
   };

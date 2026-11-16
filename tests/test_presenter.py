@@ -164,3 +164,16 @@ def test_dates_grouped_without_a_measure_are_counted_for_the_chart():
     for c in comps.values():
         for ref in c.get("children", []) + [c.get("child")] + [t["child"] for t in c.get("tabs", [])]:
             assert ref is None or ref in comps, ref
+
+
+def test_two_numbers_and_a_measure_is_a_bubble_chart():
+    meta = {"cubes": [{"name": "circuits", "dimensions": [
+        {"name": "circuits.name", "type": "string", "shortTitle": "Name"},
+        {"name": "circuits.lat", "type": "number", "shortTitle": "Lat"},
+        {"name": "circuits.lng", "type": "number", "shortTitle": "Lng"}], "measures": []},
+        {"name": "races", "dimensions": [], "measures": [{"name": "races.count", "shortTitle": "Count"}]}]}
+    q = {"dimensions": ["circuits.name", "circuits.lat", "circuits.lng"], "measures": ["races.count"]}
+    rows = [{"circuits.name": f"c{i}", "circuits.lat": str(i), "circuits.lng": str(-i), "races.count": str(i * 2)}
+            for i in range(5)]
+    o = choose_chart(q, rows, columns_for(q, rows, member_info(meta)))["options"]
+    assert o["chart"]["type"] == "bubble" and o["series"][0]["data"][2] == {"x": 2, "y": -2, "name": "c2", "z": 4}

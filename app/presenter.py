@@ -7,6 +7,7 @@ whichever model wrote the query:
 
   one row of measures only               -> stat tiles (no chart)
   time dimension + measure(s)            -> line chart, one line per measure or per category
+  two numbers per item + one measure     -> bubble chart (the measure sets the bubble size)
   two numbers per item                   -> scatter plot (two numeric columns, or two measures
                                             for more than 15 items)
   one category + measure(s)              -> bar chart (horizontal when labels are long or many)
@@ -178,6 +179,10 @@ def choose_chart(query: dict, rows: list[dict], cols: list[dict]) -> dict:
         pair, label_cols = nums, cats
     elif len(measures) == 2 and len(cats) + len(nums) >= 1 and not times and len(rows) > MAX_GROUPED_BARS:
         pair, label_cols = measures, cats + nums
+    size = None  # a third number per item: bubble size
+    plain = [c for c in nums if not _is_id(c)]
+    if len(measures) == 1 and len(plain) == 2 and not times and len(rows) >= 3:
+        pair, label_cols, size = plain, cats + [c for c in nums if _is_id(c)], measures[0]
     if pair:
         xc, yc = pair
         points = []
@@ -186,10 +191,15 @@ def choose_chart(query: dict, rows: list[dict], cols: list[dict]) -> dict:
             if x is not None and y is not None:
                 points.append({"x": x, "y": y,
                                "name": " ".join(_label(r.get(c["key"])) for c in label_cols)})
+                if size:
+                    points[-1]["z"] = _num(r.get(size["key"])) or 0
         if len(points) >= 3:
-            opts = _base_options("scatter", xc["title"], yc["title"])
-            opts["tooltip"] = {"headerFormat": "", "pointFormat":
-                               f"<b>{{point.name}}</b><br>{xc['title']}: {{point.x}}<br>{yc['title']}: {{point.y}}"}
+            opts = _base_options("bubble" if size else "scatter", xc["title"], yc["title"])
+            tip = f"<b>{{point.name}}</b><br>{xc['title']}: {{point.x}}<br>{yc['title']}: {{point.y}}"
+            if size:
+                tip += f"<br>{size['title']}: {{point.z}}"
+                opts["subtitle"] = {"text": f"Bubble size: {size['title']}"}
+            opts["tooltip"] = {"headerFormat": "", "pointFormat": tip}
             opts["series"] = [{"name": " / ".join(c["title"] for c in label_cols) or "Rows", "data": points}]
             return {"form": "chart", "options": opts, "truncated": len(rows) > MAX_SCATTER_POINTS}
 
