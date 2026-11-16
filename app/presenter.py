@@ -312,7 +312,7 @@ def build_surface(surface_id: str, *, question: str, query: dict | None, rows: l
             main = "table"
         dropped = [info.get(d, {}).get("title", d) for d in query.get("dimensions") or []
                    if d not in (shown_q.get("dimensions") or [])]
-        if dropped and main != "table":
+        if dropped and main != "table" and choice["form"] != "empty":
             grain = next((t.get("granularity") for t in query.get("timeDimensions") or []
                           if isinstance(t, dict) and t.get("granularity")), "period")
             comps += [_text("grain_note", f"Shown per {grain}. The submitted query also lists "
