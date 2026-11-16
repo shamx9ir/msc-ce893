@@ -118,6 +118,11 @@ def _fmt(v) -> str:
 
 # ---- chart choice ------------------------------------------------------------------------
 
+def _is_id(col: dict) -> bool:
+    """Identifier columns (driverId, link_to_event, zip) are labels, not quantities to plot."""
+    return bool(re.search(r"(Id|_id|\.id|Ref|zip)$", col["key"]))
+
+
 def _base_options(kind: str, x_title: str | None, y_title: str | None) -> dict:
     return {
         "chart": {"type": kind},
@@ -169,7 +174,7 @@ def choose_chart(query: dict, rows: list[dict], cols: list[dict]) -> dict:
     # Two numbers per item: a scatter plot. Either two numeric columns with no measure (circuit
     # latitude and longitude), or two measures for more items than grouped bars can show.
     pair = None
-    if not measures and len(nums) == 2 and not times and len(rows) >= 3:
+    if not measures and len(nums) == 2 and not times and len(rows) >= 3 and not any(map(_is_id, nums)):
         pair, label_cols = nums, cats
     elif len(measures) == 2 and len(cats) + len(nums) >= 1 and not times and len(rows) > MAX_GROUPED_BARS:
         pair, label_cols = measures, cats + nums

@@ -139,3 +139,11 @@ def test_two_numbers_per_item_is_a_scatter_plot():
     many = [{"circuits.name": f"c{i}", "circuits.count": "1", "circuits.avg_alt": str(i)} for i in range(30)]
     assert choose_chart(q, many, columns_for(q, many, info))["options"]["chart"]["type"] == "scatter"
     assert choose_chart(q, many[:5], columns_for(q, many[:5], info))["options"]["chart"]["type"] == "column"
+
+
+def test_id_columns_are_not_scatter_axes():
+    meta = {"cubes": [{"name": "r", "dimensions": [{"name": "r.driverId", "type": "number"},
+                                                    {"name": "r.points", "type": "number"}], "measures": []}]}
+    q = {"dimensions": ["r.driverId", "r.points"]}
+    rows = [{"r.driverId": str(i), "r.points": "25"} for i in range(5)]
+    assert choose_chart(q, rows, columns_for(q, rows, member_info(meta)))["form"] == "table"
