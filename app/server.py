@@ -45,28 +45,33 @@ MODELS = [
 DATABASES = ["formula_1", "student_club"]
 
 # Questions that make good charts. BIRD test questions are added from data/bird/dev.json if present.
+# (question, joins tables?, chart type it is meant to show or None)
 CHART_EXAMPLES = {
     "formula_1": [
-        ("How many races were held in each year?", False),
-        ("How many drivers are there of each nationality? Show the top 15.", False),
-        ("How many drivers are there?", False),                                        # stat tile
-        ("Which 10 drivers have scored the most points in their careers?", True),      # drivers + results
-        ("Which constructors have won the most races? Show the top 10.", True),        # constructors + results
-        ("Which countries have hosted the most races?", True),                         # circuits + races
-        ("How many points did Lewis Hamilton score in each season?", True),            # drivers + results + races
-        ("What are the 10 most common finishing statuses in race results?", True),     # status + results
+        ("How many races were held in each year?", False, "Columns"),
+        ("How many drivers are there of each nationality? Show the top 15.", False, "Horizontal bars"),
+        ("How many races were held in each month of 2009?", False, "Line"),
+        ("How many drivers are there?", False, "Single number"),
+        ("List the names and nationalities of all constructors.", False, "Table"),
+        ("Which 10 drivers have scored the most points in their careers?", True, None),      # drivers + results
+        ("Which constructors have won the most races? Show the top 10.", True, None),        # constructors + results
+        ("Which countries have hosted the most races?", True, None),                         # circuits + races
+        ("How many points did Lewis Hamilton score in each season?", True, None),            # drivers + results + races
+        ("What are the 10 most common finishing statuses in race results?", True, None),     # status + results
     ],
     "student_club": [
-        ("How much was spent in each budget category?", False),
-        ("How many events of each type are there?", False),
-        ("How many events of each type are there, split by status?", False),           # stacked bars
-        ("How much income was received each month?", False),                           # line chart
-        ("What is the budgeted amount and the amount spent for each budget category?", False),  # two series
-        ("How much did each event spend? Show the top 10.", True),                     # event + budget
-        ("How many event attendances came from each college?", True),                  # attendance + member + major
-        ("Which 10 members have spent the most on expenses?", True),                   # member + expense
-        ("How many attendances did each type of event have?", True),                   # attendance + event
-        ("How much was spent on expenses in each budget category?", True),             # expense + budget
+        ("How much was spent in each budget category?", False, "Columns"),
+        ("How many events of each type are there, split by status?", False, "Stacked bars"),
+        ("What is the budgeted amount and the amount spent for each budget category?", False, "Two series"),
+        ("How much income was received each month?", False, "Line"),
+        ("How many members are there?", False, "Single number"),
+        ("List the members' names and emails.", False, "Table"),
+        ("How many events of each type are there?", False, None),
+        ("How much did each event spend? Show the top 10.", True, None),                     # event + budget
+        ("How many event attendances came from each college?", True, None),                  # attendance + member + major
+        ("Which 10 members have spent the most on expenses?", True, None),                   # member + expense
+        ("How many attendances did each type of event have?", True, None),                   # attendance + event
+        ("How much was spent on expenses in each budget category?", True, None),             # expense + budget
     ],
 }
 
@@ -123,7 +128,8 @@ def create_app(cube_url: str, ollama_url: str, num_ctx: int, max_steps: int,
         return {
             "models": [dict(m, available=None if available is None else available[m["id"]]) for m in MODELS],
             "databases": DATABASES,
-            "examples": {db: [{"question": q, "hint": None, "join": j} for q, j in CHART_EXAMPLES[db]]
+            "examples": {db: [{"question": q, "hint": None, "join": j, "chart": c}
+                              for q, j, c in CHART_EXAMPLES[db]]
                          for db in DATABASES},
             "birdExamples": bird,
             "cube": cube_ok,

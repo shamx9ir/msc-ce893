@@ -25,6 +25,7 @@ interface Example {
   question: string;
   hint: string | null;
   join?: boolean;
+  chart?: string | null;
 }
 interface Config {
   models: ModelInfo[];
@@ -249,9 +250,15 @@ export class CubeDemoApp extends LitElement {
             />`
           : html`<button type="button" class="link" @click=${() => (this.showHint = true)}>+ Add a hint</button>`}
         <div class="examples">
-          <span class="label">One table</span>
-          ${examples.filter(ex => !ex.join).map(ex => html`<button type="button" class="chip" @click=${() => this.pick(ex)}>${ex.question}</button>`)}
+          <span class="label">By chart type</span>
+          ${examples.filter(ex => ex.chart).map(ex => html`<button type="button" class="chip" @click=${() => this.pick(ex)}><span class="kind">${ex.chart}</span>${ex.question}</button>`)}
         </div>
+        ${examples.some(ex => !ex.join && !ex.chart)
+          ? html`<div class="examples">
+              <span class="label">One table</span>
+              ${examples.filter(ex => !ex.join && !ex.chart).map(ex => html`<button type="button" class="chip" @click=${() => this.pick(ex)}>${ex.question}</button>`)}
+            </div>`
+          : nothing}
         <div class="examples">
           <span class="label">Joins across tables</span>
           ${examples.filter(ex => ex.join).map(ex => html`<button type="button" class="chip" @click=${() => this.pick(ex)}>${ex.question}</button>`)}
@@ -472,6 +479,11 @@ export class CubeDemoApp extends LitElement {
     .label {
       color: var(--text-secondary);
       margin-right: 4px;
+    }
+    .kind {
+      font-weight: 600;
+      color: var(--accent);
+      margin-right: 6px;
     }
     .chip {
       font: inherit;
