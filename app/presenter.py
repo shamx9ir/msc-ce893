@@ -262,6 +262,12 @@ def display_query(query: dict, info: dict[str, dict]) -> dict:
     grained = {t.get("dimension") for t in query.get("timeDimensions") or []
                if isinstance(t, dict) and t.get("granularity")}
     dims = [d for d in query.get("dimensions") or [] if d not in grained]
+    # Dates grouped by a granularity but nothing counted ("races in each month" answered as a list
+    # of dates): chart the row count per period.
+    if grained and not query.get("measures") and not extra:
+        count = next(iter(grained)).split(".")[0] + ".count"
+        if info.get(count, {}).get("kind") == "measure":
+            extra = [count]
     if not extra and len(dims) == len(query.get("dimensions") or []):
         return query
     shown = dict(query, measures=list(query.get("measures") or []) + extra, dimensions=dims)
@@ -357,8 +363,11 @@ def build_surface(surface_id: str, *, question: str, query: dict | None, rows: l
                       {"id": "grain_col", "component": "Column", "children": [main, "grain_note"]}]
             main = "grain_col"
         if added:
-            comps += [_text("added_note", f"{', '.join(added)} is shown because the query sorts by it; "
-                                          "the submitted answer leaves it out.", "caption"),
+            sorts = set(query.get("order") or {}) if isinstance(query.get("order"), dict) else set()
+            why = ("is shown because the query sorts by it; the submitted answer leaves it out."
+                   if any(m in sorts for m in shown_q.get("measures") or []) else
+                   "is added for the chart; the submitted query groups the dates but does not count anything.")
+            comps += [_text("added_note", f"{', '.join(added)} {why}", "caption"),
                       {"id": "main_col", "component": "Column", "children": [main, "added_note"]}]
             main = "main_col"
         if main != "table":

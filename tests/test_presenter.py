@@ -147,3 +147,20 @@ def test_id_columns_are_not_scatter_axes():
     q = {"dimensions": ["r.driverId", "r.points"]}
     rows = [{"r.driverId": str(i), "r.points": "25"} for i in range(5)]
     assert choose_chart(q, rows, columns_for(q, rows, member_info(meta)))["form"] == "table"
+
+
+def test_dates_grouped_without_a_measure_are_counted_for_the_chart():
+    from app.presenter import display_query
+    q = {"dimensions": ["races.date"], "filters": [{"member": "races.year", "operator": "equals", "values": ["2009"]}],
+         "timeDimensions": [{"dimension": "races.date", "granularity": "month"}]}
+    shown = display_query(q, INFO)
+    assert shown["measures"] == ["races.count"] and "dimensions" not in shown and shown["filters"] == q["filters"]
+    rows = [{"races.date.month": f"2009-0{m}-01T00:00:00.000", "races.count": "2"} for m in (3, 4, 5)]
+    msgs = build_surface("s6", question="q", query=q, rows=rows, meta=META, model_label="7B", stats={},
+                         display=(shown, rows))
+    comps = {c["id"]: c for c in msgs[1]["updateComponents"]["components"]}
+    assert msgs[2]["updateDataModel"]["value"]["chart"]["chart"]["type"] == "line"
+    assert "does not count" in comps["added_note"]["text"]
+    for c in comps.values():
+        for ref in c.get("children", []) + [c.get("child")] + [t["child"] for t in c.get("tabs", [])]:
+            assert ref is None or ref in comps, ref
