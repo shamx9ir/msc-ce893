@@ -3,6 +3,7 @@
  *
  *   HighchartsChart  {options: DynamicValue (a Highcharts options object), height?: number}
  *   DataTable        {columns: DynamicValue ([{key, title, numeric}]), rows: DynamicValue ([{...}])}
+ *   ToolCalls        {steps: DynamicValue (the agent's tool calls, from app/presenter.py trace_steps)}
  *
  * A v0.9 surface uses exactly one catalog, so both are merged under one catalog id, which the
  * server names in createSurface (app/presenter.py CATALOG_ID).
@@ -253,9 +254,181 @@ export class A2uiDataTableElement extends A2uiLitElement<typeof DataTableApi> {
   }
 }
 
+// ---- ToolCalls ----------------------------------------------------------------------------
+
+export const ToolCallsApi = {
+  name: 'ToolCalls',
+  schema: z
+    .object({
+      steps: DynamicValueSchema.describe(
+        'List of agent steps: {n, kind: tool|text|harness, tool, args, result, status, summary, via_text, text}.',
+      ),
+      weight: z.number().optional(),
+    })
+    .describe("Displays the agent's tool calls with their arguments and results.")
+    .strict(),
+} satisfies ComponentApi;
+
+interface Step {
+  n: number;
+  kind: 'tool' | 'text' | 'harness';
+  tool?: string;
+  args?: string | null;
+  result?: string | null;
+  status?: 'ok' | 'warning' | 'error' | 'none';
+  summary?: string;
+  via_text?: boolean;
+  text?: string;
+}
+
+/** Pretty-prints a JSON result; leaves other text as it is. */
+function pretty(text: string): string {
+  const t = text.trim();
+  if (t.startsWith('{') || t.startsWith('[')) {
+    try {
+      return JSON.stringify(JSON.parse(t), null, 2);
+    } catch {
+      /* not complete JSON (the harness clips long results) */
+    }
+  }
+  return text;
+}
+
+export class A2uiToolCallsElement extends A2uiLitElement<typeof ToolCallsApi> {
+  static readonly tagName = 'a2ui-tool-calls';
+
+  static override styles = css`
+    :host {
+      display: block;
+      width: 100%;
+      min-width: 0;
+    }
+    ol {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 10px;
+    }
+    li {
+      border: 1px solid var(--grid, #e6e5e0);
+      border-radius: 10px;
+      padding: 10px 12px;
+      min-width: 0;
+    }
+    .head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      font-size: 13px;
+    }
+    .n {
+      color: var(--text-secondary, #52514e);
+      font-variant-numeric: tabular-nums;
+      min-width: 1.5em;
+    }
+    .tool {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-weight: 600;
+    }
+    .tag {
+      font-size: 12px;
+      color: var(--text-secondary, #52514e);
+    }
+    .status {
+      margin-left: auto;
+      font-size: 12px;
+      padding: 1px 8px;
+      border-radius: 999px;
+      border: 1px solid currentColor;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .ok {
+      color: var(--good, #008300);
+    }
+    .warning {
+      color: var(--warning, #b06d00);
+    }
+    .error {
+      color: var(--critical, #c62a2a);
+    }
+    .none {
+      color: var(--text-secondary, #52514e);
+    }
+    .label {
+      font-size: 12px;
+      color: var(--text-secondary, #52514e);
+      margin: 8px 0 4px;
+    }
+    pre {
+      margin: 0;
+      font-size: 12px;
+      line-height: 1.45;
+      white-space: pre-wrap;
+      word-break: break-word;
+      background: var(--surface-1, #fcfcfb);
+      border: 1px solid var(--grid, #e6e5e0);
+      border-radius: 8px;
+      padding: 8px 10px;
+      max-height: 260px;
+      overflow: auto;
+    }
+    details summary {
+      cursor: pointer;
+      font-size: 12px;
+      color: var(--text-secondary, #52514e);
+      margin: 8px 0 4px;
+    }
+    .note {
+      font-size: 13px;
+      color: var(--text-secondary, #52514e);
+    }
+  `;
+
+  override render() {
+    const props = this.controller.props;
+    if (!props) return nothing;
+    const steps = (Array.isArray(props.steps) ? props.steps : []) as Step[];
+    if (!steps.length) return html`<p class="note">No steps recorded.</p>`;
+    return html`<ol>
+      ${steps.map(st => this.renderStep(st))}
+    </ol>`;
+  }
+
+  private renderStep(st: Step) {
+    if (st.kind !== 'tool') {
+      const what = st.kind === 'harness' ? 'Harness' : 'Model wrote text';
+      return html`<li>
+        <div class="head"><span class="n">${st.n}</span><span class="tag">${what}</span></div>
+        <pre>${st.text ?? ''}</pre>
+      </li>`;
+    }
+    const result = st.result ?? '';
+    const long = result.length > 600;
+    return html`<li>
+      <div class="head">
+        <span class="n">${st.n}</span>
+        <span class="tool">${st.tool}</span>
+        ${st.via_text ? html`<span class="tag">written as text, run by the harness</span>` : nothing}
+        <span class="status ${st.status ?? 'none'}" title=${st.summary ?? ''}>${st.summary ?? ''}</span>
+      </div>
+      ${st.args ? html`<div class="label">Arguments</div><pre>${st.args}</pre>` : nothing}
+      ${st.result == null
+        ? nothing
+        : long
+          ? html`<details><summary>Result (${result.length.toLocaleString()} characters)</summary><pre>${pretty(result)}</pre></details>`
+          : html`<div class="label">Result</div><pre>${pretty(result)}</pre>`}
+    </li>`;
+  }
+}
+
 // ---- catalog ------------------------------------------------------------------------------
 
-for (const el of [A2uiHighchartsElement, A2uiDataTableElement]) {
+for (const el of [A2uiHighchartsElement, A2uiDataTableElement, A2uiToolCallsElement]) {
   if (!customElements.get(el.tagName)) customElements.define(el.tagName, el);
 }
 
@@ -266,6 +439,7 @@ export const appCatalog = new Catalog(
     ...basicCatalog.components.values(),
     {...HighchartsChartApi, tagName: A2uiHighchartsElement.tagName, element: A2uiHighchartsElement},
     {...DataTableApi, tagName: A2uiDataTableElement.tagName, element: A2uiDataTableElement},
+    {...ToolCallsApi, tagName: A2uiToolCallsElement.tagName, element: A2uiToolCallsElement},
   ],
   [...basicCatalog.functions.values()],
   basicCatalog.themeSchema,

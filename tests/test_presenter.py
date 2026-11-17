@@ -177,3 +177,42 @@ def test_two_numbers_and_a_measure_is_a_bubble_chart():
             for i in range(5)]
     o = choose_chart(q, rows, columns_for(q, rows, member_info(meta)))["options"]
     assert o["chart"]["type"] == "bubble" and o["series"][0]["data"][2] == {"x": 2, "y": -2, "name": "c2", "z": 4}
+
+
+TRACE = [
+    {"role": "assistant", "tool": "search_values", "args": {"dimension": "circuits.country", "text": "ital"}},
+    {"role": "tool", "name": "search_values", "content": '["Italy"]'},
+    {"role": "assistant", "tool": "submit_answer", "args": {"query": {"measures": ["circuit.count"]}}},
+    {"role": "tool", "name": "submit_answer", "content": "Not accepted: Unknown members: circuit.count (did you mean circuits.count?)"},
+    {"role": "cube_analyst", "content": '{"name": "run_query", "arguments": {"query": {}}}'},
+    {"role": "tool", "name": "run_query(text)", "content": '{"row_count": 5, "rows": []}'},
+    {"role": "assistant", "tool": "submit_answer", "args": {"query": {"measures": ["circuits.count"]}}},
+    {"role": "tool", "name": "submit_answer", "content": "Accepted."},
+]
+
+
+def test_trace_steps_pair_calls_with_results():
+    from app.presenter import trace_steps
+    steps = trace_steps(TRACE)
+    tools = [(s["tool"], s["status"], s["summary"]) for s in steps if s["kind"] == "tool"]
+    assert tools == [("search_values", "ok", "1 value found"),
+                     ("submit_answer", "error", "rejected"),
+                     ("run_query", "ok", "5 rows"),
+                     ("submit_answer", "ok", "accepted")]
+    assert steps[2]["kind"] == "text" and steps[3]["via_text"] and steps[3]["args"] is None
+    assert [s["n"] for s in steps] == [1, 2, 3, 4, 5]
+    assert steps[0]["args"] == 'dimension: "circuits.country"\ntext: "ital"'
+
+
+def test_surface_shows_tool_calls_tab_and_flow():
+    q = {"measures": ["circuits.count"]}
+    msgs = build_surface("s7", question="q", query=q, rows=[{"circuits.count": "5"}], meta=META,
+                         model_label="7B", stats={"steps": 4}, trace=TRACE)
+    comps = {c["id"]: c for c in msgs[1]["updateComponents"]["components"]}
+    assert comps["trace"]["component"] == "ToolCalls"
+    assert {"title": "Tool calls (4)", "child": "trace"} in comps["tabs"]["tabs"]
+    assert "4 tool calls" in comps["stats"]["text"]
+    assert comps["flow"]["text"] == ("Tool calls: search_values (1 value found) → submit_answer (rejected) → "
+                                  "run_query (5 rows) → submit_answer (accepted)")
+    assert comps["root"]["children"][:2] == ["stats", "flow"]
+    assert len(msgs[2]["updateDataModel"]["value"]["trace"]) == 5

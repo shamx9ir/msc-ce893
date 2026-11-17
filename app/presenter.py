@@ -312,8 +312,16 @@ def build_surface(surface_id: str, *, question: str, query: dict | None, rows: l
     comps: list[dict] = []
     data: dict = {}
     # The page shows the question above the answers, so the surface starts with the run's stats.
+    if trace and "tool_calls" not in stats:
+        stats = dict(stats, tool_calls=sum(1 for st in trace_steps(trace) if st["kind"] == "tool"))
     header = [_text("stats", stats_line(model_label, stats, len(rows) if query and not error else None),
                     "caption")]
+    if trace:  # one line with the tool calls in order; the "Tool calls" tab has the details
+        short = {"error": "rejected", "warning": "warning", "none": "no result"}
+        flow = [f"{st['tool']} ({short.get(st['status'], st['summary'])})"
+                for st in trace_steps(trace) if st["kind"] == "tool"]
+        if flow:
+            header.append(_text("flow", "Tool calls: " + " → ".join(flow), "caption"))
     tabs = []
 
     if error or query is None:
@@ -394,14 +402,17 @@ def build_surface(surface_id: str, *, question: str, query: dict | None, rows: l
         comps.append(_text("query", text))
         tabs.append({"title": "Cube query", "child": "query"})
     if trace:
-        comps.append(_text("trace", trace_markdown(trace)))
-        tabs.append({"title": "Agent steps", "child": "trace"})
+        steps = trace_steps(trace)
+        data["trace"] = steps
+        comps.append({"id": "trace", "component": "ToolCalls", "steps": {"path": "/trace"}})
+        n_calls = sum(1 for st in steps if st["kind"] == "tool")
+        tabs.append({"title": f"Tool calls ({n_calls})", "child": "trace"})
     if tabs:
         comps.append({"id": "tabs", "component": "Tabs", "tabs": tabs})
         body.append("tabs")
 
     comps += header
-    comps.append({"id": "root", "component": "Column", "children": ["stats"] + body})
+    comps.append({"id": "root", "component": "Column", "children": [c["id"] for c in header] + body})
     msgs = [
         _msg("createSurface", {"surfaceId": surface_id, "catalogId": CATALOG_ID}),
         _msg("updateComponents", {"surfaceId": surface_id, "components": comps}),
@@ -432,6 +443,8 @@ def stats_line(model_label: str, stats: dict, n_rows: int | None) -> str:
     parts = [model_label]
     if stats.get("steps") is not None:
         parts.append(f"{stats['steps']} LLM call{'s' if stats['steps'] != 1 else ''}")
+    if stats.get("tool_calls") is not None:
+        parts.append(f"{stats['tool_calls']} tool call{'s' if stats['tool_calls'] != 1 else ''}")
     if stats.get("wall_s") is not None:
         parts.append(f"{stats['wall_s']:.1f} s")
     if stats.get("prompt_tokens"):
@@ -439,6 +452,68 @@ def stats_line(model_label: str, stats: dict, n_rows: int | None) -> str:
     if n_rows is not None:
         parts.append(f"{n_rows:,} row{'s' if n_rows != 1 else ''}")
     return " · ".join(parts)
+
+
+def _status(tool: str, result: str | None) -> tuple[str, str]:
+    """(status, short summary) of one tool result, from the harness's own wording."""
+    if result is None:
+        return "none", "no result recorded"
+    r = result.strip()
+    if r.startswith("Accepted"):
+        return "ok", "accepted"
+    if r.startswith(("Not accepted", "Unknown", "Cube error", "Error", "That query failed")) or "did you mean" in r:
+        return "error", "rejected" if tool == "submit_answer" else "error"
+    if r.startswith(("Check before submitting", "You already made this exact call")):
+        return "warning", r.split(".")[0][:120]
+    if tool == "run_query" or r.startswith("{"):
+        try:
+            n = json.loads(r).get("row_count")
+            return "ok", f"{n:,} row{'s' if n != 1 else ''}"
+        except (ValueError, AttributeError, TypeError):
+            pass
+    if tool == "search_values":
+        if r.startswith("No value"):
+            return "warning", "no match"
+        try:
+            vals = json.loads(r)
+            return "ok", f"{len(vals)} value{'s' if len(vals) != 1 else ''} found"
+        except ValueError:
+            pass
+    return "ok", r.split("\n")[0][:120]
+
+
+def trace_steps(trace: list) -> list[dict]:
+    """The harness trace as one entry per step, for the ToolCalls component:
+    {kind: tool|text|harness, tool, args (JSON text), result, status, summary, via_text}.
+    A tool call is paired with the result that follows it. Calls the model wrote as plain text
+    (run by the harness's fallback) show up as "run_query(text)" results without a call."""
+    steps: list[dict] = []
+    for t in trace:
+        role = t.get("role")
+        if role == "assistant" and t.get("tool"):
+            steps.append({"kind": "tool", "tool": t["tool"], "via_text": False,
+                          "args": "\n".join(f"{k}: {json.dumps(v, ensure_ascii=False)}"
+                                             for k, v in (t.get("args") or {}).items()),
+                          "result": None})
+        elif role == "tool":
+            name = str(t.get("name", ""))
+            via_text = name.endswith("(text)")
+            tool = name.removesuffix("(text)")
+            open_step = next((st for st in reversed(steps) if st["kind"] == "tool" and st["result"] is None
+                              and st["tool"] == tool), None)
+            if open_step is None or via_text:
+                open_step = {"kind": "tool", "tool": tool, "via_text": via_text, "args": None, "result": None}
+                steps.append(open_step)
+            open_step["result"] = str(t.get("content", ""))
+        elif role == "harness":
+            steps.append({"kind": "harness", "text": str(t.get("content", ""))})
+        elif t.get("content"):
+            steps.append({"kind": "text", "text": str(t["content"])})
+    for i, st in enumerate(steps, 1):
+        st["n"] = i
+        if st["kind"] == "tool":
+            st["status"], st["summary"] = _status(st["tool"], st["result"])
+    return steps
 
 
 def trace_markdown(trace: list) -> str:
