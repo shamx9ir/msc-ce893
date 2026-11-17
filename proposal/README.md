@@ -102,7 +102,9 @@ Cube query return the same value, so the pair is known to be correct.
 - **Model.** The pipeline works with any instruction-tuned Hugging Face model that has a tool-calling
   chat template. If the instructor's model differs from Qwen2.5-Coder-7B-Instruct, it replaces the
   `--base` argument of `scripts/train_lora.py` and the Ollama tag in the evaluator; the data and harness
-  are unchanged. Qwen2.5-Coder 7B and 14B serve as the pilot models.
+  are unchanged. Qwen2.5-Coder 7B and 14B serve as the pilot models: the Coder variants were chosen
+  because the task is mostly strict JSON with exact field names, which matches their code and SQL training;
+  both support tool calls and run in Ollama, and at 7B and 14B both sizes can be QLoRA-trained on a 16 GB GPU.
 - **Training.** QLoRA with Hugging Face PEFT: 4-bit base, rank 16, alpha 32, learning rate 2e-4,
   2 epochs, effective batch 16, loss on assistant tokens only, examples up to 8,192 tokens (4,096 for 14B).
 - **Compute.** Training runs on a local RTX 5070 Ti (16 GB), about 5–7 hours for the 7B model. The Colab
@@ -164,6 +166,10 @@ This is an individual project; I am responsible for every stage.
 needs ~32 GB RAM. (2) Disk space for merged and quantised models. (3) The 14B LoRA model sometimes emits
 tool calls as text, which the harness has to parse. (4) 30% of test questions are outside what the semantic
 layer can express, which caps all conditions. (5) Run-to-run variance in a 332-question test set.
+
+**Planned extension.** Run a newer general Qwen model of similar size (8–14B) as a harness-only baseline on
+the 363 tuning questions, to check whether the choice of base model matters; if it clearly wins, discuss it
+in the report as future work rather than replacing the four main conditions.
 
 **Smaller feasible scope.** If time or compute runs short: 7B only (conditions A and B), one test database
 (student_club, 158 questions), one training epoch, and a single significance test. This still answers the
