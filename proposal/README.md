@@ -123,7 +123,9 @@ before the pair is kept.
 (b) Each base model is compared with itself plus LoRA, so any difference comes from the adapter.
 
 - **Baselines and conditions.** A: 7B base + harness; B: 7B + LoRA + harness; C: 14B base + harness;
-  D: 14B + LoRA + harness. A single-shot prompt without tools is an optional extra baseline.
+  D: 14B + LoRA + harness. BIRD's hint is part of the input in all four, as in BIRD's standard setting.
+  Two optional extra conditions: a single-shot prompt without tools, and a **no-hint** run (question only) of
+  the best base and LoRA models, which is closer to what a real analyst would type.
 - **Splits.** Train on BIRD train, validate on 3 held-out train databases, design the harness on the
   3 tuning databases, then freeze it and report once on the 332 test questions.
 - **Primary metric.** Strict execution accuracy, with paired McNemar tests per question (A vs B, C vs D,
