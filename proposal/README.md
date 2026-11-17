@@ -19,7 +19,8 @@ chart** on an A2UI surface. Generating Cube queries instead of raw SQL keeps joi
 reviewed model, so the LLM only has to choose names and filters.
 
 - **Intended user:** non-technical analyst exploring a relational database.
-- **Input:** an English question plus BIRD's one-line hint ("evidence"), and the database's Cube schema.
+- **Input:** an English question and the database's Cube schema, tested both with and without BIRD's
+  one-line hint ("evidence"), since a real analyst would not normally write one.
 - **Output:** a Cube JSON query, its result rows, and a chart.
 
 | Question (database) | Expected Cube query |
@@ -47,6 +48,8 @@ models will be identical in every condition: only the model weights change.
   agent steps and latency per question.
 - **Hypothesis:** LoRA improves strict accuracy at both 7B and 14B, mainly by reducing format errors
   (wrong member type, invalid filter operators) rather than by adding knowledge.
+- **Second question:** how much does each setup depend on the hint? I expect all conditions to drop
+  without it, and the LoRA models (trained with hints) possibly to drop more.
 
 ## 3. Chosen route: prompt engineering + tools as the baseline, LoRA fine-tuning as the intervention
 
@@ -120,16 +123,17 @@ before the pair is kept.
 ![Figure 3](figures/fig3_evaluation.png)
 
 **Figure 3. Evaluation design.** (a) Four disjoint splits; the test set is used once, at the end.
-(b) Each base model is compared with itself plus LoRA, so any difference comes from the adapter.
+(b) Each base model is compared with itself plus LoRA, so any difference comes from the adapter; all four
+are run with and without the hint.
 
 - **Baselines and conditions.** A: 7B base + harness; B: 7B + LoRA + harness; C: 14B base + harness;
-  D: 14B + LoRA + harness. BIRD's hint is part of the input in all four, as in BIRD's standard setting.
-  Two optional extra conditions: a single-shot prompt without tools, and a **no-hint** run (question only) of
-  the best base and LoRA models, which is closer to what a real analyst would type.
+  D: 14B + LoRA + harness. Each is run twice on the test set: **with the hint** (BIRD's standard setting,
+  comparable with published work) and **without the hint** (question only, closer to real use), giving
+  8 runs. Training data keeps the hint. A single-shot prompt without tools is an optional extra baseline.
 - **Splits.** Train on BIRD train, validate on 3 held-out train databases, design the harness on the
   3 tuning databases, then freeze it and report once on the 332 test questions.
 - **Primary metric.** Strict execution accuracy, with paired McNemar tests per question (A vs B, C vs D,
-  B vs D). Secondary: relaxed accuracy, accuracy by database and BIRD difficulty, steps and latency.
+  B vs D, each with and without the hint, and each condition with vs without the hint). Secondary: relaxed accuracy, accuracy by database and BIRD difficulty, steps and latency.
 - **Error analysis.** Classify every wrong answer from the saved traces: wrong member, dimension used as a
   measure, wrong filter value, wrong operator, missing or extra column, Cube error, and question outside the
   semantic layer. Compare the counts before and after LoRA and show real successful and failed outputs.
@@ -142,7 +146,7 @@ before the pair is kept.
 | 2 | Harness: ADK agent, 3 tools, evaluator; design on tuning databases | harness, baselines A and C |
 | 3 | Training data: translate, verify, add value searches, format | verified training set |
 | 4–5 | LoRA training and export, 7B then 14B | adapters, conditions B and D |
-| 6 | Test-set evaluation, significance tests, error analysis | run files, notebook |
+| 6 | Test-set evaluation (8 runs: 4 conditions × hint / no hint), significance tests, error analysis | run files, notebook |
 | 7 | Demo app (Cube + A2UI + Highcharts) and report | app, report |
 
 This is an individual project; I am responsible for every stage.
@@ -155,6 +159,6 @@ conditions. (5) Run-to-run variance on a 332-question test set.
 **Planned extension.** Run a newer general Qwen model of similar size (8–14B) as a harness-only baseline on
 the tuning questions, to check whether the choice of base model matters.
 
-**Smaller feasible scope.** If time or compute runs short: 7B only (conditions A and B), one test database
+**Smaller feasible scope.** If time or compute runs short: 7B only (conditions A and B, with and without the hint), one test database
 (student_club, 158 questions), one training epoch and a single significance test. This still answers the
 research question.

@@ -149,7 +149,7 @@ def fig_eval():
         ax.text(x + 0.15, y + 0.25, h, fontsize=9.5, color=MUTED, va="center")
     arrow(ax, (12.1, 3.42), (12.5, 3.42))
     arrow(ax, (12.1, 2.17), (12.5, 2.17))
-    ax.text(9.8, 1.45, "Arrow = effect of adding LoRA (A vs B, C vs D).\n"
+    ax.text(9.8, 1.45, "Arrow = effect of adding LoRA (A vs B, C vs D).\nEach condition runs with and without the BIRD hint.\n"
             "Primary metric: strict execution accuracy on\nthe 332 test questions; paired McNemar tests.", fontsize=10, color=INK, va="top")
     ax.text(0.1, 1.45, "Qwen2.5-Coder-Instruct 7B and 14B; LoRA via Hugging Face PEFT (4-bit QLoRA).",
             fontsize=10, color=MUTED, va="top")
