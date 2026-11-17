@@ -140,14 +140,14 @@ are run with and without the hint.
 
 ## 7. Work plan
 
-| Weeks | Stage | Output |
-|---|---|---|
-| 1 | Data: BIRD → DuckDB → Cube models; fix the splits | Cube models, split files |
-| 2 | Harness: ADK agent, 3 tools, evaluator; design on tuning databases | harness, baselines A and C |
-| 3 | Training data: translate, verify, add value searches, format | verified training set |
-| 4–5 | LoRA training and export, 7B then 14B | adapters, conditions B and D |
-| 6 | Test-set evaluation (8 runs: 4 conditions × hint / no hint), significance tests, error analysis | run files, notebook |
-| 7 | Demo app (Cube + A2UI + Highcharts) and report | app, report |
+| Week | Stage and main tasks | Output | Check before moving on |
+|--|------------------------------------------------|------------------|----------------------|
+| 1 | **Data and semantic layer.** Download BIRD train and dev; copy the SQLite databases into DuckDB with typed columns; generate Cube models (cubes, dimensions, measures, joins) from the schema, column descriptions and foreign keys; fix the splits (test: formula_1 + student_club; tuning: superhero, toxicology, california_schools; training: BIRD train). | DuckDB file, Cube models, split files | Cube starts and answers a sample query on every database; no database appears in two splits |
+| 2 | **Harness.** Build the ADK agent with the three tools (`search_values`, `run_query`, `submit_answer`), a check of member names with "did you mean" hints, and the evaluator (strict and relaxed execution accuracy). Improve the prompt and tools on the tuning databases only, then freeze the harness. | Harness, baselines A (7B) and C (14B) on the tuning set | Unit tests pass; each harness change is judged on tuning data, never on the test set |
+| 3 | **Training data.** Translate BIRD-train gold SQL into Cube queries; keep only pairs whose results match; add value-lookup steps; write chat transcripts with the harness's exact prompt and tools; hold out 3 whole databases for validation. | Verified training and validation sets | No test database in the training data; training prompt identical to the prompt used at test time |
+| 4–5 | **LoRA training and export.** QLoRA (rank 16, about 2 epochs) on the 7B model, then the 14B; keep the best checkpoint by validation loss; merge, quantise to the same 4-bit format as the base model and load into Ollama with the base chat template. | Adapters, training curves, conditions B and D | Validation loss falls; the LoRA model makes valid tool calls on a few tuning questions |
+| 6 | **Evaluation.** 8 test runs (4 conditions × with / without hint); McNemar tests per pair; error analysis by error type, by database and BIRD difficulty, by query shape (joins, aggregations) and tool use; collect examples of successes and failures. | Run files, results notebook, figures | Every run covers all 332 questions; notebook reruns from the saved files |
+| 7 | **Demo app and report.** App flow: question → agent → Cube → Highcharts chart and table on an A2UI surface, with a switch between base and LoRA models. Write the report from the template with figures and captions. | App, report, runnable notebook | App answers the example questions with both models |
 
 This is an individual project; I am responsible for every stage.
 
