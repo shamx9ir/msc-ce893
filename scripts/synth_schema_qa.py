@@ -37,6 +37,34 @@ def words(name: str) -> str:
     return name.replace("_", " ").lower().strip()
 
 
+def plural(w: str) -> str:
+    last = w.split()[-1]
+    if last.endswith(("ss", "us", "sh", "ch", "x")):
+        return w + "es"
+    if last.endswith("s"):
+        return w
+    if last.endswith("y") and last[-2:-1] not in "aeiou":
+        return w[:-1] + "ies"
+    return w + "s"
+
+
+def singular(w: str) -> str:
+    last = w.split()[-1]
+    if last.endswith("ies"):
+        return w[:-3] + "y"
+    if last.endswith(("sses", "uses")):
+        return w[:-2]
+    if last.endswith("s") and not last.endswith(("ss", "us")):
+        return w[:-1]
+    return w
+
+
+def is_id(d: dict) -> bool:
+    n = d["name"]
+    return bool(re.search(r"(Id|_id|ID|Ref|key)$", n)) or n.lower() in ("id", "link_to_member", "link_to_event",
+                                                                        "link_to_budget", "link_to_major")
+
+
 class Schema:
     def __init__(self, db: str):
         y = yaml.safe_load(open(ROOT / "cube" / "model" / f"{db}.yml", encoding="utf-8"))
@@ -92,10 +120,14 @@ class Generator:
     def make(self, cube: str, d: dict):
         """One question about column d of cube (several templates, chosen at random)."""
         r, s = self.rng, self.s
-        ent = words(cube)
+        ent, one = plural(words(cube)), singular(words(cube))
+        if is_id(d) and r.random() < 0.6:
+            return None  # fewer id lookups; ids are still covered, just less often
         m = f"{cube}.{d['name']}"
         lab = s.label(r, cube, d)
         others = [o for o in s.cubes[cube]["dims"] if o is not d]
+        if r.random() < 0.7:
+            others = [o for o in others if not is_id(o)] or others
         templates = ["count_eq", "list_eq", "list_by"]
         if d["agg"]:
             templates += ["agg", "agg", "agg_eq", "num_cmp", "top_n"]
@@ -123,7 +155,7 @@ class Generator:
                 return None
             q = {"dimensions": [m], "filters": [f]}
             question = r.choice([f"List the {lab} of {ent} whose {s.label(r, cube, o)} is {txt}.",
-                                 f"What is the {lab} of the {ent} with {s.label(r, cube, o)} {txt}?"])
+                                 f"What is the {lab} of the {one} with {s.label(r, cube, o)} {txt}?"])
         elif t == "list_by":  # filter on d, return another column
             o = r.choice(others) if others else None
             if not o:
@@ -132,7 +164,7 @@ class Generator:
             if not f:
                 return None
             q = {"dimensions": [f"{cube}.{o['name']}"], "filters": [f]}
-            question = f"Give the {s.label(r, cube, o)} of every {ent} whose {lab} is {txt}."
+            question = f"Give the {s.label(r, cube, o)} of every {one} whose {lab} is {txt}."
         elif t in ("agg", "agg_eq"):
             agg = r.choice(list(AGG_WORD))
             q = {"measures": [f"{cube}.{agg}_{d['name']}"]}
@@ -161,7 +193,7 @@ class Generator:
             n, dirn, word = r.choice([1, 3, 5]), *r.choice([("desc", "highest"), ("asc", "lowest")])
             om = f"{cube}.{o['name']}"
             q = {"dimensions": [om, m], "order": {m: dirn}, "limit": n}
-            what = f"the {ent}" if n == 1 else f"the {n} {ent}"
+            what = f"the {one}" if n == 1 else f"the {n} {ent}"
             question = f"List the {s.label(r, cube, o)} and {lab} of {what} with the {word} {lab}."
         elif t == "top_group":
             q = {"dimensions": [m], "order": {f"{cube}.count": "desc"}, "limit": 1}
@@ -175,13 +207,15 @@ class Generator:
             f, txt = self.eq_filter(f"{other}.{o['name']}", o["type"])
             if not f:
                 return None
-            olab = f"{words(other)} {s.label(r, other, o)}"
+            olab = s.label(r, other, o)
+            if singular(words(other)) not in olab:
+                olab = f"{singular(words(other))} {olab}"
             if t == "join_count":
                 q = {"measures": [f"{cube}.count"], "filters": [f]}
-                question = f"How many {ent} are linked to a {olab} {txt}?"
+                question = f"How many {ent} are linked to a {olab} of {txt}?"
             else:
                 q = {"dimensions": [m], "filters": [f]}
-                question = f"List the {lab} of {ent} that have a {olab} {txt}."
+                question = f"List the {lab} of {ent} that have a {olab} of {txt}."
         return {"template": t, "question": question, "cube_query": q}
 
     def verify(self, rec: dict) -> dict | None:
@@ -210,7 +244,7 @@ class Generator:
     def run(self, n: int) -> list[dict]:
         cols = [(c, d) for c, v in self.s.cubes.items() for d in v["dims"]]
         out, seen_q, seen_query, tries = [], set(), set(), 0
-        while len(out) < n and tries < n * 20:
+        while len(out) < n and tries < n * 40:
             tries += 1
             cube, d = cols[tries % len(cols)]  # round-robin, so every column is asked about
             rec = self.make(cube, d)
