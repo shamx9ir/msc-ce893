@@ -2,10 +2,8 @@
 
     python proposal/make_figures.py
 
-Needs only matplotlib. Pilot numbers come from proposal/pilot_results.json, which was
-summarised from runs/test_*.jsonl and the LoRA trainer_state.json files.
+Needs only matplotlib.
 """
-import json
 import textwrap
 from pathlib import Path
 
@@ -18,7 +16,6 @@ from matplotlib.patches import FancyArrowPatch, FancyBboxPatch
 HERE = Path(__file__).parent
 OUT = HERE / "figures"
 OUT.mkdir(exist_ok=True)
-RES = json.loads((HERE / "pilot_results.json").read_text())
 
 plt.rcParams.update({"font.size": 11, "font.family": "DejaVu Sans", "axes.spines.top": False,
                      "axes.spines.right": False})
@@ -83,80 +80,85 @@ def fig_pipeline():
 
 
 def fig_data():
-    fig, (a1, a2) = plt.subplots(1, 2, figsize=(13, 4.8), gridspec_kw={"width_ratios": [1.05, 1]})
-    cats = ["verified (kept)", "not expressible\nby translator", "Cube error", "result differed",
-            "empty gold result"]
-    vals = [3531, 2782, 900, 682, 108]
-    cols = [GREEN, GREY, RED, ORANGE, GREY]
-    y = range(len(cats))[::-1]
-    a1.barh(list(y), vals, color=cols)
-    for yi, v in zip(y, vals):
-        a1.text(v + 60, yi, f"{v:,}", va="center", fontsize=10.5)
-    a1.set_yticks(list(y), cats)
-    a1.set_xlim(0, 4300)
-    a1.set_xlabel("BIRD train questions (59 databases, 8,003 in total)")
-    a1.set_title("a) What happened to each training question", loc="left", fontsize=12)
+    fig = plt.figure(figsize=(13, 5.4))
+    a1 = fig.add_axes([0, 0.5, 1, 0.5])
+    a1.set_xlim(0, 13)
+    a1.set_ylim(0, 2.0)
+    a1.axis("off")
+    a1.text(0.05, 1.95, "a) Planned preparation of the LoRA training data (BIRD train split)", fontsize=12,
+            va="top")
+    steps = [("1  Load", "BIRD train:\nquestion, hint,\ngold SQL, SQLite DB"),
+             ("2  Cube models", "generate cubes from\nschema + column\ndescriptions"),
+             ("3  Translate", "rule-based\nSQL -> Cube JSON;\ndrop what Cube\ncannot express"),
+             ("4  Verify", "run both; keep pair\nonly if results match;\ndrop empty results"),
+             ("5  Format", "chat examples with\nthe harness prompt\nand tool calls;\nhold out 3 DBs")]
+    for i, (t, b) in enumerate(steps):
+        x = 0.1 + i * 2.6
+        col, fill = (GREEN, "#eaf6ef") if i == 3 else (BLUE, "#eef4fb")
+        box(a1, x, 0.05, 2.2, 1.6, t, b, color=col, fill=fill)
+        if i < 4:
+            arrow(a1, (x + 2.2, 0.85), (x + 2.6, 0.85))
 
+    a2 = fig.add_axes([0, 0, 1, 0.46])
     a2.axis("off")
-    a2.set_title("b) One verified pair (address database)", loc="left", fontsize=12)
-    q = "Q: What is the total number of households in Arecibo county?"
-    h = "Hint: \"ARECIBO\" is the county; total number of households refer to sum(households)"
-    sql = ("Gold SQL: SELECT SUM(T1.households) FROM zip_data AS T1\n"
-           "  INNER JOIN country AS T2 ON T1.zip_code = T2.zip_code\n  WHERE T2.county = 'ARECIBO'")
-    cube = ('Cube query: {"measures": ["zip_data.sum_households"],\n'
-            '  "filters": [{"member": "country.county",\n'
-            '               "operator": "equals", "values": ["ARECIBO"]}]}')
-    chk = "Check: both return 36526  ->  keep"
-    yy = 0.95
-    for txt, col, fam in [(textwrap.fill(q, 62), INK, "DejaVu Sans"), (textwrap.fill(h, 66), MUTED, "DejaVu Sans"),
-                          (sql, INK, "DejaVu Sans Mono"), (cube, BLUE, "DejaVu Sans Mono"), (chk, GREEN, "DejaVu Sans")]:
-        a2.text(0.0, yy, txt, va="top", fontsize=9.8, color=col, family=fam, transform=a2.transAxes)
-        yy -= 0.07 * (txt.count("\n") + 1) + 0.06
-    fig.tight_layout()
+    a2.text(0.005, 0.97, "b) One prepared pair (address database)", fontsize=12, va="top",
+            transform=a2.transAxes)
+    left = [("Q: What is the total number of households in Arecibo county?", INK, "DejaVu Sans"),
+            ('Hint: "ARECIBO" is the county; total number of households refer to sum(households)', MUTED,
+             "DejaVu Sans"),
+            ("Gold SQL: SELECT SUM(T1.households) FROM zip_data AS T1\n"
+             "  INNER JOIN country AS T2 ON T1.zip_code = T2.zip_code\n  WHERE T2.county = 'ARECIBO'", INK,
+             "DejaVu Sans Mono")]
+    right = [('Cube query (training target):\n{"measures": ["zip_data.sum_households"],\n'
+              ' "filters": [{"member": "country.county",\n'
+              '              "operator": "equals", "values": ["ARECIBO"]}]}', BLUE, "DejaVu Sans Mono"),
+             ("Verification: keep only if the Cube result\nequals the gold SQL result on the SQLite file", GREEN,
+              "DejaVu Sans")]
+    for col_x, items in [(0.005, left), (0.55, right)]:
+        yy = 0.82
+        for txt, c, fam in items:
+            a2.text(col_x, yy, txt, va="top", fontsize=10, color=c, family=fam, transform=a2.transAxes)
+            yy -= 0.1 * (txt.count("\n") + 1) + 0.07
     fig.savefig(OUT / "fig2_data_prep.png", dpi=200, bbox_inches="tight")
     plt.close(fig)
 
 
-def fig_pilot():
-    acc = RES["test_accuracy"]
-    arms = [("harness_7b", "7B\nharness"), ("lora_7b", "7B\nLoRA + harness"),
-            ("harness_14b", "14B\nharness"), ("lora_14b", "14B\nLoRA + harness")]
-    fig, (a1, a2) = plt.subplots(1, 2, figsize=(13, 4.6), gridspec_kw={"width_ratios": [1.2, 1]})
-    xs = range(len(arms))
-    s = [acc[k]["all"]["strict"] for k, _ in arms]
-    r = [acc[k]["all"]["relaxed"] for k, _ in arms]
-    cols = [GREY, BLUE, GREY, BLUE]
-    a1.bar([x - 0.2 for x in xs], s, 0.4, color=cols)
-    a1.bar([x + 0.2 for x in xs], r, 0.4, color=cols, alpha=0.45)
-    for x, v in zip(xs, s):
-        a1.text(x - 0.2, v + 1, f"{v:.1f}", ha="center", fontsize=10, fontweight="bold")
-    for x, v in zip(xs, r):
-        a1.text(x + 0.2, v + 1, f"{v:.1f}", ha="center", fontsize=9.5, color=MUTED)
-    a1.axhline(70, ls=":", color=MUTED)
-    a1.text(3.45, 71, "rule-translator ceiling 70% (relaxed)", ha="right", fontsize=9, color=MUTED)
-    a1.set_xticks(list(xs), [l for _, l in arms])
-    a1.set_ylabel("execution accuracy (%)")
-    a1.set_ylim(0, 80)
-    a1.set_title("a) Pilot accuracy on 332 test questions\n    dark = strict (primary), light = relaxed", loc="left", fontsize=12)
-
-    for key, label, col in [("qwen7b", "7B", BLUE), ("qwen14b", "14B", ORANGE)]:
-        t = RES["training"][key]
-        a2.plot([p[0] for p in t["train"]], [p[1] for p in t["train"]], color=col, lw=1.4,
-                label=f"{label} train ({t['train_examples']:,} ex.)")
-        a2.plot([p[0] for p in t["val"]], [p[1] for p in t["val"]], "o--", color=col, ms=6,
-                label=f"{label} validation")
-    a2.set_xlabel("optimizer step (16 examples each)")
-    a2.set_ylabel("loss (assistant tokens only)")
-    a2.set_ylim(0.2, 0.75)
-    a2.legend(frameon=False, fontsize=9.5)
-    a2.set_title("b) LoRA training progress (2 epochs)", loc="left", fontsize=12)
-    fig.tight_layout()
-    fig.savefig(OUT / "fig3_pilot.png", dpi=200, bbox_inches="tight")
+def fig_eval():
+    fig, ax = plt.subplots(figsize=(15, 4.6))
+    ax.set_xlim(0, 15)
+    ax.set_ylim(0, 4.6)
+    ax.axis("off")
+    ax.text(0.05, 4.5, "a) Data splits: no database appears in more than one split", fontsize=12, va="top")
+    splits = [("LoRA training", "BIRD train\n~9,400 questions\n69 databases", BLUE, "#eef4fb"),
+              ("LoRA validation", "3 whole train\ndatabases held out", BLUE, "#eef4fb"),
+              ("Harness tuning", "BIRD dev:\nsuperhero, toxicology,\ncalifornia_schools\n= 363 questions", ORANGE,
+               "#fdf1e7"),
+              ("Test (used once)", "BIRD dev:\nformula_1 (174)\n+ student_club (158)\n= 332 questions", GREEN,
+               "#eaf6ef")]
+    for i, (t, b, c, f) in enumerate(splits):
+        box(ax, 0.1 + i * 2.35, 1.75, 2.2, 2.35, t, b, color=c, fill=f)
+    ax.text(9.7, 4.5, "b) Four conditions, compared in pairs", fontsize=12, va="top")
+    cells = [("A", "7B base", "harness only"), ("B", "7B + LoRA", "same harness"),
+             ("C", "14B base", "harness only"), ("D", "14B + LoRA", "same harness")]
+    for i, (k, m, h) in enumerate(cells):
+        x = 9.8 + (i % 2) * 2.7
+        y = 2.95 - (i // 2) * 1.25
+        c, f = (BLUE, "#eef4fb") if i % 2 else (GREY, "#f2f4f6")
+        ax.add_patch(FancyBboxPatch((x, y), 2.3, 0.95, boxstyle="round,pad=0.02", fc=f, ec=c, lw=1.5))
+        ax.text(x + 0.15, y + 0.62, f"{k}  {m}", fontsize=11, fontweight="bold", color=INK, va="center")
+        ax.text(x + 0.15, y + 0.25, h, fontsize=9.5, color=MUTED, va="center")
+    arrow(ax, (12.1, 3.42), (12.5, 3.42))
+    arrow(ax, (12.1, 2.17), (12.5, 2.17))
+    ax.text(9.8, 1.45, "Arrow = effect of adding LoRA (A vs B, C vs D).\n"
+            "Primary metric: strict execution accuracy on\nthe 332 test questions; paired McNemar tests.", fontsize=10, color=INK, va="top")
+    ax.text(0.1, 1.45, "Qwen2.5-Coder-Instruct 7B and 14B; LoRA via Hugging Face PEFT (4-bit QLoRA).",
+            fontsize=10, color=MUTED, va="top")
+    fig.savefig(OUT / "fig3_evaluation.png", dpi=200, bbox_inches="tight")
     plt.close(fig)
 
 
 if __name__ == "__main__":
     fig_pipeline()
     fig_data()
-    fig_pilot()
+    fig_eval()
     print("figures written to", OUT)
