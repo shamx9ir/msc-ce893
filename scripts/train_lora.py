@@ -107,6 +107,9 @@ def main() -> None:
     ap.add_argument("--grad-accum", type=int, default=16)
     ap.add_argument("--seed", type=int, default=7)
     ap.add_argument("--resume", action="store_true", help="continue from the last checkpoint in --out")
+    ap.add_argument("--match", type=Path,
+                    help="keep only the BIRD examples whose --match (e.g. full-profile) version fits --max-len, "
+                         "so a shorter-prompt arm trains on the same questions as the arm it is compared with")
     ap.add_argument("--dry-run", action="store_true", help="tokenise, show one masked example, and stop")
     args = ap.parse_args()
 
@@ -120,6 +123,12 @@ def main() -> None:
     data = {}
     for split in ("train", "val"):
         rows = load_rows(args.data / f"sft_{args.mode}_{split}.jsonl")
+        if args.match:
+            ref = load_rows(args.match / f"sft_{args.mode}_{split}.jsonl")
+            fits = {r["id"] for r in ref if encode(tok, r, args.max_len)}
+            before = len(rows)
+            rows = [r for r in rows if r.get("synthetic") or r["id"] in fits]
+            print(f"{split}: --match keeps {len(rows)}/{before} rows ({len(fits)}/{len(ref)} reference rows fit)")
         enc = [e for e in (encode(tok, r, args.max_len) for r in rows) if e]
         data[split] = enc
         print(f"{split}: {len(enc)}/{len(rows)} examples fit {args.max_len} tokens")

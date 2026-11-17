@@ -56,7 +56,7 @@ def example(rec: dict, schema: str, mode: str, with_evidence: bool = True, profi
     q = rec["cube_query"]
     if mode == "single":
         msgs.append({"role": "assistant", "content": dumps(q)})
-        return {"messages": msgs}
+        return {"id": f"{rec['db_id']}/{rec['question_id']}", "messages": msgs}
     preview = dumps({"row_count": rec["row_count"], "rows": rec["preview"]})
     i = 0
     for srch in rec.get("searches") or []:  # value lookups, added by scripts/add_value_searches.py
@@ -68,7 +68,12 @@ def example(rec: dict, schema: str, mode: str, with_evidence: bool = True, profi
              {"role": "tool", "tool_call_id": f"call_{i}", "name": "run_query", "content": preview},
              {"role": "assistant", "content": "", "tool_calls": [tool_call(i + 1, "submit_answer", {"query": q})]},
              {"role": "tool", "tool_call_id": f"call_{i + 1}", "name": "submit_answer", "content": "Accepted."}]
-    return {"messages": msgs, "tools": TOOLS} if profile == "full" else {"messages": msgs}
+    row = {"id": f"{rec['db_id']}/{rec['question_id']}", "messages": msgs}
+    if rec.get("synthetic"):
+        row["synthetic"] = True
+    if profile == "full":
+        row["tools"] = TOOLS
+    return row
 
 
 def main() -> None:
