@@ -275,3 +275,37 @@ def test_compact_schema():
             "  dim  races.raceId (number)\n  meas races.count (count)\n  meas races.sum_laps (sum)\n"
             "  meas races.avg_laps (avg)")
     assert compact_schema(full) == "cube races\n  name string -- race name\n  laps number+\n  raceId number"
+
+
+def test_no_tool_schemas_model_drops_text_beside_tool_calls():
+    """A stray token before <tool_call> must not hide the call from the history sent back."""
+    import asyncio
+    from google.adk.models.llm_request import LlmRequest
+    from google.genai import types
+    from harness.agent import LiteLlmNoToolSchemas
+    seen = []
+
+    class Probe(LiteLlmNoToolSchemas):
+        pass
+
+    async def fake_super(self, llm_request, stream=False):
+        seen.append(llm_request)
+        if False:
+            yield None
+
+    from google.adk.models.lite_llm import LiteLlm
+    orig = LiteLlm.generate_content_async
+    LiteLlm.generate_content_async = fake_super
+    try:
+        req = LlmRequest(contents=[
+            types.Content(role="user", parts=[types.Part(text="q")]),
+            types.Content(role="model", parts=[types.Part(text="junk"),
+                                               types.Part(function_call=types.FunctionCall(name="run_query", args={}))])])
+        async def go():
+            async for _ in Probe(model="openai/x").generate_content_async(req):
+                pass
+        asyncio.run(go())
+    finally:
+        LiteLlm.generate_content_async = orig
+    parts = seen[0].contents[1].parts
+    assert len(parts) == 1 and parts[0].function_call.name == "run_query"

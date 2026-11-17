@@ -47,6 +47,13 @@ class LiteLlmNoToolSchemas(LiteLlm):
     parses back into function calls."""
 
     async def generate_content_async(self, llm_request, stream: bool = False):
+        # Qwen's Ollama template renders an assistant turn as its text OR its tool calls, never both
+        # ({{ if .Content }}...{{ else if .ToolCalls }}). The Q4 LoRA models often emit a stray token
+        # before <tool_call>; kept as text, it hides the call from the history, so the model never
+        # sees that it already ran the query and repeats it. Training turns have no such text.
+        for c in llm_request.contents or []:
+            if c.role == "model" and c.parts and any(p.function_call for p in c.parts):
+                c.parts = [p for p in c.parts if not p.text or p.function_call]
         cfg = llm_request.config
         saved = cfg.tools if cfg is not None else None
         if cfg is not None:
