@@ -214,3 +214,64 @@ def test_time_dimension_must_be_time():
     err = h.validate(DB, {"measures": ["member.count"],
                           "timeDimensions": [{"dimension": "member.first_name", "dateRange": "2021"}]})
     assert err and "not a time dimension" in err
+
+
+def test_no_tool_schemas_model_still_runs_tools():
+    """Prompt profiles lean/noschema: the request carries no tool declarations, and a Qwen-style
+    <tool_call> text reply is still executed as a tool call. Needs no Cube server."""
+    import asyncio
+    import threading
+    from http.server import BaseHTTPRequestHandler, HTTPServer
+    from google.adk.agents import LlmAgent
+    from google.adk.runners import InMemoryRunner
+    from google.genai import types
+    from harness.agent import make_model
+    captured, called = [], []
+
+    class Capture(BaseHTTPRequestHandler):
+        def do_POST(self):
+            captured.append(json.loads(self.rfile.read(int(self.headers["Content-Length"]))))
+            text = ('<tool_call>\n{"name": "submit_answer", "arguments": {"query": {"measures": ["member.count"]}}}\n'
+                    '</tool_call>') if len(captured) == 1 else "done"
+            out = json.dumps({"id": "x", "object": "chat.completion", "created": 0, "model": "m",
+                              "choices": [{"index": 0, "finish_reason": "stop",
+                                           "message": {"role": "assistant", "content": text}}],
+                              "usage": {"prompt_tokens": 1, "completion_tokens": 1, "total_tokens": 2}}).encode()
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(out)
+
+        def log_message(self, *a):
+            pass
+
+    def submit_answer(query: dict) -> str:
+        """Submit the final Cube query."""
+        called.append(query)
+        return "Accepted."
+
+    async def go():
+        model = make_model("openai/capture", f"http://127.0.0.1:{srv.server_port}/v1", "x", tool_schemas=False)
+        agent = LlmAgent(name="t", model=model, instruction="x", tools=[submit_answer])
+        runner = InMemoryRunner(agent=agent, app_name="t")
+        s = await runner.session_service.create_session(app_name="t", user_id="u")
+        async for _ in runner.run_async(user_id="u", session_id=s.id,
+                                        new_message=types.Content(role="user", parts=[types.Part(text="q")])):
+            pass
+
+    srv = HTTPServer(("127.0.0.1", 0), Capture)
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    try:
+        asyncio.run(go())
+    finally:
+        srv.shutdown()
+    assert not captured[0].get("tools")
+    assert called == [{"measures": ["member.count"]}]
+
+
+def test_compact_schema():
+    from harness.prompts import compact_schema
+    full = ("cube races\n  dim  races.name (string) -- race name\n  dim  races.laps (number)\n"
+            "  dim  races.raceId (number)\n  meas races.count (count)\n  meas races.sum_laps (sum)\n"
+            "  meas races.avg_laps (avg)")
+    assert compact_schema(full) == "cube races\n  name string -- race name\n  laps number+\n  raceId number"

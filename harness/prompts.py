@@ -63,6 +63,58 @@ The semantic layer for "{db}":
 Reply with the Cube query as a single JSON object and nothing else."""
 
 
+# ---- prompt profiles for the schema-offloading experiment ----------------------------------
+# "full"     harness v4.2: query guide + full schema; tool schemas sent through the API.
+# "lean"     no query guide, no tool schemas (the LoRA learned both), compact schema.
+# "noschema" no guide, no tool schemas, no schema: only the database name. Needs a LoRA that has
+#            been trained on that database's schema (scripts/synth_schema_qa.py).
+PROFILES = ("full", "lean", "noschema")
+
+SYSTEM_LEAN = """\
+You answer questions about the "{db}" database by writing Cube queries.
+Tools: search_values(dimension, text), run_query(query), submit_answer(query).
+
+The semantic layer for "{db}" (members are cube.column; every cube has a count measure;
+columns marked number+ also have sum_, avg_, min_ and max_ measures, e.g. cube.avg_column):
+{schema}"""
+
+SYSTEM_NOSCHEMA = """\
+You answer questions about the "{db}" database by writing Cube queries.
+Tools: search_values(dimension, text), run_query(query), submit_answer(query)."""
+
+
+def compact_schema(schema: str) -> str:
+    """Shorten CubeClient.describe() text: no measure lines (count and the sum_/avg_/min_/max_
+    pattern are implied, the numeric columns that have them are marked number+) and no repeated
+    cube prefix on each column."""
+    lines = schema.splitlines()
+    measures = {l.split()[1] for l in lines if l.startswith("  meas ")}
+    out = []
+    for l in lines:
+        if l.startswith("cube "):
+            out.append(l)
+        elif l.startswith("  dim "):
+            head, _, desc = l[6:].strip().partition(" -- ")
+            name, kind = head.split(" ", 1)
+            kind = kind.strip("()")
+            cube, col = name.split(".", 1)
+            if kind == "number" and f"{cube}.sum_{col}" in measures:
+                kind = "number+"
+            out.append(f"  {col} {kind}" + (f" -- {desc}" if desc else ""))
+    return "\n".join(out)
+
+
+def render_profile(profile: str, db: str, schema: str) -> str:
+    """The instruction (system prompt before ADK's agent line) for a tools-mode profile."""
+    if profile == "full":
+        return SYSTEM_TOOLS.format(db=db, guide=QUERY_GUIDE, schema=schema)
+    if profile == "lean":
+        return SYSTEM_LEAN.format(db=db, schema=compact_schema(schema))
+    if profile == "noschema":
+        return SYSTEM_NOSCHEMA.format(db=db)
+    raise ValueError(profile)
+
+
 def user_prompt(question: str, evidence: str | None, schema: str | None = None) -> str:
     """The per-question message. With the schema text, it also lists the fields whose names
     the question or hint mention (harness v4 schema linking)."""

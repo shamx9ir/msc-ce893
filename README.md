@@ -146,3 +146,32 @@ python -m harness.evaluate --db formula_1 --db student_club --ids-file splits/te
 
 The same with `Qwen2.5-Coder-14B-Instruct` / `qwen2.5-coder:14b` for the 14B arm. Both arms use harness v4.2,
 examples up to 8,192 tokens (7B; the 14B may need --max-len 6144), and Q4_K_M weights in Ollama, so each LoRA model differs from its baseline only by the adapter.
+
+## Schema-offloading arms (prompt profiles)
+
+Can the LoRA carry what the prompt spells out, so each question costs fewer tokens?
+`--profile` (in `harness.evaluate` and `scripts/make_sft.py`) picks the prompt:
+
+| profile | query guide | tool JSON schemas | data schema | linked fields |
+|---|---|---|---|---|
+| `full` (harness v4.2) | yes | yes | full `describe()` text | yes |
+| `lean` | no | no (one line with tool names) | compact: no measure lines, no cube prefix | yes |
+| `noschema` | no | no | none, only the database name | no |
+
+`lean` and `noschema` send no tool declarations to the model (`LiteLlmNoToolSchemas`); ADK still runs
+the tools and parses Qwen's `<tool_call>` text back into calls.
+
+The test databases (formula_1, student_club) are not in the LoRA training data, so a model can only
+work without their schema if it is trained on it. `scripts/synth_schema_qa.py` writes template
+questions from the two schemas and sampled values (no BIRD dev question, hint or SQL is used) and
+checks each query against Cube. The `noschema` training set = the 59 training databases with the
+`lean` prompt + these synthetic examples with the `noschema` prompt. It is a single-database setting
+(a model fine-tuned for the databases it serves), unlike `lean`, which stays database-agnostic.
+
+```
+python scripts/synth_schema_qa.py --db formula_1 --n 800 --db student_club --n 500 --out data/synth/synth.jsonl --audit
+python scripts/make_sft.py --data training_data --profile lean --out data/sft_lean
+python scripts/make_sft.py --data training_data --profile noschema --synthetic data/synth/synth.jsonl --out data/sft_noschema
+python scripts/train_lora.py --data data/sft_lean --out lora/qwen7b-lean
+python -m harness.evaluate ... --profile lean --model ollama_chat/qwen7b-cube-lean
+```

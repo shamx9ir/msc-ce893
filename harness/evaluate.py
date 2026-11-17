@@ -107,15 +107,18 @@ def main() -> None:
     ap.add_argument("--max-steps", type=int, default=8)
     ap.add_argument("--no-evidence", action="store_true", help="hide BIRD's hint text from the model")
     ap.add_argument("--no-link", action="store_true", help="do not list question-matched fields (harness v3 prompt)")
+    ap.add_argument("--profile", choices=["full", "lean", "noschema"], default="full",
+                    help="prompt profile; lean/noschema also send no tool schemas (for LoRAs trained that way)")
     ap.add_argument("--setup", default="harness", help="label stored with each result, e.g. harness or lora")
     ap.add_argument("--out", type=Path, required=True)
     args = ap.parse_args()
 
     ids = set(json.load(open(args.ids_file, encoding="utf-8"))) if args.ids_file else None
     questions = load_questions(args.bird_dir, args.db, ids, args.limit)
-    harness = Harness(make_model(args.model, args.base_url, args.api_key, num_ctx=args.num_ctx),
+    harness = Harness(make_model(args.model, args.base_url, args.api_key, num_ctx=args.num_ctx,
+                                 tool_schemas=args.profile == "full"),
                       CubeClient(args.cube_url), mode=args.mode, max_steps=args.max_steps,
-                      link=not args.no_link)
+                      link=not args.no_link, profile=args.profile)
     args.out.parent.mkdir(parents=True, exist_ok=True)
     done = set()
     if args.out.exists():  # resume
@@ -141,7 +144,7 @@ def main() -> None:
             relaxed_total += relaxed
             total += 1
             rec = {"question_id": q["question_id"], "db_id": q["db_id"], "difficulty": q["difficulty"],
-                   "setup": args.setup, "model": args.model, "mode": args.mode,
+                   "setup": args.setup, "model": args.model, "mode": args.mode, "profile": args.profile,
                    "question": q["question"], "evidence": q.get("evidence"), "gold_sql": q["SQL"],
                    "pred_query": res.query, "correct": ok, "correct_relaxed": relaxed, "error": exec_error, "steps": res.steps,
                    "prompt_tokens": res.prompt_tokens, "completion_tokens": res.completion_tokens,
