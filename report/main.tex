@@ -1,0 +1,19 @@
+\input{preamble}
+\usepackage{float}
+\usepackage{needspace}
+\let\oldsection\section
+\renewcommand{\section}{\Needspace{8\baselineskip}\oldsection}
+% let text share pages with figures instead of leaving float-only pages
+\renewcommand{\topfraction}{0.9}
+\renewcommand{\bottomfraction}{0.7}
+\renewcommand{\textfraction}{0.07}
+\renewcommand{\floatpagefraction}{0.85}
+\setcounter{topnumber}{3}
+\setcounter{bottomnumber}{2}
+\setcounter{totalnumber}{5}
+\setlength{\textfloatsep}{8pt plus 2pt minus 2pt}
+\setlength{\floatsep}{8pt plus 2pt minus 2pt}
+\setlength{\abovecaptionskip}{4pt}
+\begin{document}
+\input{report}
+\end{document}
