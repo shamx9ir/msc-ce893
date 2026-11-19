@@ -24,6 +24,7 @@ of BIRD's gold SQL on the original SQLite database (set comparison, column order
 | `scripts/make_sft.py` | writes chat-format fine-tuning files that reproduce the harness's exact prompts |
 | `splits/test_ids.json` | the frozen test set: all 332 dev questions on formula_1 and student_club |
 | `splits/tune_ids.json` | tuning set for harness changes: 40 questions each from superhero, toxicology and california_schools (no overlap with the test databases) |
+| `app/` | the demo app: Python server (`app/server.py`) and web page (`app/web`, A2UI + Highcharts) |
 | `tests/` | end-to-end tests with a scripted stand-in for the LLM |
 
 ## How the harness works
@@ -198,3 +199,33 @@ Prompt tokens are summed over all model calls of a question. Strict / relaxed ex
 McNemar exact (strict): 7B lean vs full p=0.008; 14B lean vs full p=0.21; 14B noschema+lean vs full p=0.35;
 14B noschema (no schema) vs full p=4e-6; 7B vs 14B noschema p=0.004. Without the schema the model invents
 members (an "Unknown members" error in 120 of 332 14B runs), mostly on student_club (14B 44.9% vs 63.9% lean).
+
+## Demo app
+
+Ask a question in plain English, pick one of the four models (or compare all four), and see the
+answer as a chart. The flow:
+
+1. `app/server.py` runs harness v4.2 unchanged (the ADK agent with Cube tools) on the chosen model.
+2. The submitted Cube query is run on Cube, and `app/presenter.py` turns query + rows into
+   [A2UI](https://github.com/a2ui-project/a2ui) v0.9 messages: one surface per answer, with tabs for
+   the chart, the table, the Cube query and the agent's tool calls.
+3. The page (`app/web`, Lit) feeds those messages to A2UI's renderer. The surface uses the A2UI basic
+   catalog plus two components of ours: `HighchartsChart` (a Highcharts options object bound to the
+   surface's data model) and `DataTable`.
+
+The chart form follows the query's shape: a single number becomes a stat tile, a time dimension a line
+chart, one category a bar chart, two categories stacked bars, anything else a table. When the answer
+query sorts by a measure it does not return ("which 10 countries have the most circuits?"), the chart
+adds that measure so the ranking is visible, and says so.
+
+```bash
+# Cube on :4000 and Ollama with the four models, as for the experiments
+cd app/web && npm install && npm run build && cd ../..
+python -m app.server                    # http://localhost:8000
+```
+
+For UI work, `npm run dev` in `app/web` serves the page on :5173 with hot reload and forwards `/api`
+to the server on :8000. Options: `--cube-url`, `--ollama-url`, `--num-ctx` (default 16384, as in the
+experiments), `--port`. If `data/bird/dev.json` is there, the page also offers questions from the test set.
+Questions run one at a time, since the four models share one GPU; switching model makes Ollama load
+the other one, so the first question after a switch takes longer.
