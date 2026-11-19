@@ -22,7 +22,7 @@ from google.adk.tools import ToolContext
 from google.genai import types
 
 from .cube_client import CubeClient, CubeError, dumps
-from .prompts import QUERY_GUIDE, SYSTEM_SINGLE, SYSTEM_TOOLS, user_prompt
+from .prompts import PROFILES, QUERY_GUIDE, SYSTEM_SINGLE, SYSTEM_TOOLS, render_profile, user_prompt
 
 QUERY_KEYS = {"measures", "dimensions", "filters", "timeDimensions", "order", "limit",
               "segments", "ungrouped", "offset", "total"}
@@ -40,9 +40,35 @@ class AgentResult:
     trace: list = field(default_factory=list)
 
 
+class LiteLlmNoToolSchemas(LiteLlm):
+    """Sends the request without tool declarations, so the tool JSON schemas cost no prompt tokens.
+    For LoRA models trained without them (prompt profiles "lean" and "noschema"). ADK still runs
+    the tools: Qwen writes calls as <tool_call>{...}</tool_call> text, which ADK's LiteLLM wrapper
+    parses back into function calls."""
+
+    async def generate_content_async(self, llm_request, stream: bool = False):
+        # Qwen's Ollama template renders an assistant turn as its text OR its tool calls, never both
+        # ({{ if .Content }}...{{ else if .ToolCalls }}). The Q4 LoRA models often emit a stray token
+        # before <tool_call>; kept as text, it hides the call from the history, so the model never
+        # sees that it already ran the query and repeats it. Training turns have no such text.
+        for c in llm_request.contents or []:
+            if c.role == "model" and c.parts and any(p.function_call for p in c.parts):
+                c.parts = [p for p in c.parts if not p.text or p.function_call]
+        cfg = llm_request.config
+        saved = cfg.tools if cfg is not None else None
+        if cfg is not None:
+            cfg.tools = None
+        try:
+            async for response in super().generate_content_async(llm_request, stream):
+                yield response
+        finally:
+            if cfg is not None:
+                cfg.tools = saved
+
+
 def make_model(model: str, base_url: str | None = None, api_key: str | None = None,
                temperature: float = 0.0, num_ctx: int | None = 16384,
-               max_tokens: int | None = 1024) -> LiteLlm:
+               max_tokens: int | None = 1024, tool_schemas: bool = True) -> LiteLlm:
     """`model` is a LiteLLM id, e.g. "ollama_chat/qwen2.5-coder:7b" or "openai/my-lora" (vLLM).
     A bare name like "qwen2.5-coder:7b" is treated as an Ollama model.
 
@@ -60,7 +86,7 @@ def make_model(model: str, base_url: str | None = None, api_key: str | None = No
         kwargs["api_base"] = base_url
     if api_key:
         kwargs["api_key"] = api_key
-    return LiteLlm(model=model, **kwargs)
+    return (LiteLlm if tool_schemas else LiteLlmNoToolSchemas)(model=model, **kwargs)
 
 
 def extract_json(text: str, unwrap: bool = True) -> dict | None:
@@ -171,21 +197,27 @@ AGENT_NAME = "cube_analyst"
 ADK_SUFFIX = f'\n\nYou are an agent. Your internal name is "{AGENT_NAME}".'
 
 
-def render_instruction(mode: str, db: str, schema: str) -> str:
-    tmpl = SYSTEM_TOOLS if mode == "tools" else SYSTEM_SINGLE
-    return tmpl.format(db=db, guide=QUERY_GUIDE, schema=schema)
+def render_instruction(mode: str, db: str, schema: str, profile: str = "full") -> str:
+    if mode == "tools":
+        return render_profile(profile, db, schema)
+    assert profile == "full", "prompt profiles are for tools mode"
+    return SYSTEM_SINGLE.format(db=db, guide=QUERY_GUIDE, schema=schema)
 
 
-def system_prompt(mode: str, db: str, schema: str) -> str:
+def system_prompt(mode: str, db: str, schema: str, profile: str = "full") -> str:
     """The exact system message the model receives through ADK."""
-    return render_instruction(mode, db, schema) + ADK_SUFFIX
+    return render_instruction(mode, db, schema, profile) + ADK_SUFFIX
 
 
 class Harness:
     def __init__(self, model: BaseLlm, cube: CubeClient, mode: str = "tools",
-                 max_steps: int = 8, preview_rows: int = 10, link: bool = True):
-        assert mode in ("tools", "single")
-        self.model, self.cube, self.mode, self.link = model, cube, mode, link
+                 max_steps: int = 8, preview_rows: int = 10, link: bool = True,
+                 profile: str = "full"):
+        """profile: the prompt profile (harness.prompts.PROFILES). "noschema" also turns off the
+        linked-fields line, since that would put schema names back into the prompt."""
+        assert mode in ("tools", "single") and profile in PROFILES
+        self.model, self.cube, self.mode, self.profile = model, cube, mode, profile
+        self.link = link and profile != "noschema"
         self.max_steps, self.preview_rows = max_steps, preview_rows
         self._schema_cache: dict[str, str] = {}
 
@@ -196,7 +228,7 @@ class Harness:
         return self._schema_cache[db]
 
     def instruction(self, db: str) -> str:
-        return render_instruction(self.mode, db, self.schema(db))
+        return render_instruction(self.mode, db, self.schema(db), self.profile)
 
     # ---- validation ----------------------------------------------------
     def validate(self, db: str, query) -> str | None:
