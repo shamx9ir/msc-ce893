@@ -175,3 +175,26 @@ python scripts/make_sft.py --data training_data --profile noschema --synthetic d
 python scripts/train_lora.py --data data/sft_lean --out lora/qwen7b-lean
 python -m harness.evaluate ... --profile lean --model ollama_chat/qwen7b-cube-lean
 ```
+
+### Results (test set, 332 questions, 2026-11-17/19)
+
+Prompt tokens are summed over all model calls of a question. Strict / relaxed execution accuracy.
+
+| Model | Arm | Strict | Relaxed | Prompt tokens / q | Steps |
+|---|---|---|---|---|---|
+| 7B | harness only (full prompt) | 27.7 | 34.0 | 15,742 | 4.0 |
+| 7B | LoRA, full prompt | 46.4 | 52.1 | 7,798 | 2.1 |
+| 7B | full-prompt LoRA given lean prompt (no retrain) | 0.0 | 0.0 | 5,409 | 3.5 |
+| 7B | LoRA trained + run on lean prompt | 41.9 | 45.5 | 3,257 | 2.2 |
+| 7B | noschema LoRA, no schema in prompt | 31.0 | 33.7 | 1,312 | 3.8 |
+| 7B | noschema LoRA, lean prompt | 44.3 | 49.7 | 3,364 | 2.2 |
+| 14B | harness only (full prompt) | 28.9 | 41.3 | 10,766 | 2.9 |
+| 14B | LoRA, full prompt | 49.7 | 56.9 | 7,341 | 2.0 |
+| 14B | full-prompt LoRA given lean prompt (127 q, stopped) | 0.0 | 0.0 | 10,169 | 3.2 |
+| 14B | LoRA trained + run on lean prompt | 47.6 | 57.2 | 3,153 | 2.1 |
+| 14B | noschema LoRA, no schema in prompt | 38.3 | 42.8 | 1,024 | 2.6 |
+| 14B | noschema LoRA, lean prompt | 47.9 | 56.0 | 3,086 | 2.0 |
+
+McNemar exact (strict): 7B lean vs full p=0.008; 14B lean vs full p=0.21; 14B noschema+lean vs full p=0.35;
+14B noschema (no schema) vs full p=4e-6; 7B vs 14B noschema p=0.004. Without the schema the model invents
+members (an "Unknown members" error in 120 of 332 14B runs), mostly on student_club (14B 44.9% vs 63.9% lean).
