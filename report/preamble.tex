@@ -1,0 +1,73 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[a4paper,top=2.65cm,bottom=3.55cm,left=2cm,right=2cm,headheight=52pt,footskip=30pt]{geometry}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{iftex}
+\usepackage[hidelinks]{hyperref}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{amsmath,amssymb}
+
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage[scaled=0.95]{helvet}
+  \renewcommand{\familydefault}{\sfdefault}
+\else
+  \usepackage{fontspec}
+  \setmainfont[
+    Path={Archivio/Archivo/static/},
+    UprightFont={Archivo-Regular.ttf},
+    BoldFont={Archivo-Bold.ttf},
+    ItalicFont={Archivo-Regular.ttf},
+    ItalicFeatures={FakeSlant=0.2}
+  ]{Archivo}
+\fi
+
+\definecolor{essexpurple}{HTML}{4B0055}
+\definecolor{essexgray}{HTML}{666666}
+\definecolor{softpurple}{HTML}{F3EBF4}
+\definecolor{softgray}{HTML}{F5F5F5}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.34em}
+\setlist[itemize]{leftmargin=1.5em,itemsep=0.15em,topsep=0.2em}
+\setlist[enumerate]{leftmargin=1.7em,itemsep=0.15em,topsep=0.2em}
+
+\titleformat{\section}{\Large\bfseries\color{essexpurple}}{\thesection.}{0.45em}{}[\vspace{-0.28em}\color{essexpurple}\rule{\textwidth}{0.5pt}]
+\titlespacing*{\section}{0pt}{0.9em}{0.4em}
+\titleformat{\subsection}{\large\bfseries\color{essexpurple}}{\thesubsection}{0.45em}{}
+\titlespacing*{\subsection}{0pt}{0.65em}{0.15em}
+
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\footrulewidth}{0.5pt}
+\fancyhead[L]{\includegraphics[height=1.5cm]{essex_logo.png}}
+\fancyhead[R]{\begin{minipage}{7cm}\raggedleft\small\textcolor{essexgray}{CE893-7-AU-CO\\Generative Artificial Intelligence}\end{minipage}}
+\fancyfoot[L]{\begin{minipage}[t]{5cm}\fontsize{9.5}{11}\selectfont\textbf{Colchester Campus}\\Wivenhoe Park\\Colchester CO4 3SQ\\United Kingdom\end{minipage}}
+\fancyfoot[R]{\raisebox{-31pt}{\fontsize{9.5}{11}\selectfont\thepage}}
+
+\newcommand{\instruction}[1]{%
+  \par\smallskip\noindent
+  \colorbox{softpurple}{\parbox{\dimexpr\linewidth-2\fboxsep}{\small\textbf{Template guidance.} #1}}%
+  \par\smallskip}
+
+\newcommand{\figureplaceholder}[2]{%
+  \begin{figure}[ht]
+    \centering
+    \fcolorbox{essexpurple}{softgray}{%
+      \parbox[c][5.1cm][c]{0.88\linewidth}{\centering
+      \textbf{Replace this box with a figure}\\[0.4em]
+      \small #2}}
+    \caption{#1}
+  \end{figure}}
+
+\newcommand{\resultplaceholder}[1]{%
+  \fcolorbox{essexpurple}{white}{\parbox{\dimexpr\linewidth-2\fboxsep-2\fboxrule}{\small #1}}}
+
+\setlength{\emergencystretch}{2em}
