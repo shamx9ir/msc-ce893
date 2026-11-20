@@ -27,6 +27,7 @@ def as_template_messages(messages: list[dict]) -> list[dict]:
     out = []
     for m in messages:
         m = dict(m)
+        m.pop("train", None)  # our own flag (see encode), not part of the chat template
         if m.get("tool_calls"):
             m["tool_calls"] = [{**tc, "function": {**tc["function"],
                                                    "arguments": json.loads(tc["function"]["arguments"])}}
@@ -36,8 +37,11 @@ def as_template_messages(messages: list[dict]) -> list[dict]:
 
 
 def encode(tok, row: dict, max_len: int) -> dict | None:
-    """input_ids with labels set only on assistant tokens; None if the example is too long."""
+    """input_ids with labels set only on assistant tokens; None if the example is too long.
+    An assistant turn marked "train": false (the deliberate wrong guess in a recovery example) is
+    context only: the model sees it but is not trained to produce it."""
     msgs = as_template_messages(row["messages"])
+    skip = {i for i, m in enumerate(row["messages"]) if m.get("train") is False}
     tools = row.get("tools")
     full = tok.apply_chat_template(msgs, tools=tools, tokenize=False)
     ids = tok(full, add_special_tokens=False)["input_ids"]
@@ -45,7 +49,7 @@ def encode(tok, row: dict, max_len: int) -> dict | None:
         return None
     labels = [-100] * len(ids)
     for i, m in enumerate(msgs):
-        if m["role"] != "assistant":
+        if m["role"] != "assistant" or i in skip:
             continue
         # tokens from "<|im_start|>assistant\n" up to and including this turn's "<|im_end|>"
         start_text = tok.apply_chat_template(msgs[:i], tools=tools, tokenize=False, add_generation_prompt=True)

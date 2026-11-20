@@ -59,11 +59,31 @@ def example(rec: dict, schema: str, mode: str, with_evidence: bool = True, profi
         return {"id": f"{rec['db_id']}/{rec['question_id']}", "messages": msgs}
     preview = dumps({"row_count": rec["row_count"], "rows": rec["preview"]})
     i = 0
-    for srch in rec.get("searches") or []:  # value lookups, added by scripts/add_value_searches.py
-        msgs += [{"role": "assistant", "content": "", "tool_calls": [
-                     tool_call(i, "search_values", {"dimension": srch["dimension"], "text": srch["text"]})]},
-                 {"role": "tool", "tool_call_id": f"call_{i}", "name": "search_values", "content": dumps(srch["result"])}]
+    rec_fix = rec.get("recovery")  # 0 rows -> search -> retry, added by scripts/add_value_searches_v2.py
+    searches = list(rec.get("searches") or [])
+    late = [s for s in searches if rec_fix and s["dimension"] == rec_fix["member"]][:1]
+    searches = [s for s in searches if s not in late]
+
+    def search_turns(srch: dict, i: int) -> list:
+        return [{"role": "assistant", "content": "", "tool_calls": [
+                    tool_call(i, "search_values", {"dimension": srch["dimension"], "text": srch["text"]})]},
+                {"role": "tool", "tool_call_id": f"call_{i}", "name": "search_values", "content": dumps(srch["result"])}]
+
+    for srch in searches:  # value lookups, added by scripts/add_value_searches*.py
+        msgs += search_turns(srch, i)
         i += 1
+    if late:
+        wrong_q = json.loads(dumps(q))
+        for f in wrong_q.get("filters") or []:
+            if isinstance(f, dict) and f.get("member") == rec_fix["member"] and f.get("values") == [rec_fix["right"]]:
+                f["values"] = [rec_fix["wrong"]]
+        # the wrong guess is context only (train_lora.py skips turns marked "train": false)
+        msgs += [{"role": "assistant", "content": "", "train": False,
+                  "tool_calls": [tool_call(i, "run_query", {"query": wrong_q})]},
+                 {"role": "tool", "tool_call_id": f"call_{i}", "name": "run_query",
+                  "content": dumps({"row_count": 0, "rows": []})}]
+        msgs += search_turns(late[0], i + 1)
+        i += 2
     msgs += [{"role": "assistant", "content": "", "tool_calls": [tool_call(i, "run_query", {"query": q})]},
              {"role": "tool", "tool_call_id": f"call_{i}", "name": "run_query", "content": preview},
              {"role": "assistant", "content": "", "tool_calls": [tool_call(i + 1, "submit_answer", {"query": q})]},
