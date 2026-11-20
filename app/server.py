@@ -4,8 +4,9 @@ the answer comes back as an A2UI surface with a Highcharts chart.
     python -m app.server                      # http://localhost:8000 (serves app/web/dist)
     python -m app.server --port 8000 --cube-url http://localhost:4000/cubejs-api/v1
 
-The agent is harness v4.2 unchanged (harness.agent.Harness). Only --model differs between the
-four experiment arms, and the app lets you switch between them or run all four on one question.
+The agent is harness v4.2 unchanged (harness.agent.Harness). Only the model (and, for the
+schema-offloading LoRAs, the prompt profile they were trained on) differs between the arms. The app
+lets you switch between them or run the four main arms on one question.
 """
 from __future__ import annotations
 
@@ -31,16 +32,29 @@ from .presenter import build_surface, display_query, member_info
 ROOT = Path(__file__).resolve().parent.parent
 DIST = Path(__file__).resolve().parent / "web" / "dist"
 
-# The four experiment arms (README "LoRA arm"); test-set strict accuracy from the frozen runs.
+# The experiment arms (README "LoRA arm" and "Schema offloading"); test-set strict accuracy from the
+# frozen runs. "profile" is the prompt profile the model was trained on (harness.prompts.PROFILES):
+# lean/noschema LoRAs get the short prompt and no tool declarations, exactly as evaluate.py --profile.
+# "core" marks the four main arms that "Compare all four" runs.
 MODELS = [
     {"id": "ollama_chat/qwen2.5-coder:7b", "label": "Qwen 7B · harness", "short": "7B", "lora": False,
-     "strict": 27.7},
-    {"id": "ollama_chat/qwen7b-cube-lora", "label": "Qwen 7B + LoRA · harness", "short": "7B+LoRA",
-     "lora": True, "strict": 46.4},
+     "strict": 27.7, "profile": "full", "group": "Harness only", "core": True},
     {"id": "ollama_chat/qwen2.5-coder:14b", "label": "Qwen 14B · harness", "short": "14B", "lora": False,
-     "strict": 28.9},
+     "strict": 28.9, "profile": "full", "group": "Harness only", "core": True},
+    {"id": "ollama_chat/qwen7b-cube-lora", "label": "Qwen 7B + LoRA · harness", "short": "7B+LoRA",
+     "lora": True, "strict": 46.4, "profile": "full", "group": "Full-prompt LoRA", "core": True},
     {"id": "ollama_chat/qwen14b-cube-lora", "label": "Qwen 14B + LoRA · harness", "short": "14B+LoRA",
-     "lora": True, "strict": 49.7},
+     "lora": True, "strict": 49.7, "profile": "full", "group": "Full-prompt LoRA", "core": True},
+    {"id": "ollama_chat/qwen7b-cube-lean", "label": "Qwen 7B + lean LoRA", "short": "7B lean",
+     "lora": True, "strict": 41.9, "profile": "lean", "group": "Schema in LoRA (short prompt)", "core": False},
+    {"id": "ollama_chat/qwen7b-cube-noschema", "label": "Qwen 7B + noschema LoRA, lean prompt",
+     "short": "7B noschema", "lora": True, "strict": 44.3, "profile": "lean",
+     "group": "Schema in LoRA (short prompt)", "core": False},
+    {"id": "ollama_chat/qwen14b-cube-lean", "label": "Qwen 14B + lean LoRA", "short": "14B lean",
+     "lora": True, "strict": 47.6, "profile": "lean", "group": "Schema in LoRA (short prompt)", "core": False},
+    {"id": "ollama_chat/qwen14b-cube-noschema", "label": "Qwen 14B + noschema LoRA, lean prompt",
+     "short": "14B noschema", "lora": True, "strict": 47.9, "profile": "lean",
+     "group": "Schema in LoRA (short prompt)", "core": False},
 ]
 DATABASES = ["formula_1", "student_club"]
 
@@ -91,12 +105,13 @@ def create_app(cube_url: str, ollama_url: str, num_ctx: int, max_steps: int,
     app = FastAPI(title="Text-to-Cube demo")
     cube = CubeClient(cube_url)
     harnesses: dict[str, Harness] = {}
-    gpu_lock = threading.Lock()  # one question at a time: the four models share one GPU
+    gpu_lock = threading.Lock()  # one question at a time: the models share one GPU
 
     def harness_for(model_id: str) -> Harness:
         if model_id not in harnesses:
-            harnesses[model_id] = Harness(make_model(model_id, ollama_url, num_ctx=num_ctx), cube,
-                                          max_steps=max_steps)
+            profile = next(m["profile"] for m in MODELS if m["id"] == model_id)
+            llm = make_model(model_id, ollama_url, num_ctx=num_ctx, tool_schemas=profile == "full")
+            harnesses[model_id] = Harness(llm, cube, max_steps=max_steps, profile=profile)
         return harnesses[model_id]
 
     def bird_examples() -> dict[str, list[dict]]:
