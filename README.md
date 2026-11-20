@@ -106,12 +106,14 @@ Result of the first run (59 of 69 train databases; the 10 largest, over 600 MB e
 | empty gold result (verifies nothing, dropped) | 108 |
 
 `make_sft.py` holds out 3 whole databases for validation (3,273 train / 258 val examples). Prompt
-length: 2,695 training examples fit in 4,096 tokens and 2,929 in 8,192 (large schemas make the rest long).
+length (Qwen tokenizer, with the search_values steps): 2,621 training examples fit in 4,096 tokens and 2,929 in 8,192
+(large schemas make the rest long).
 
 ## Harness versions
 
-Tune on `splits/tune_ids.json`, report on `splits/test_ids.json`. The tuning databases need their own
-DuckDB copy and Cube models:
+Tune on the three tuning databases, report on `splits/test_ids.json`. Early comparisons (v2 to v4.1) used the
+120-question sample `splits/tune_ids.json`; it proved too noisy, so v3 and v4.2 were also compared on all 363 dev
+questions of those databases (drop `--ids-file`). The tuning databases need their own DuckDB copy and Cube models:
 
 ```bash
 python scripts/build_duckdb.py --bird-dir data/bird --out data/bird.duckdb --db formula_1 --db student_club --db superhero --db toxicology --db california_schools
@@ -120,14 +122,14 @@ python -m harness.evaluate --db superhero --db toxicology --db california_school
     --model ollama_chat/qwen2.5-coder:7b --setup harness-v3 --out runs/tune_v3.jsonl
 ```
 
-| Version | Commit | Change | Test strict / relaxed |
+| Version | Commit | Change | Result, strict / relaxed (7B unless noted) |
 |---|---|---|---|
 | v1 | 0c95b22 | first harness | 13.3% / 26.8% |
 | v2 | bb618ff | measure/dimension and filter checks, text tool calls unwrapped, rules + 4 examples in the prompt | 20.5% / 34.3% |
-| v3 | 53c8093 | value lookup on number/time columns, repeated-call guard, one-time column check at submit | tune 23.3% (v2 22.5%) |
+| v3 | 53c8093 | value lookup on number/time columns, repeated-call guard, one-time column check at submit | tune-120 23.3% (v2 22.5%); tune-363 26.2% / 33.6% |
 | v4 | e9d1d12 | schema linking: the question message lists fields the question/hint name (`--no-link` turns it off); column check also on text answers; text values on number filters caught | tune 22.5% (california_schools 0/40, toxicology 15/40) |
 | v4.1 | 309104f | linked fields weighted by word rarity, at most 5, labelled "not a list of columns to return"; formula-like members get a clear error | tune 24.2% / 30.8% |
-| v4.2 | (this) | an unchanged resubmit after the column warning is trimmed by the harness; text answers get the same check; timeDimensions must be time fields | not yet run |
+| **v4.2** (frozen) | 33da679 | an unchanged resubmit after the column warning is trimmed by the harness; text answers get the same check; timeDimensions must be time fields | tune-363 32.0% / 35.3% (vs v3 McNemar p = 0.011), 14B 38.8% / 47.9%; **test 27.7% / 34.0%, 14B 28.9% / 41.3%** |
 
 ## LoRA arm
 
@@ -146,7 +148,10 @@ python -m harness.evaluate --db formula_1 --db student_club --ids-file splits/te
 ```
 
 The same with `Qwen2.5-Coder-14B-Instruct` / `qwen2.5-coder:14b` for the 14B arm. Both arms use harness v4.2,
-examples up to 8,192 tokens (7B; the 14B may need --max-len 6144), and Q4_K_M weights in Ollama, so each LoRA model differs from its baseline only by the adapter.
+Q4_K_M weights in Ollama, and the same chat template (checked by `export_ollama.py`), so each LoRA model differs from its
+baseline only by the adapter. The 7B was trained on examples up to 8,192 tokens; the 14B only fits 16 GB at
+`--max-len 4096` (2,621 train / 139 val examples), so it saw about 10% fewer examples. `--quantize` is optional:
+without it Ollama would quantise, but Ollama 0.40 cannot make Q4_K_M, so we used llama.cpp's `llama-quantize` (release b12376).
 
 ## Schema-offloading arms (prompt profiles)
 
