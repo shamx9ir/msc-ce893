@@ -1,0 +1,70 @@
+cube city
+  dim  city.city_id (number) -- unique identifier for the city
+  dim  city.city_name (string) -- name of the city
+  dim  city.state (string) -- state in which the city is
+  dim  city.population (number) -- population of the city
+  dim  city.area (number) -- square miles the city covers population density (land area per capita) = area / population
+  meas city.count (count)
+  meas city.sum_population (sum)
+  meas city.avg_population (avg)
+  meas city.min_population (min)
+  meas city.max_population (max)
+  meas city.sum_area (sum)
+  meas city.avg_area (avg)
+  meas city.min_area (min)
+  meas city.max_area (max)
+cube customer
+  dim  customer.cust_id (number) -- Unique identifier for the customer
+  dim  customer.cust_name (string) -- Business name of the customer
+  dim  customer.annual_revenue (number) -- Annual revenue of the customer
+  dim  customer.cust_type (string) -- Whether the customer is a manufacturer or a wholes
+  dim  customer.address (string) -- Physical street address of the customer
+  dim  customer.city (string) -- City of the customer's address
+  dim  customer.state (string) -- State of the customer's address please mention its full name in the question, by referring to https://www23.statcan.gc.ca/imdb/p3VD.pl?Function=getVD&TVD=53971 e.g., NY --> New York
+  dim  customer.zip (number) -- Postal code of the customer's address
+  dim  customer.phone (string) -- Telephone number to reach the customer
+  meas customer.count (count)
+  meas customer.sum_annual_revenue (sum)
+  meas customer.avg_annual_revenue (avg)
+  meas customer.min_annual_revenue (min)
+  meas customer.max_annual_revenue (max)
+  meas customer.sum_zip (sum)
+  meas customer.avg_zip (avg)
+  meas customer.min_zip (min)
+  meas customer.max_zip (max)
+cube driver
+  dim  driver.driver_id (number) -- Unique identifier for the driver
+  dim  driver.first_name (string) -- First given name of the driver
+  dim  driver.last_name (string) -- Family name of the driver full name = first_name + last_name
+  dim  driver.address (string) -- Street address of the driver's home
+  dim  driver.city (string) -- City the driver lives in
+  dim  driver.state (string) -- State the driver lives in please mention its full name in the question, by referring to https://www23.statcan.gc.ca/imdb/p3VD.pl?Function=getVD&TVD=53971 e.g., NY --> New York
+  dim  driver.zip_code (number) -- postal code of the driver's address
+  dim  driver.phone (string) -- telephone number of the driver
+  meas driver.count (count)
+  meas driver.sum_zip_code (sum)
+  meas driver.avg_zip_code (avg)
+  meas driver.min_zip_code (min)
+  meas driver.max_zip_code (max)
+cube truck
+  dim  truck.truck_id (number) -- Unique identifier of the truck table
+  dim  truck.make (string) -- The brand of the truck  Peterbilt headquarter: Texas (TX)  Mack headquarter: North Carolina (NC)  Kenworth headquarter: Washington (WA) can ask question about headquarters of the truck
+  dim  truck.model_year (number) -- The year the truck was manufactured The truck with earlier model year means this truck is newer.
+  meas truck.count (count)
+  meas truck.sum_model_year (sum)
+  meas truck.avg_model_year (avg)
+  meas truck.min_model_year (min)
+  meas truck.max_model_year (max)
+cube shipment
+  dim  shipment.ship_id (number) -- Unique identifier of the shipment
+  dim  shipment.cust_id (number) -- A reference to the customer table that indicates which customer the shipment is for
+  dim  shipment.weight (number) -- The number of pounds being transported on the shipment
+  dim  shipment.truck_id (number) -- A reference to the truck table that indicates which truck is used in the shipment
+  dim  shipment.driver_id (number) -- A reference to the driver table that indicates which driver transported the goods in the shipment
+  dim  shipment.city_id (number) -- A reference to the city table that indicates the destination of the shipment
+  dim  shipment.ship_date (time) -- the date the items were received by the driver yyyy-mm-dd
+  meas shipment.count (count)
+  meas shipment.sum_weight (sum)
+  meas shipment.avg_weight (avg)
+  meas shipment.min_weight (min)
+  meas shipment.max_weight (max)

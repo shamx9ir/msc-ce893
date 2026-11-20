@@ -168,14 +168,15 @@ without it Ollama would quantise, but Ollama 0.40 cannot make Q4_K_M, so we used
 The first adapters almost stopped calling `search_values` (7B: 1 of 332 test questions, 14B: 0; harness-only 92%),
 because only 769 of the 3,531 training examples (22%) had a lookup. On 7B, wrong answers whose final query returned
 0 rows went from 10 to 25. `scripts/add_value_searches_v2.py` rebuilds the lookups: one for every string `equals`
-filter on a text column (up to 2 per example), searched with a short lower-case word from the question/value rather
-than the exact stored value, plus about 12% recovery examples (first `run_query` with a plausible wrong spelling,
+filter on a text column (68% of examples, up from 22%) (up to 2 per example), searched with a short lower-case word from the question/value rather
+than the exact stored value, plus 312 recovery examples (first `run_query` with a plausible wrong spelling,
 0 rows, `search_values`, corrected query). The wrong first query is marked `"train": false`, so `train_lora.py`
 keeps it as context but does not train the model to write it.
 
 ```bash
-python scripts/add_value_searches_v2.py --data training_data --out data/training_sv2 --bird-train data/bird_train/train_databases
-python scripts/make_sft.py --data data/training_sv2 --out data/sft_sv2
+# training_data_sv2/ is in git (2,386 of 3,531 examples with a lookup, 312 recovery examples); rebuild with:
+# python scripts/add_value_searches_v2.py --data training_data --out training_data_sv2 --bird-train data/bird_train/train_databases --recovery-share 0.18
+python scripts/make_sft.py --data training_data_sv2 --out data/sft_sv2
 python scripts/train_lora.py --base Qwen/Qwen2.5-Coder-7B-Instruct --data data/sft_sv2 --out lora/qwen7b-sv2
 ```
 

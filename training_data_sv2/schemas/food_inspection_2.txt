@@ -1,0 +1,95 @@
+cube employee
+  dim  employee.employee_id (number) -- the unique id for the employee
+  dim  employee.first_name (string) -- first name of the employee
+  dim  employee.last_name (string) -- last name of the employee full name: first name + last_name
+  dim  employee.address (string) -- physical street address of the employee
+  dim  employee.city (string) -- city of the employee's address
+  dim  employee.state (string) -- state of the customer's address
+  dim  employee.zip (number) -- postal code of the employee's address
+  dim  employee.phone (string) -- telephone number to reach the customer
+  dim  employee.title (string) -- career title of the employee  Sanitarian  Supervisor  Division Manager
+  dim  employee.salary (number) -- the salary of the employee us dollars / year monthly salary: salary / 12
+  dim  employee.supervisor (number) -- the employee id of the employee's supervisor
+  meas employee.count (count)
+  meas employee.sum_zip (sum)
+  meas employee.avg_zip (avg)
+  meas employee.min_zip (min)
+  meas employee.max_zip (max)
+  meas employee.sum_salary (sum)
+  meas employee.avg_salary (avg)
+  meas employee.min_salary (min)
+  meas employee.max_salary (max)
+  meas employee.sum_supervisor (sum)
+  meas employee.avg_supervisor (avg)
+  meas employee.min_supervisor (min)
+  meas employee.max_supervisor (max)
+cube establishment
+  dim  establishment.license_no (number) -- the license number of the facility
+  dim  establishment.dba_name (string) -- the dba name of the facility DBA stands for doing business as. It's also referred to as your business's assumed, trade or fictitious name.
+  dim  establishment.aka_name (string) -- the aka name of the facility the aka name is used to indicate another name that a person or thing has or uses
+  dim  establishment.facility_type (string) -- the facility type can ask some questions about its categories, for i.e.:  "Restaurant" and "Cafeteria" refers to restaurants  PASTRY school and "CULINARY ARTS SCHOOL" belongs to "Education" or "School". Please design this and mention your evidence in the commonsense part of questions, thanks
+  dim  establishment.risk_level (number) -- the risk level of the facility Facilities with higher risk level have more serious food safety issues
+  dim  establishment.address (string) -- physical street address of the facility
+  dim  establishment.city (string) -- city of the facility's address
+  dim  establishment.state (string) -- state of the facility's address
+  dim  establishment.zip (number) -- postal code of the facility's address
+  dim  establishment.latitude (number) -- the latitude of the facility
+  dim  establishment.longitude (number) -- the longitude of the facility location = POINT(latitude, longitude)
+  dim  establishment.ward (number) -- the ward number of the facility Ward number is the number assigned by the local authorities to identify the population count in each town, village and district usually for electoral purposes or to extract property and locality details
+  meas establishment.count (count)
+  meas establishment.sum_risk_level (sum)
+  meas establishment.avg_risk_level (avg)
+  meas establishment.min_risk_level (min)
+  meas establishment.max_risk_level (max)
+  meas establishment.sum_zip (sum)
+  meas establishment.avg_zip (avg)
+  meas establishment.min_zip (min)
+  meas establishment.max_zip (max)
+  meas establishment.sum_latitude (sum)
+  meas establishment.avg_latitude (avg)
+  meas establishment.min_latitude (min)
+  meas establishment.max_latitude (max)
+  meas establishment.sum_longitude (sum)
+  meas establishment.avg_longitude (avg)
+  meas establishment.min_longitude (min)
+  meas establishment.max_longitude (max)
+  meas establishment.sum_ward (sum)
+  meas establishment.avg_ward (avg)
+  meas establishment.min_ward (min)
+  meas establishment.max_ward (max)
+cube inspection
+  dim  inspection.inspection_id (number) -- the unique id for the inspection
+  dim  inspection.inspection_date (time) -- the date of the inspection yyyy-mm-dd
+  dim  inspection.inspection_type (string) -- the type of the inspection
+  dim  inspection.results (string) -- the inspection results  Pass  Pass w/ Conditions  Fail  Out of Business  Business Not Located  No Entry  Not Ready the quality is verified: Pass + Pass w/ Conditions
+  dim  inspection.employee_id (number) -- the id of the employee who is responsible for the inspection
+  dim  inspection.license_no (number) -- the license number of the facility that is inspected
+  dim  inspection.followup_to (number) -- the id of inspections that this inspection is following up 'No data' means the inspection has no followup. if followup_to has value:  it's the parent inspection id, and this value represents child inspection id  the entire inspection: followup_to + inspection_id
+  meas inspection.count (count)
+  meas inspection.sum_followup_to (sum)
+  meas inspection.avg_followup_to (avg)
+  meas inspection.min_followup_to (min)
+  meas inspection.max_followup_to (max)
+cube inspection_point
+  dim  inspection_point.point_id (number) -- the unique id for the inspection point
+  dim  inspection_point.Description (string) -- the specific description of the inspection results
+  dim  inspection_point.category (string) -- the inspection category
+  dim  inspection_point.code (string) -- the sanitary operating requirement code Each code stands for an operating requirement
+  dim  inspection_point.fine (number) -- the fines for food safety problems The fine of more serious food safety problems will be higher.  Minor: 100  Serious: 250  Critical: 500
+  dim  inspection_point.point_level (string) -- point level Critical / Serious/ Minor
+  meas inspection_point.count (count)
+  meas inspection_point.sum_fine (sum)
+  meas inspection_point.avg_fine (avg)
+  meas inspection_point.min_fine (min)
+  meas inspection_point.max_fine (max)
+cube violation
+  dim  violation.row_key (string)
+  dim  violation.inspection_id (number) -- the unique id for the inspection
+  dim  violation.point_id (number) -- the inspection point id
+  dim  violation.fine (number) -- the fine of the violation The fine of more serious food safety problems will be higher.  Minor: 100  Serious: 250  Critical: 500
+  dim  violation.inspector_comment (string) -- the comment of the inspector
+  meas violation.count (count)
+  meas violation.sum_fine (sum)
+  meas violation.avg_fine (avg)
+  meas violation.min_fine (min)
+  meas violation.max_fine (max)

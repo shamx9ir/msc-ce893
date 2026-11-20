@@ -1,0 +1,46 @@
+cube genre
+  dim  genre.id (number) -- the unique identifier of the game genre
+  dim  genre.genre_name (string) -- the game genre The game genre can have a significant effect on the game. The genre refers to the category or type of game, such as action, adventure, strategy, or role-playing. The genre can determine the general style and gameplay of the game, as well as the expectations of the players. The genre can also affect the audience for the game, as different genres may appeal to different groups of play
+  meas genre.count (count)
+cube game
+  dim  game.id (number) -- the unique identifier of the game
+  dim  game.genre_id (number) -- the id of the game genre If game A and game B have the same genre, the user who likes game A may also like game B.
+  dim  game.game_name (string) -- the name of the game
+  meas game.count (count)
+cube platform
+  dim  platform.id (number) -- the unique identifier of the game platform
+  dim  platform.platform_name (string) -- the name of the platform The game platform, or the platform on which a game is played, can have a significant effect on the game. The platform can determine what hardware and software the game can run on, as well as the technical capabilities of the game. The platform can also affect the audience for the game, as different platforms may attract different groups of players.
+  meas platform.count (count)
+cube publisher
+  dim  publisher.id (number) -- the unique identifier of the game publisher
+  dim  publisher.publisher_name (string) -- the name of the publisher The publisher is the company or organization that finances, produces, and distributes the game. The publisher can influence the development of the game by providing resources, guidance, and support to the game's development team. The publisher can also affect the marketing and distribution of the game, as they are responsible for promoting the game and making it available
+  meas publisher.count (count)
+cube game_publisher
+  dim  game_publisher.id (number) -- the unique identifier of the game publisher
+  dim  game_publisher.game_id (number) -- the id of the game
+  dim  game_publisher.publisher_id (number) -- the id of the publisher If game A and game B were published by the same publisher, the user who likes game A may also like game B if the user is a fan of the publisher company.
+  meas game_publisher.count (count)
+cube game_platform
+  dim  game_platform.id (number) -- the unique identifier of the record
+  dim  game_platform.game_publisher_id (number) -- the id of the game publisher
+  dim  game_platform.platform_id (number) -- the id of the platform
+  dim  game_platform.release_year (number) -- the release year of the game
+  meas game_platform.count (count)
+  meas game_platform.sum_release_year (sum)
+  meas game_platform.avg_release_year (avg)
+  meas game_platform.min_release_year (min)
+  meas game_platform.max_release_year (max)
+cube region
+  dim  region.id (number) -- the unique identifier of the region
+  dim  region.region_name (string) -- the region name
+  meas region.count (count)
+cube region_sales
+  dim  region_sales.row_key (string)
+  dim  region_sales.region_id (number) -- the id of the region
+  dim  region_sales.game_platform_id (number) -- the id of the game platform
+  dim  region_sales.num_sales (number) -- the number of sales in this region The number of games sold in the region = num_sales * 100000. The game platform with higher num_sales is more popular in the region.
+  meas region_sales.count (count)
+  meas region_sales.sum_num_sales (sum)
+  meas region_sales.avg_num_sales (avg)
+  meas region_sales.min_num_sales (min)
+  meas region_sales.max_num_sales (max)

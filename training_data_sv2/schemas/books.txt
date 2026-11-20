@@ -1,0 +1,94 @@
+cube address_status
+  dim  address_status.status_id (number) -- the unique identifier of the status
+  dim  address_status.address_status (string) -- the status of the address  active: the address is still in use  inactive: the address is not in use anymore
+  meas address_status.count (count)
+cube author
+  dim  author.author_id (number) -- the unique identifier of the author
+  dim  author.author_name (string) -- the name of the author
+  meas author.count (count)
+cube book_language
+  dim  book_language.language_id (number) -- the unique identifier of the language
+  dim  book_language.language_code (string) -- the language code A language code is a unique identifier for a specific language. It is typically used to identify a language in computing and other technical contexts. Some common language codes include "en" for English, "fr" for French, and "es" for Spanish. The specific codes used for each language can vary depending on the context and the system in which they are being used.
+  dim  book_language.language_name (string) -- the language name
+  meas book_language.count (count)
+cube country
+  dim  country.country_id (number) -- the unique identifier of the country
+  dim  country.country_name (string) -- the country name
+  meas country.count (count)
+cube address
+  dim  address.address_id (number) -- the unique identifier of the address
+  dim  address.street_number (string) -- the street number of the address The street number is typically used to identify a specific building or residence on a street, with higher numbers generally indicating a location further down the street from the starting point. For example, if a street starts at number 1 and goes up to number 100, a building with the number 50 would be closer to the starting point than a building with the number 7
+  dim  address.street_name (string) -- the street name
+  dim  address.city (string) -- the city where the address belongs
+  dim  address.country_id (number) -- the id of the country where the address belongs Maps to the country (country id). The full address of the customer is 'No.street_number street_name, city, country'
+  meas address.count (count)
+cube customer
+  dim  customer.customer_id (number) -- the unique identifier of the customer
+  dim  customer.first_name (string) -- the first name of the customer
+  dim  customer.last_name (string) -- the last name of the customer A person's full name is the first name, middle name (if applicable), and last name.
+  dim  customer.email (string) -- the email of the customer
+  meas customer.count (count)
+cube customer_address
+  dim  customer_address.row_key (string)
+  dim  customer_address.customer_id (number) -- the id of the customer Maps to customer(customer_id)
+  dim  customer_address.address_id (number) -- the id of the address Maps to address(address_id)
+  dim  customer_address.status_id (number) -- the id of the address status A customer may have several addresses. If a customer has several addresses, the address that the status_id = 1 is the customer's current address that is in use. The other addresses with 2 as status_id is abandoned addresses.
+  meas customer_address.count (count)
+cube order_status
+  dim  order_status.status_id (number) -- the unique identifier of the order status
+  dim  order_status.status_value (string) -- the status value The order statuses include order received, pending delivery, delivery in progress, delivered, canceled, and returned.
+  meas order_status.count (count)
+cube publisher
+  dim  publisher.publisher_id (number) -- the unique identifier of the publisher
+  dim  publisher.publisher_name (string) -- the name of the publisher
+  meas publisher.count (count)
+cube book
+  dim  book.book_id (number) -- the unique identifier of the book
+  dim  book.title (string) -- the title of the book
+  dim  book.isbn13 (string) -- the International Standard Book Number of the book An ISBN is a unique 13-digit number assigned to each book to identify it internationally. The ISBN13 of a book is the specific version of the ISBN that uses 13 digits. It is typically displayed on the back cover of a book, along with the barcode and other information.
+  dim  book.language_id (number) -- the id of the book language Maps to book_language (language_id)
+  dim  book.num_pages (number) -- the number of the pages
+  dim  book.publication_date (time) -- the publication date of the book The publication date of a book can provide information about when the book was released to the public. This can be useful for understanding the context in which the book was written, as well as for determining how current or outdated the information in the book might be. Additionally, the publication date can provide insight into the age of the book and its potenti
+  dim  book.publisher_id (number) -- the id of the publisher Maps to publisher (publisher_id)
+  meas book.count (count)
+  meas book.sum_num_pages (sum)
+  meas book.avg_num_pages (avg)
+  meas book.min_num_pages (min)
+  meas book.max_num_pages (max)
+cube book_author
+  dim  book_author.row_key (string)
+  dim  book_author.book_id (number) -- the id of the book Maps to book(book_id)
+  dim  book_author.author_id (number) -- the id of the author Maps to author(author_id) Books with the same author id are written by the same author.
+  meas book_author.count (count)
+cube shipping_method
+  dim  shipping_method.method_id (number) -- the unique identifier of the method
+  dim  shipping_method.method_name (string) -- the method name
+  dim  shipping_method.cost (number) -- the cost of the shipping method The main difference between the various shipping methods, such as standard, priority, express, and international, is the speed at which the item is delivered. Standard shipping is the slowest and least expensive option, while express and priority shipping are faster and more expensive. International shipping is for items that are being shipped to a destination outsi
+  meas shipping_method.count (count)
+  meas shipping_method.sum_cost (sum)
+  meas shipping_method.avg_cost (avg)
+  meas shipping_method.min_cost (min)
+  meas shipping_method.max_cost (max)
+cube cust_order
+  dim  cust_order.order_id (number) -- the unique identifier of the customer order
+  dim  cust_order.order_date (time) -- the date of the order
+  dim  cust_order.customer_id (number) -- the id of the customer Maps to customer(customer_Id) The number of orders ordered by the customer = the show-up times of the relative customer id in the table
+  dim  cust_order.shipping_method_id (number) -- the id of the shipping method Maps to shipping_method(method_id)
+  dim  cust_order.dest_address_id (number) -- the id of the destination address Maps to address(address_id)
+  meas cust_order.count (count)
+cube order_history
+  dim  order_history.history_id (number) -- the unique identifier of the order history
+  dim  order_history.order_id (number) -- the id of the order Maps to cust_order(order_id)
+  dim  order_history.status_id (number) -- the id of the order Maps to order_status(status_id) The order statuses include order received, pending delivery, delivery in progress, delivered, canceled, and returned.
+  dim  order_history.status_date (time) -- the date of the status updated
+  meas order_history.count (count)
+cube order_line
+  dim  order_line.line_id (number) -- the unique identifier of the order line
+  dim  order_line.order_id (number) -- the id of the order Maps to cust_order(order_id)
+  dim  order_line.book_id (number) -- the id of the book Maps to book(book_id)
+  dim  order_line.price (number) -- the price of the order Even though the customer ordered the book with the same book id, the price could be different. The price of the order may be influenced by the shipping method, seasonal discount, and the number of books the customer ordered.
+  meas order_line.count (count)
+  meas order_line.sum_price (sum)
+  meas order_line.avg_price (avg)
+  meas order_line.min_price (min)
+  meas order_line.max_price (max)

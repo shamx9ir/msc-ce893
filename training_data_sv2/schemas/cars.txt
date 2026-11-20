@@ -1,0 +1,57 @@
+cube country
+  dim  country.origin (number) -- the unique identifier for the origin country
+  dim  country.country (string) -- the origin country of the car
+  meas country.count (count)
+cube price
+  dim  price.ID (number) -- unique ID for each car
+  dim  price.price (number) -- price of the car in USD
+  meas price.count (count)
+  meas price.sum_price (sum)
+  meas price.avg_price (avg)
+  meas price.min_price (min)
+  meas price.max_price (max)
+cube data
+  dim  data.ID (number) -- unique ID for each car
+  dim  data.mpg (number) -- mileage of the car in miles per gallon The car with higher mileage is more fuel-efficient.
+  dim  data.cylinders (number) -- the number of cylinders present in the car
+  dim  data.displacement (number) -- engine displacement in cubic mm sweep volume = displacement / no_of cylinders
+  dim  data.horsepower (number) -- horse power associated with the car horse power is the metric used to indicate the power produced by a car's engine - the higher the number, the more power is sent to the wheels and, in theory, the faster it will go.
+  dim  data.weight (number) -- weight of the car in lbs A bigger, heavier vehicle provides better crash protection than a smaller
+  dim  data.acceleration (number) -- acceleration of the car in miles per squared hour
+  dim  data.model (number) -- the year when the car model was introduced in the market 0 --> 1970
+  dim  data.car_name (string) -- name of the car
+  meas data.count (count)
+  meas data.sum_mpg (sum)
+  meas data.avg_mpg (avg)
+  meas data.min_mpg (min)
+  meas data.max_mpg (max)
+  meas data.sum_cylinders (sum)
+  meas data.avg_cylinders (avg)
+  meas data.min_cylinders (min)
+  meas data.max_cylinders (max)
+  meas data.sum_displacement (sum)
+  meas data.avg_displacement (avg)
+  meas data.min_displacement (min)
+  meas data.max_displacement (max)
+  meas data.sum_horsepower (sum)
+  meas data.avg_horsepower (avg)
+  meas data.min_horsepower (min)
+  meas data.max_horsepower (max)
+  meas data.sum_weight (sum)
+  meas data.avg_weight (avg)
+  meas data.min_weight (min)
+  meas data.max_weight (max)
+  meas data.sum_acceleration (sum)
+  meas data.avg_acceleration (avg)
+  meas data.min_acceleration (min)
+  meas data.max_acceleration (max)
+  meas data.sum_model (sum)
+  meas data.avg_model (avg)
+  meas data.min_model (min)
+  meas data.max_model (max)
+cube production
+  dim  production.row_key (string)
+  dim  production.ID (number) -- the id of the car
+  dim  production.model_year (number) -- year when the car model was introduced in the market
+  dim  production.country (number) -- country id to which the car belongs Japan --> Asia USA --> North America
+  meas production.count (count)

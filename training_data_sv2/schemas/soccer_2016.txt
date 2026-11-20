@@ -1,0 +1,184 @@
+cube Batting_Style
+  dim  Batting_Style.Batting_Id (number) -- unique id for batting hand
+  dim  Batting_Style.Batting_hand (string) -- the batting hand: left or right
+  meas Batting_Style.count (count)
+cube Bowling_Style
+  dim  Bowling_Style.Bowling_Id (number) -- unique id for bowling style
+  dim  Bowling_Style.Bowling_skill (string) -- the bowling skill
+  meas Bowling_Style.count (count)
+cube City
+  dim  City.City_Id (number) -- unique id for city
+  dim  City.City_Name (string) -- city name
+  dim  City.Country_id (number) -- id of country
+  meas City.count (count)
+cube Country
+  dim  Country.Country_Id (number) -- unique id for country
+  dim  Country.Country_Name (string) -- country name
+  meas Country.count (count)
+cube Extra_Type
+  dim  Extra_Type.Extra_Id (number) -- unique id for extra type
+  dim  Extra_Type.Extra_Name (string) -- extra type name
+  meas Extra_Type.count (count)
+cube Extra_Runs
+  dim  Extra_Runs.row_key (string)
+  dim  Extra_Runs.Match_Id (number) -- Unique Number Which Identifies a match
+  dim  Extra_Runs.Over_Id (number) -- Unique Number which Identifies an over in an Innings
+  dim  Extra_Runs.Ball_Id (number) -- Unique Number which Identifies a ball in an over
+  dim  Extra_Runs.Extra_Type_Id (number) -- Unique Number which Identifies extra type
+  dim  Extra_Runs.Extra_Runs (number) -- Number of extra runs
+  dim  Extra_Runs.Innings_No (number) -- Unique Number which Identifies an innings in a match
+  meas Extra_Runs.count (count)
+  meas Extra_Runs.sum_Extra_Runs (sum)
+  meas Extra_Runs.avg_Extra_Runs (avg)
+  meas Extra_Runs.min_Extra_Runs (min)
+  meas Extra_Runs.max_Extra_Runs (max)
+cube Out_Type
+  dim  Out_Type.Out_Id (number) -- unique id for out type
+  dim  Out_Type.Out_Name (string) -- out type name
+  meas Out_Type.count (count)
+cube Outcome
+  dim  Outcome.Outcome_Id (number) -- unique id for outcome
+  dim  Outcome.Outcome_Type (string) -- type of the outcome
+  meas Outcome.count (count)
+cube Player
+  dim  Player.Player_Id (number) -- the id of the player
+  dim  Player.Player_Name (string) -- the name of the player
+  dim  Player.DOB (time) -- player's birthday yyyy-mm-dd
+  dim  Player.Batting_hand (number) -- the id of the batting hand
+  dim  Player.Bowling_skill (number) -- the id of the bowling skill
+  dim  Player.Country_Name (number) -- the name of the country where the player is from
+  meas Player.count (count)
+cube Rolee
+  dim  Rolee.Role_Id (number) -- the unique id for the role
+  dim  Rolee.Role_Desc (string) -- the role description
+  meas Rolee.count (count)
+cube Season
+  dim  Season.Season_Id (number) -- the unique id for season
+  dim  Season.Man_of_the_Series (number) -- the player id of man of the series In team sport, a player of the series or man (or woman) of the series award is often given to the outstanding player in a particular series.
+  dim  Season.Orange_Cap (number) -- the player id who wins the orange cap The Orange Cap is a coveted award for a batter who is participating in the Indian Premier League (IPL)
+  dim  Season.Purple_Cap (number) -- the player id who wins the purple cap The Purple Cap is awarded to the bowler who has emerged as the leading wicket-taker in a particular edition of the high-profile Indian Premier League (IPL)
+  dim  Season.Season_Year (number) -- the year of the season
+  meas Season.count (count)
+  meas Season.sum_Man_of_the_Series (sum)
+  meas Season.avg_Man_of_the_Series (avg)
+  meas Season.min_Man_of_the_Series (min)
+  meas Season.max_Man_of_the_Series (max)
+  meas Season.sum_Orange_Cap (sum)
+  meas Season.avg_Orange_Cap (avg)
+  meas Season.min_Orange_Cap (min)
+  meas Season.max_Orange_Cap (max)
+  meas Season.sum_Purple_Cap (sum)
+  meas Season.avg_Purple_Cap (avg)
+  meas Season.min_Purple_Cap (min)
+  meas Season.max_Purple_Cap (max)
+  meas Season.sum_Season_Year (sum)
+  meas Season.avg_Season_Year (avg)
+  meas Season.min_Season_Year (min)
+  meas Season.max_Season_Year (max)
+cube Team
+  dim  Team.Team_Id (number) -- the unique id for the team
+  dim  Team.Team_Name (string) -- the team name
+  meas Team.count (count)
+cube Toss_Decision
+  dim  Toss_Decision.Toss_Id (number) -- the unique id for the toss
+  dim  Toss_Decision.Toss_Name (string) -- the toss decision name
+  meas Toss_Decision.count (count)
+cube Umpire
+  dim  Umpire.Umpire_Id (number) -- the unique id of the umpire
+  dim  Umpire.Umpire_Name (string) -- umpire's name
+  dim  Umpire.Umpire_Country (number) -- the id of the country where the umpire are from
+  meas Umpire.count (count)
+cube Venue
+  dim  Venue.Venue_Id (number) -- the unique id of the venue
+  dim  Venue.Venue_Name (string) -- the name of the venue
+  dim  Venue.City_Id (number) -- the city id where the venue is located in
+  meas Venue.count (count)
+cube Win_By
+  dim  Win_By.Win_Id (number) -- the unique id for the winning
+  dim  Win_By.Win_Type (string) -- the winning type
+  meas Win_By.count (count)
+cube Match
+  dim  Match.Match_Id (number) -- unique id for match
+  dim  Match.Team_1 (number) -- the team id of the first team
+  dim  Match.Team_2 (number) -- the team id for the second team
+  dim  Match.Match_Date (time) -- the date of the match yyyy-mm-dd
+  dim  Match.Season_Id (number) -- the id of the season
+  dim  Match.Venue_Id (number) -- the id of the venue where the match held
+  dim  Match.Toss_Winner (number) -- the id of the toss winner The toss winner is a term used in cricket and is the team that wins the heads or tails toss of coin at the beginning of a match which then enables the team captain to decide whether to bat or bowl first on the pitch.
+  dim  Match.Toss_Decide (number) -- the decision (batting or bowling) made after winning the toss â¢ field â¢ bat
+  dim  Match.Win_Type (number) -- the id of the winning type
+  dim  Match.Win_Margin (number) -- the points of the winning margin A winning margin bet is a wager on the final result of a game, within a certain range of points.
+  dim  Match.Outcome_type (number) -- the id of the outcome type
+  dim  Match.Match_Winner (number) -- the team id of the match winner
+  dim  Match.Man_of_the_Match (number) -- the id of the man of the match In team sport, a player of the match or man (or woman) of the match award is often given to the outstanding player in a particular match.
+  meas Match.count (count)
+  meas Match.sum_Win_Margin (sum)
+  meas Match.avg_Win_Margin (avg)
+  meas Match.min_Win_Margin (min)
+  meas Match.max_Win_Margin (max)
+cube Ball_by_Ball
+  dim  Ball_by_Ball.row_key (string)
+  dim  Ball_by_Ball.Match_Id (number) -- Unique Number Which Identifies a match
+  dim  Ball_by_Ball.Over_Id (number) -- Unique Number which Identifies an over in an Innings The match is made up of two innings and each team takes a turn at batting and bowling. An innings is made up of 50 overs. An over involves six deliveries from the bowler.
+  dim  Ball_by_Ball.Ball_Id (number) -- Unique Number which Identifies a ball in an over
+  dim  Ball_by_Ball.Innings_No (number) -- Unique Number which Identifies an innings in a match
+  dim  Ball_by_Ball.Team_Batting (number) -- Unique Number which Identifies Batting team in a match
+  dim  Ball_by_Ball.Team_Bowling (number) -- Unique Number which Identifies Bowling team in a match
+  dim  Ball_by_Ball.Striker_Batting_Position (number) -- Unique Number which Identifies the position in which player came into bat
+  dim  Ball_by_Ball.Striker (number) -- Unique Number which Identifies the player who is on strike for that particular ball
+  dim  Ball_by_Ball.Non_Striker (number) -- Unique Number which Identifies the player who is Non-striker for that particular ball
+  dim  Ball_by_Ball.Bowler (number) -- Unique Number which Identifies the player who is Bowling that particular ball
+  meas Ball_by_Ball.count (count)
+  meas Ball_by_Ball.sum_Team_Batting (sum)
+  meas Ball_by_Ball.avg_Team_Batting (avg)
+  meas Ball_by_Ball.min_Team_Batting (min)
+  meas Ball_by_Ball.max_Team_Batting (max)
+  meas Ball_by_Ball.sum_Team_Bowling (sum)
+  meas Ball_by_Ball.avg_Team_Bowling (avg)
+  meas Ball_by_Ball.min_Team_Bowling (min)
+  meas Ball_by_Ball.max_Team_Bowling (max)
+  meas Ball_by_Ball.sum_Striker_Batting_Position (sum)
+  meas Ball_by_Ball.avg_Striker_Batting_Position (avg)
+  meas Ball_by_Ball.min_Striker_Batting_Position (min)
+  meas Ball_by_Ball.max_Striker_Batting_Position (max)
+  meas Ball_by_Ball.sum_Striker (sum)
+  meas Ball_by_Ball.avg_Striker (avg)
+  meas Ball_by_Ball.min_Striker (min)
+  meas Ball_by_Ball.max_Striker (max)
+  meas Ball_by_Ball.sum_Non_Striker (sum)
+  meas Ball_by_Ball.avg_Non_Striker (avg)
+  meas Ball_by_Ball.min_Non_Striker (min)
+  meas Ball_by_Ball.max_Non_Striker (max)
+  meas Ball_by_Ball.sum_Bowler (sum)
+  meas Ball_by_Ball.avg_Bowler (avg)
+  meas Ball_by_Ball.min_Bowler (min)
+  meas Ball_by_Ball.max_Bowler (max)
+cube Batsman_Scored
+  dim  Batsman_Scored.row_key (string)
+  dim  Batsman_Scored.Match_Id (number) -- Unique Number Which Identifies a match
+  dim  Batsman_Scored.Over_Id (number) -- Unique Number which Identifies an over in an Innings
+  dim  Batsman_Scored.Ball_Id (number) -- Unique Number which Identifies a ball in an over
+  dim  Batsman_Scored.Runs_Scored (number) -- Number of Runs scored by the batsman
+  dim  Batsman_Scored.Innings_No (number) -- Unique Number which Identifies an innings in a match
+  meas Batsman_Scored.count (count)
+  meas Batsman_Scored.sum_Runs_Scored (sum)
+  meas Batsman_Scored.avg_Runs_Scored (avg)
+  meas Batsman_Scored.min_Runs_Scored (min)
+  meas Batsman_Scored.max_Runs_Scored (max)
+cube Player_Match
+  dim  Player_Match.row_key (string)
+  dim  Player_Match.Match_Id (number) -- unique id for match
+  dim  Player_Match.Player_Id (number) -- the id of the player
+  dim  Player_Match.Role_Id (number) -- the id of the play's role in the match if a player has multiple roles in a match, it means this player is versatile
+  dim  Player_Match.Team_Id (number) -- the id of player's team
+  meas Player_Match.count (count)
+cube Wicket_Taken
+  dim  Wicket_Taken.row_key (string)
+  dim  Wicket_Taken.Match_Id (number) -- the id of the match
+  dim  Wicket_Taken.Over_Id (number) -- the id of the over in an inning
+  dim  Wicket_Taken.Ball_Id (number) -- the id of the ball in an over
+  dim  Wicket_Taken.Player_Out (number) -- the player id who got an out
+  dim  Wicket_Taken.Kind_Out (number) -- the id that represents the out type
+  dim  Wicket_Taken.Fielders (number) -- the id of fielders
+  dim  Wicket_Taken.Innings_No (number) -- number which identifies an innings in a match
+  meas Wicket_Taken.count (count)

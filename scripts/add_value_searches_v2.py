@@ -68,7 +68,7 @@ def main() -> None:
     ap.add_argument("--data", type=Path, default=Path("training_data"))
     ap.add_argument("--out", type=Path, default=Path("data/training_sv2"))
     ap.add_argument("--bird-train", type=Path, default=Path("data/bird_train/train_databases"))
-    ap.add_argument("--recovery-share", type=float, default=0.12,
+    ap.add_argument("--recovery-share", type=float, default=0.18,
                     help="share of eligible examples turned into 0-rows -> search -> retry examples")
     ap.add_argument("--max-searches", type=int, default=2)
     ap.add_argument("--seed", type=int, default=7)
