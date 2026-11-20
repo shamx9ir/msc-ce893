@@ -19,6 +19,9 @@ interface ModelInfo {
   short: string;
   lora: boolean;
   strict: number;
+  profile: string;
+  group: string;
+  core: boolean;
   available: boolean | null;
 }
 interface Example {
@@ -50,7 +53,8 @@ interface Turn {
   answers: Answer[];
 }
 
-const ALL = '__all__';
+const ALL = '__all__'; // the four main arms
+const ALL_SHORT = '__short__'; // the four short-prompt (schema-offloading) LoRAs
 
 export class CubeDemoApp extends LitElement {
   static properties = {
@@ -114,7 +118,12 @@ export class CubeDemoApp extends LitElement {
   private async ask(question = this.question, hint: string | null = this.hint || null) {
     question = question.trim();
     if (!question || this.busy || !this.config) return;
-    const models = this.model === ALL ? this.config.models : this.config.models.filter(m => m.id === this.model);
+    const models =
+      this.model === ALL
+        ? this.config.models.filter(m => m.core)
+        : this.model === ALL_SHORT
+          ? this.config.models.filter(m => !m.core)
+          : this.config.models.filter(m => m.id === this.model);
     const turn: Turn = {
       id: this.nextId++,
       question,
@@ -215,12 +224,21 @@ export class CubeDemoApp extends LitElement {
           <label class="model">
             <span>Model</span>
             <select @change=${(e: Event) => (this.model = (e.target as HTMLSelectElement).value)}>
-              ${cfg.models.map(
-                m => html`<option value=${m.id} ?selected=${this.model === m.id}>
-                  ${m.label} (${m.strict}% on test)${m.available === false ? ' – not installed' : ''}
-                </option>`,
+              ${[...new Set(cfg.models.map(m => m.group))].map(
+                g => html`<optgroup label=${g}>
+                  ${cfg.models
+                    .filter(m => m.group === g)
+                    .map(
+                      m => html`<option value=${m.id} ?selected=${this.model === m.id}>
+                        ${m.label} (${m.strict}% on test)${m.available === false ? ' – not installed' : ''}
+                      </option>`,
+                    )}
+                </optgroup>`,
               )}
-              <option value=${ALL} ?selected=${this.model === ALL}>Compare all four</option>
+              <optgroup label="Compare">
+                <option value=${ALL} ?selected=${this.model === ALL}>Compare the four main arms</option>
+                <option value=${ALL_SHORT} ?selected=${this.model === ALL_SHORT}>Compare the four short-prompt LoRAs</option>
+              </optgroup>
             </select>
           </label>
         </div>

@@ -202,8 +202,10 @@ members (an "Unknown members" error in 120 of 332 14B runs), mostly on student_c
 
 ## Demo app
 
-Ask a question in plain English, pick one of the four models (or compare all four), and see the
-answer as a chart. The flow:
+Ask a question in plain English, pick a model (or compare the four main arms, or the four
+short-prompt LoRAs), and see the answer as a chart. The menu has the four main arms plus the
+schema-offloading LoRAs that score best on the test set (lean, and noschema run with the lean prompt);
+these run with the prompt profile they were trained on, as `evaluate.py --profile lean` does. The flow:
 
 1. `app/server.py` runs harness v4.2 unchanged (the ADK agent with Cube tools) on the chosen model.
 2. The submitted Cube query is run on Cube, and `app/presenter.py` turns query + rows into
@@ -219,7 +221,7 @@ query sorts by a measure it does not return ("which 10 countries have the most c
 adds that measure so the ranking is visible, and says so.
 
 ```bash
-# Cube on :4000 and Ollama with the four models, as for the experiments
+# Cube on :4000 and Ollama with the experiment models (missing ones show as not installed)
 cd app/web && npm install && npm run build && cd ../..
 python -m app.server                    # http://localhost:8000
 ```
@@ -227,5 +229,5 @@ python -m app.server                    # http://localhost:8000
 For UI work, `npm run dev` in `app/web` serves the page on :5173 with hot reload and forwards `/api`
 to the server on :8000. Options: `--cube-url`, `--ollama-url`, `--num-ctx` (default 16384, as in the
 experiments), `--port`. If `data/bird/dev.json` is there, the page also offers questions from the test set.
-Questions run one at a time, since the four models share one GPU; switching model makes Ollama load
+Questions run one at a time, since the models share one GPU; switching model makes Ollama load
 the other one, so the first question after a switch takes longer.
