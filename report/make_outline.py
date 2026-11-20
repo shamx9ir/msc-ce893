@@ -67,6 +67,7 @@ NOTES = {
     "Compared systems": [
         "Baseline: base model + harness v4.2 (full prompt).",
         "Proposed: same model file + LoRA, same harness and prompt.",
+        "No-hint runs: baseline and LoRA at both sizes with the hint hidden (adapters were trained with hints).",
         "Prompt-offloading arms: lean LoRA; noschema LoRA with no schema / with lean prompt; control = full LoRA given the lean prompt without retraining.",
     ],
     "Evaluation data and measures": [
@@ -83,9 +84,17 @@ NOTES = {
         "Training curves (Fig. 6): converged within half an epoch, val loss 1.00 to 0.27 (7B), no overfitting.",
         "Fig. 8: lean = 1.5k tokens per call vs 3.6-3.9k; loses 2.1 points at 14B (n.s.) and 4.5 at 7B (p=0.008). No schema: 38.3% (invented members). Full LoRA given lean prompt without retraining: 0%.",
     ],
+    "Without the hint": [
+        "Table 6: hiding the hint costs the adapters -9.6 (7B) and -9.0 (14B) points strict vs -6.3 and -1.5 (n.s.) for the baselines.",
+        "Why: adapters were trained with hints and never call search_values, so they guess values; empty answers 7.5% to 13.0% (7B). Baselines look up more (1.6 to 2.0 per q at 7B).",
+        "LoRA still leads by 15.3 (7B) and 13.3 (14B) points, both p<1e-6.",
+        "Tool use: 7B baseline has 0.8-1.1 rejected calls per q, adapters about 0.1; 14B models write most calls as text (71% / 100%).",
+    ],
     "Resource use": [
         "Training time 5.3 h (7B), 9.0 h (14B), lean 2-3 h; one 16 GB GPU.",
         "Steps 4.0 to 2.1, prompt tokens per question halve, model time 3.2 s to 1.3 s (7B).",
+        "Latency columns in Table 5: p90 5.9 s to 1.7 s (7B); output speed unchanged (~110 tok/s 7B, 60-65 14B), so the saving is fewer and shorter calls.",
+        "Time to first token not measured: future work (would separate prompt processing from decoding).",
         "Caveat: part of the saving is because the adapter skips search_values (0.3% vs 92%).",
     ],
     "Interpretation and error analysis": [
@@ -102,7 +111,8 @@ NOTES = {
     "Conclusion": [
         "Answer the RQ directly with the two headline numbers and the halved steps.",
         "Most of the prompt can move into the weights (lean within 2 points at 14B, 40% of tokens); the schema must stay for unseen dbs.",
-        "Main limitation: adapter stopped looking up values. Next step: retrain with search_values in every text-filter transcript.",
+        "No hint: adapters lose about 9 points (more than baselines) but still lead by 13-15.",
+        "Main limitation: adapter stopped looking up values (worst without the hint). Next steps: retrain with search_values in every text-filter transcript and some hints removed; measure time to first token.",
     ],
 }
 
