@@ -4,8 +4,12 @@ MSc Generative AI module project. A local LLM answers questions from the
 [BIRD](https://bird-bench.github.io/) benchmark by writing **Cube semantic-layer
 queries** instead of SQL. We compare two setups on identical prompts and tools:
 
-1. **Pure harness**: base model + prompt + Cube tools (this part is built)
-2. **LoRA + harness**: the same model with a LoRA adapter (next)
+1. **Pure harness**: base model + prompt + Cube tools (harness v4.2, frozen)
+2. **LoRA + harness**: the same model with a LoRA adapter, the same harness
+
+Both were run with Qwen2.5-Coder 7B and 14B. On the 332 test questions, strict / relaxed accuracy:
+7B 27.7% / 34.0% → 46.4% / 52.1% with LoRA; 14B 28.9% / 41.3% → 49.7% / 56.9% with LoRA.
+The write-up is in `report/` and the notebook that reproduces its numbers is `notebook/CE893_evaluation.ipynb`.
 
 Accuracy is *execution accuracy*: the Cube query's result must equal the result
 of BIRD's gold SQL on the original SQLite database (set comparison, column order ignored).
@@ -25,13 +29,19 @@ of BIRD's gold SQL on the original SQLite database (set comparison, column order
 | `splits/test_ids.json` | the frozen test set: all 332 dev questions on formula_1 and student_club |
 | `splits/tune_ids.json` | tuning set for harness changes: 40 questions each from superhero, toxicology and california_schools (no overlap with the test databases) |
 | `app/` | the demo app: Python server (`app/server.py`) and web page (`app/web`, A2UI + Highcharts) |
+| `scripts/add_value_searches.py`, `scripts/synth_schema_qa.py` | add search_values steps to training examples; synthetic questions on the test schemas (noschema arm) |
+| `scripts/train_lora.py`, `scripts/export_ollama.py` | QLoRA training; merge + GGUF Q4_K_M + Ollama model |
+| `training_data/` | the 3,531 verified training pairs and their schemas |
+| `results/` | stored test and tuning runs (`runs/*.jsonl.gz`) and LoRA training logs (`training/`) |
+| `report/`, `notebook/` | final report (LaTeX, full draft + outline) and the notebook that reproduces its numbers and figures |
+| `proposal/` | the coursework proposal |
 | `tests/` | end-to-end tests with a scripted stand-in for the LLM |
 
 ## How the harness works
 
 The agent loop is built on Google's [Agent Development Kit (ADK)](https://google.github.io/adk-docs/).
 ADK calls the model through LiteLLM, so any local server works: Ollama for the base model, and
-Ollama or vLLM with the adapter for the LoRA model. Both setups use exactly the same agent.
+Ollama with the adapter merged in for the LoRA model (`scripts/export_ollama.py`). Both setups use exactly the same agent.
 
 The system prompt holds a short guide to Cube's query JSON and a compact listing of every
 cube, dimension (with BIRD's column descriptions) and measure for the question's database.
@@ -165,7 +175,7 @@ the tools and parses Qwen's `<tool_call>` text back into calls.
 The test databases (formula_1, student_club) are not in the LoRA training data, so a model can only
 work without their schema if it is trained on it. `scripts/synth_schema_qa.py` writes template
 questions from the two schemas and sampled values (no BIRD dev question, hint or SQL is used) and
-checks each query against Cube. The `noschema` training set = the 59 training databases with the
+checks each query against Cube. The `noschema` training set = the 58 training databases (55 train + 3 validation) with the
 `lean` prompt + these synthetic examples with the `noschema` prompt. It is a single-database setting
 (a model fine-tuned for the databases it serves), unlike `lean`, which stays database-agnostic.
 
