@@ -66,6 +66,7 @@ train[["db_id", "question", "sql", "cube_query"]].head(3)
 """)
 
 md("## 2. Main results (Table 5 and Fig. 7)")
+md("Every reported test run hides BIRD's hint from the model (`--no-evidence`). Runs with the hint are kept under `hint_*` names for reference (section 2b).")
 code(r"""
 t = A.summary_table()
 t[["run", "n", "strict", "relaxed", "prompt_tokens", "steps", "latency_s", "latency_median_s", "latency_p90_s",
@@ -74,7 +75,8 @@ t[["run", "n", "strict", "relaxed", "prompt_tokens", "steps", "latency_s", "late
 code(r"""
 pairs = [("harness_7b", "lora_7b"), ("harness_14b", "lora_14b"), ("lora_7b", "lora_14b"), ("harness_7b", "harness_14b"),
          ("harness_7b", "lean_7b"), ("harness_14b", "lean_14b"), ("lora_7b", "lean_7b"), ("lora_14b", "lean_14b"),
-         ("lora_14b", "noschema_lean_14b"), ("lora_14b", "noschema_14b"), ("harness_v1_7b", "harness_7b")]
+         ("lora_14b", "noschema_lean_14b"), ("lora_14b", "noschema_14b")]
+pairs = [(a, b) for a, b in pairs if A.available([a, b]) == [a, b]]
 pd.DataFrame([A.mcnemar(a, b) for a, b in pairs]).assign(p=lambda d: d.p.map("{:.2g}".format))
 """)
 code(r"""
@@ -86,21 +88,21 @@ for run in ["harness_7b", "lora_7b", "harness_14b", "lora_14b"]:
 pd.DataFrame(rows).pivot(index="group", columns="run", values="strict")
 """)
 
-md("## 2b. Without BIRD's hint, and tool use (Table 6)")
+md("## 2b. Tool use (Table 6), and the same arms with BIRD's hint (for reference)")
 code(r"""
-arms = [a for k in A.MAIN_ARMS for a in (k, "nohint_" + k)]
-t = A.summary_table(arms)[["run", "strict", "relaxed", "steps", "latency_s", "latency_p90_s", "tokens_per_s"]]
-t.join(A.tool_table(arms).drop(columns="run")).round(2)
+A.tool_table(A.MAIN_ARMS).round(2)
 """)
 code(r"""
-pairs = [(k, "nohint_" + k) for k in A.MAIN_ARMS] + [("nohint_harness_7b", "nohint_lora_7b"),
-         ("nohint_harness_14b", "nohint_lora_14b"), ("nohint_lora_7b", "nohint_lora_14b")]
-pd.DataFrame([A.mcnemar(a, b) for a, b in pairs]).assign(p=lambda d: d.p.map("{:.2g}".format))
+hint = ["hint_" + k for k in A.MAIN_ARMS]
+pd.concat([A.summary_table(A.MAIN_ARMS), A.summary_table(hint)])[["run", "strict", "relaxed", "steps", "latency_s"]].round(1)
+""")
+code(r"""
+pd.DataFrame([A.mcnemar("hint_" + k, k) for k in A.MAIN_ARMS]).assign(p=lambda d: d.p.map("{:.2g}".format))
 """)
 
 md("## 3. Prompt versions and training progress (Fig. 4 and Fig. 6)")
 code(r"""
-pd.DataFrame({**{f"test {k}": A.summary(A.test_run(k)) for k in ["harness_v1_7b", "harness_v2_7b", "harness_7b"]},
+pd.DataFrame({**{f"test {k}": A.summary(A.test_run(k)) for k in ["hint_harness_v1_7b", "hint_harness_v2_7b", "hint_harness_7b"]},
               **{f"tune120 {k}": A.summary(A.load_run(v)) for k, v in A.TUNE_RUNS.items()},
               **{f"tune363 {k}": A.summary(A.load_run(v)) for k, v in A.TUNE363_RUNS.items()}}).T[["n", "strict", "relaxed", "prompt_tokens", "steps"]].round(1)
 """)
@@ -113,7 +115,7 @@ pd.DataFrame([{**{k: A.training_log(n)["config"][k] for k in ["base", "max_len",
 md("## 4. Errors and real outputs (Fig. 9 and Fig. 10)")
 md("Each wrong answer gets one rule-based category (`analysis.error_category`, rules applied in order). The rules compare the predicted Cube query with the gold SQL; they describe where the query differs, not why the model erred.")
 code(r"""
-pd.DataFrame({r: A.error_counts(r) for r in ["harness_7b", "lora_7b", "harness_14b", "lora_14b", "lean_14b", "noschema_14b"]})
+pd.DataFrame({r: A.error_counts(r) for r in A.available(["harness_7b", "lora_7b", "harness_14b", "lora_14b", "lean_14b", "noschema_14b"])})
 """)
 code(r"""
 h, l = A.test_run("harness_7b"), A.test_run("lora_7b")
@@ -157,19 +159,17 @@ STEPS = [
     "python scripts/build_training_data.py --bird-dir data/bird_train --out data/training   # needs train.zip; already in training_data/",
     "python scripts/make_sft.py --data training_data --out data/sft",
     # baseline arms
-    "python -m harness.evaluate --db formula_1 --db student_club --ids-file splits/test_ids.json --model ollama_chat/qwen2.5-coder:7b --setup harness-v4.2-7b --out runs/test_harness_7b.jsonl",
-    "python -m harness.evaluate --db formula_1 --db student_club --ids-file splits/test_ids.json --model ollama_chat/qwen2.5-coder:14b --setup harness-v4.2-14b --out runs/test_harness_14b.jsonl",
-    "# no-hint runs: the same commands plus --no-evidence, e.g.",
-    "python -m harness.evaluate --db formula_1 --db student_club --ids-file splits/test_ids.json --no-evidence --model ollama_chat/qwen7b-cube-lora --setup lora-v4.2-7b-nohint --out runs/test_nohint_lora_7b.jsonl",
+    "python -m harness.evaluate --db formula_1 --db student_club --ids-file splits/test_ids.json --no-evidence --model ollama_chat/qwen2.5-coder:7b --setup harness-v4.2-7b-nohint --out runs/test_nohint_harness_7b.jsonl",
+    "python -m harness.evaluate --db formula_1 --db student_club --ids-file splits/test_ids.json --no-evidence --model ollama_chat/qwen2.5-coder:14b --setup harness-v4.2-14b-nohint --out runs/test_nohint_harness_14b.jsonl",
     # LoRA arm (7B; same with 14B and --max-len 4096)
     "python scripts/train_lora.py --base Qwen/Qwen2.5-Coder-7B-Instruct --out lora/qwen7b",
     "python scripts/export_ollama.py --base Qwen/Qwen2.5-Coder-7B-Instruct --adapter lora/qwen7b/final --llama-cpp ../llama.cpp --quantize ../llama.cpp/build/bin/llama-quantize --ollama-base qwen2.5-coder:7b --name qwen7b-cube-lora",
-    "python -m harness.evaluate --db formula_1 --db student_club --ids-file splits/test_ids.json --model ollama_chat/qwen7b-cube-lora --setup lora-v4.2-7b --out runs/test_lora_7b.jsonl",
+    "python -m harness.evaluate --db formula_1 --db student_club --ids-file splits/test_ids.json --no-evidence --model ollama_chat/qwen7b-cube-lora --setup lora-v4.2-7b-nohint --out runs/test_nohint_lora_7b.jsonl",
     # prompt-offloading arms
     "python scripts/make_sft.py --data training_data --profile lean --out data/sft_lean",
     "python scripts/synth_schema_qa.py --db formula_1 --n 800 --db student_club --n 500 --out data/synth/synth.jsonl --audit",
     "python scripts/make_sft.py --data training_data --profile noschema --synthetic data/synth/synth.jsonl --out data/sft_noschema",
-    "python -m harness.evaluate --db formula_1 --db student_club --ids-file splits/test_ids.json --profile lean --model ollama_chat/qwen7b-cube-lean --setup lora-lean-7b --out runs/test_lean_7b.jsonl",
+    "python -m harness.evaluate --db formula_1 --db student_club --ids-file splits/test_ids.json --no-evidence --profile lean --model ollama_chat/qwen7b-cube-lean --setup lora-lean-7b-nohint --out runs/test_nohint_lean_7b.jsonl",
 ]
 for s in STEPS:
     print("$", s)

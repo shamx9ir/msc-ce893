@@ -14,7 +14,7 @@
 \vfill
 \begin{minipage}{0.88\linewidth}
 \color{essexpurple}\rule{\linewidth}{1.2pt}\par\smallskip
-\textbf{Summary.} A local Qwen2.5-Coder model answers questions about a database by writing queries for a Cube semantic layer, inside a tool-using agent built with Google's ADK. Fine-tuning the same model with a LoRA adapter, while keeping the prompt and tools identical, raised strict execution accuracy on 332 held-out BIRD questions from 27.7\% to 46.4\% (7B) and from 28.9\% to 49.7\% (14B). A LoRA trained on a shorter prompt kept most of that gain while sending 2.4 times fewer prompt tokens per model call.
+\textbf{Summary.} A local Qwen2.5-Coder model answers questions about a database by writing queries for a Cube semantic layer, inside a tool-using agent built with Google's ADK. Fine-tuning the same model with a LoRA adapter, while keeping the prompt and tools identical, raised strict execution accuracy on 332 held-out BIRD questions, asked without BIRD's hint, from 21.4\% to 36.7\% (7B) and from 27.4\% to 40.7\% (14B). A LoRA trained on a shorter prompt kept most of that gain while sending 2.4 times fewer prompt tokens per model call.
 \par\smallskip\color{essexpurple}\rule{\linewidth}{1.2pt}
 \end{minipage}
 \end{center}
@@ -31,7 +31,7 @@ The model must use member names that exist, put each field in the right slot (a 
 Text-to-SQL benchmarks moved from Spider~\cite{yu2018spider} to BIRD~\cite{li2023bird}, which adds large real databases, dirty values and an ``evidence'' hint per question, and scores \emph{execution accuracy}. Prompt-only systems such as DIN-SQL~\cite{pourreza2023din} decompose the task and self-correct, and agent loops in the style of ReAct~\cite{yao2023react} let the model test a query before answering; our harness follows this route. Fine-tuned open models such as CodeS~\cite{li2024codes} reach strong BIRD scores at small sizes, and Gorilla~\cite{patil2023gorilla} showed that fine-tuning teaches correct API calls better than prompting alone. LoRA~\cite{hu2021lora} and QLoRA~\cite{dettmers2023qlora} make this possible on one consumer GPU. Finally, \emph{context distillation}~\cite{askell2021general,snell2022distilling} trains a model to behave as if a long prompt were present, which is the idea we test for the harness prompt.
 
 \subsection{Research question and contribution}
-\resultplaceholder{\textbf{RQ.} When the same agent harness (prompt + tools) is kept fixed, how much does a LoRA adapter trained on verified tool-use transcripts improve execution accuracy on unseen databases, and how much of the prompt (query guide, tool definitions, schema) can the adapter replace without losing accuracy? A second question: how much does each setup depend on BIRD's hint?}
+\resultplaceholder{\textbf{RQ.} When the same agent harness (prompt + tools) is kept fixed, how much does a LoRA adapter trained on verified tool-use transcripts improve execution accuracy on unseen databases, and how much of the prompt (query guide, tool definitions, schema) can the adapter replace without losing accuracy? Questions are asked as an analyst would, without BIRD's hint.}
 
 We built (i) a Cube semantic layer and an ADK agent for BIRD databases, (ii) a pipeline that turns BIRD training SQL into 3,531 execution-verified Cube transcripts, (iii) LoRA adapters for Qwen2.5-Coder 7B and 14B~\cite{hui2024qwen25coder} under three prompt profiles, and (iv) a demo app that shows answers as Highcharts charts through A2UI~\cite{a2ui}. Every arm runs the same 4-bit model file in Ollama, so arms differ only in the adapter and the prompt.
 
@@ -54,7 +54,7 @@ We built (i) a Cube semantic layer and an ADK agent for BIRD databases, (ii) a p
 \textbf{Element} & \textbf{Definition}\\
 \midrule
 Intended user & An analyst or manager who asks questions in English about a known database.\\
-Input & Question, BIRD hint (evidence) and the database name; the harness adds the Cube schema.\\
+Input & Question and database name, without BIRD's hint (an analyst would not write one); the harness adds the Cube schema.\\
 Required output & One Cube JSON query submitted with \texttt{submit\_answer}; its rows feed the chart.\\
 Correct response & The query's rows equal the rows of BIRD's gold SQL on the original SQLite file (order of columns ignored).\\
 Constraints & Local model on a 16\,GB GPU; at most 8 model calls per question; only names defined in the Cube models.\\
@@ -93,7 +93,7 @@ Final test & All BIRD dev questions on \texttt{formula\_1} (174) and \texttt{stu
 \end{table}
 
 \subsection{Source and preparation}
-BIRD gives, for each question, an English question, an evidence hint, a gold SQL query and the SQLite database. We copied each database to DuckDB and generated a Cube model from its schema, foreign keys and BIRD's column descriptions. For training data, a rule-based translator turned each gold SQL query into a Cube query; we ran both and kept the pair only if the rows matched and were not empty (Fig.~\ref{fig:data}a). Each kept pair became a chat transcript with the harness's exact system prompt, the user message and the tool calls \texttt{run\_query} then \texttt{submit\_answer}; 769 transcripts also start with a \texttt{search\_values} call for a filtered text value. The loss is computed only on assistant turns.
+BIRD gives, for each question, an English question, an evidence hint, a gold SQL query and the SQLite database. We copied each database to DuckDB and generated a Cube model from its schema, foreign keys and BIRD's column descriptions. For training data, a rule-based translator turned each gold SQL query into a Cube query; we ran both and kept the pair only if the rows matched and were not empty (Fig.~\ref{fig:data}a). Each kept pair became a chat transcript with the harness's exact system prompt, the user message and the tool calls \texttt{run\_query} then \texttt{submit\_answer}; 769 transcripts also start with a \texttt{search\_values} call for a filtered text value. Training transcripts keep BIRD's hint in the user message; at test time it is hidden. The loss is computed only on assistant turns.
 
 \begin{figure}[!htbp]
 \centering
@@ -113,7 +113,7 @@ Both arms use \texttt{Qwen2.5-Coder-7B-Instruct} and \texttt{-14B-Instruct}~\cit
 \begin{figure}[!htbp]
 \centering
 \includegraphics[width=0.8\linewidth]{figures/fig04_harness_versions.pdf}
-\caption{Prompt-engineering progress for the 7B baseline. (a) The three versions that were also run on the test set: strict accuracy doubled from v1 to v4.2. (b) The development loop used only tuning databases; on all 363 tuning questions v4.2 beat v3 (32.0\% vs 26.2\%, McNemar $p{=}0.011$), and the 14B model reached 38.8\%.}
+\caption{Prompt-engineering progress for the 7B baseline (development runs, with BIRD's hint). (a) The three versions that were also run on the test set: strict accuracy doubled from v1 to v4.2. (b) The development loop used only tuning databases; on all 363 tuning questions v4.2 beat v3 (32.0\% vs 26.2\%, McNemar $p{=}0.011$), and the 14B model reached 38.8\%.}
 \label{fig:versions}
 \end{figure}
 
@@ -159,12 +159,11 @@ Hardware & one RTX 5070 Ti (16\,GB), 32\,GB RAM, Windows; training 5.3\,h (7B) a
 \begin{enumerate}
   \item \textbf{Baseline:} base Qwen2.5-Coder 7B or 14B with harness v4.2 (full prompt, tools sent as JSON schemas).
   \item \textbf{Proposed system:} the same model file plus the LoRA adapter, same harness and prompt.
-  \item \textbf{No-hint runs:} baseline and LoRA at both sizes again with BIRD's evidence hint hidden from the model (the adapters were trained with hints), closer to an analyst who types only a question.
   \item \textbf{Prompt-offloading arms:} LoRA trained and run with the \emph{lean} prompt; the \emph{noschema} LoRA run with no schema and with the lean prompt. As a control, the full-prompt LoRA was also given the lean prompt without retraining.
 \end{enumerate}
 
 \subsection{Evaluation data and measures}
-The 332 test questions come from two databases unseen in training and tuning (218 simple, 91 moderate, 23 challenging; 77\% need a join).
+The 332 test questions come from two databases unseen in training and tuning (218 simple, 91 moderate, 23 challenging; 77\% need a join). In every test run BIRD's hint is hidden from the model (\texttt{--no-evidence}), so the model sees only the question, as a real user would type it.
 
 \begin{table}[!htbp]
 \centering
@@ -192,7 +191,7 @@ The test split and scoring rule were frozen first; the harness was developed on 
 \begin{table}[!htbp]
 \centering
 \footnotesize
-\caption{Main results on the 332 held-out test questions. Tok./q: prompt tokens per question. $p$: McNemar, strict, against the harness-only arm of the same size.}
+\caption{Main results on the 332 held-out test questions (no hint). Tok./q: prompt tokens per question. $p$: McNemar, strict, against the harness-only arm of the same size.}
 \label{tab:main}
 \setlength{\tabcolsep}{4pt}
 \begin{tabularx}{\linewidth}{@{}Xrrrrcrr@{}}
@@ -200,12 +199,12 @@ The test split and scoring rule were frozen first; the harness was developed on 
 \textbf{System} & \textbf{Strict\,\%} & \textbf{Relax.\,\%} & \textbf{Tok./q} & \textbf{Steps} & \textbf{Latency (s)} & \textbf{Tok./s} & $p$\\
  & & & & & {\scriptsize mean\,/\,med.\,/\,p90} & {\scriptsize output} & \\
 \midrule
-7B harness only (baseline) & 27.7 & 34.0 & 15,742 & 4.0 & 3.2\,/\,2.2\,/\,5.9 & 118 & --\\
-7B LoRA + harness & \textbf{46.4} & \textbf{52.1} & 7,798 & 2.1 & 1.3\,/\,1.2\,/\,1.7 & 103 & $6{\times}10^{-11}$\\
+7B harness only (baseline) & 21.4 & 27.7 & 15,929 & 4.1 & 3.5\,/\,2.3\,/\,6.8 & 121 & --\\
+7B LoRA + harness & \textbf{36.7} & \textbf{40.7} & 7,672 & 2.1 & 1.3\,/\,1.2\,/\,1.7 & 104 & $5{\times}10^{-8}$\\
 7B lean LoRA & 41.9 & 45.5 & 3,257 & 2.2 & 1.3\,/\,1.2\,/\,1.6 & 109 & $1{\times}10^{-6}$\\
 \midrule
-14B harness only (baseline) & 28.9 & 41.3 & 10,766 & 2.9 & 4.0\,/\,3.5\,/\,5.7 & 67 & --\\
-14B LoRA + harness & \textbf{49.7} & 56.9 & 7,341 & 2.0 & 2.5\,/\,2.4\,/\,3.3 & 58 & $3{\times}10^{-15}$\\
+14B harness only (baseline) & 27.4 & 35.8 & 11,952 & 3.2 & 4.6\,/\,3.8\,/\,7.0 & 67 & --\\
+14B LoRA + harness & \textbf{40.7} & \textbf{45.5} & 7,344 & 2.0 & 2.4\,/\,2.3\,/\,3.2 & 61 & $2{\times}10^{-7}$\\
 14B lean LoRA & 47.6 & \textbf{57.2} & 3,153 & 2.1 & 2.4\,/\,2.1\,/\,3.1 & 64 & $2{\times}10^{-12}$\\
 \bottomrule
 \end{tabularx}
@@ -214,14 +213,15 @@ The test split and scoring rule were frozen first; the harness was developed on 
 \begin{figure}[!htbp]
 \centering
 \includegraphics[width=0.68\linewidth]{figures/fig07_main.pdf}
-\caption{Before and after fine-tuning (higher is better). (a) The LoRA adds about 20 points of strict accuracy at both sizes, more than doubling the model size does. (b) The gain holds on both databases and every difficulty level, and is largest on questions that need a join (7B: 24\% to 46\%).}
+\caption{Before and after fine-tuning (higher is better). (a) The LoRA adds 13--15 points of strict accuracy at both sizes, more than doubling the model size does. (b) The gain holds on both databases and is largest on questions that need a join (7B: 20\% to 35\%, 14B: 23\% to 41\%).}
 \label{fig:main}
 \end{figure}
 
 \subsection{Main findings}
-The adapter is the main effect (Table~\ref{tab:main}, Fig.~\ref{fig:main}). At 7B it raised strict accuracy by 18.7 points: 78 questions became correct and 16 became wrong. At 14B the gain was 20.8 points (77 vs 8). The 7B LoRA beats the 14B baseline by 17.5 points, while the 14B LoRA is only 3.3 points above the 7B LoRA ($p{=}0.12$, not significant). The baseline 14B model has a much higher relaxed than strict score (41.3 vs 28.9): it often returns the right rows with extra columns, a habit the adapter mostly removed.
+The adapter is the main effect (Table~\ref{tab:main}, Fig.~\ref{fig:main}). At 7B it raised strict accuracy by 15.4 points: 70 questions became correct and 19 became wrong. At 14B the gain was 13.3 points (58 vs 14). The 7B LoRA beats the 14B baseline by 9.3 points ($p{=}0.0009$), while the 14B LoRA is only 3.9 points above the 7B LoRA ($p{=}0.09$, not significant). The baseline 14B model has a much higher relaxed than strict score (35.8 vs 27.4): it often returns the right rows with extra columns, a habit the adapter mostly removed.
 
 
+% TODO(no-hint): update with the no-hint prompt-offloading runs
 Fig.~\ref{fig:offload} answers the second part of the RQ. The lean LoRA sends 1.5k prompt tokens per call instead of 3.6--3.9k and loses 2.1 points at 14B ($p{=}0.21$, n.s.) but 4.5 points at 7B ($p{=}0.008$). Removing the schema entirely costs much more (14B: 38.3\%), because the model then invents members; adding the short schema back to the noschema adapter recovers 47.9\% (14B). A full-prompt LoRA given the lean prompt without retraining scored 0\%: the adapter learned its prompt, not the task in general.
 
 \begin{figure}[!htbp]
@@ -231,33 +231,28 @@ Fig.~\ref{fig:offload} answers the second part of the RQ. The lean LoRA sends 1.
 \label{fig:offload}
 \end{figure}
 
-\subsection{Without the hint}
+\subsection{Tool use}
 \begin{table}[!htbp]
 \centering
 \footnotesize
-\caption{Main arms with and without BIRD's hint, and tool use per question. $p$: McNemar (strict), without vs with hint. Lookups: \texttt{search\_values} calls; drafts: \texttt{run\_query} calls; rejected: calls the harness or Cube turned back; empty: answers whose last draft returned no rows.}
-\label{tab:nohint}
-\begin{tabularx}{\linewidth}{@{}Xlrrrrrrr@{}}
+\caption{Tool use per question (no hint). Lookups: \texttt{search\_values} calls; drafts: \texttt{run\_query} calls; rejected: calls the harness or Cube turned back; text: calls written as text instead of a tool call; empty: answers whose last draft returned no rows.}
+\label{tab:tools}
+\begin{tabularx}{\linewidth}{@{}Xrrrrrr@{}}
 \toprule
-\textbf{System} & \textbf{Hint} & \textbf{Strict \%} & \textbf{Relaxed \%} & $p$ & \textbf{Lookups} & \textbf{Drafts} & \textbf{Rejected} & \textbf{Empty \%}\\
+\textbf{System} & \textbf{Lookups} & \textbf{Drafts} & \textbf{Rejected} & \textbf{Text \%} & \textbf{No answer \%} & \textbf{Empty \%}\\
 \midrule
-7B harness only & yes & 27.7 & 34.0 & -- & 1.59 & 0.86 & 0.83 & 3.0\\
- & no & 21.4 & 27.7 & 0.010 & 1.97 & 0.69 & 1.09 & 2.4\\
-7B LoRA + harness & yes & 46.4 & 52.1 & -- & 0.00 & 1.09 & 0.13 & 7.5\\
- & no & 36.7 & 40.7 & $9{\times}10^{-7}$ & 0.01 & 1.09 & 0.11 & 13.0\\
-\midrule
-14B harness only & yes & 28.9 & 41.3 & -- & 0.66 & 0.94 & 0.10 & 10.5\\
- & no & 27.4 & 35.8 & 0.58 & 0.95 & 0.95 & 0.14 & 10.2\\
-14B LoRA + harness & yes & 49.7 & 56.9 & -- & 0.00 & 0.98 & 0.00 & 5.4\\
- & no & 40.7 & 45.5 & $1{\times}10^{-6}$ & 0.00 & 0.97 & 0.00 & 13.3\\
+7B harness only & 1.97 & 0.69 & 1.09 & 16 & 5.4 & 2.4\\
+7B LoRA + harness & 0.01 & 1.09 & 0.11 & 0 & 0.0 & 13.0\\
+14B harness only & 0.95 & 0.95 & 0.14 & 54 & 0.9 & 10.2\\
+14B LoRA + harness & 0.00 & 0.97 & 0.00 & 100 & 0.0 & 13.3\\
 \bottomrule
 \end{tabularx}
 \end{table}
 
-Hiding the hint costs the adapters more than the baselines (Table~\ref{tab:nohint}): $-9.6$ and $-9.0$ points against $-6.3$ and $-1.5$ (n.s.). Trained with hints and never looking values up, the adapters guess more filter values and their empty answers double; the baselines look values up more often instead. The LoRA still leads by 15.3 (7B) and 13.3 points (14B), both $p{<}10^{-6}$. The 7B baseline spends its extra steps on rejected calls (0.8--1.1 per question vs about 0.1); the 14B models write most calls as text (71\%, 100\%), which the harness parses.
+The adapters work differently from the baselines (Table~\ref{tab:tools}). The 7B baseline looks up about two values per question and has one call per question turned back by the name and type checks; the adapters draft once, submit and are almost never rejected. But they never look values up, so 13\% of their answers come from a draft that returned no rows (case B in Fig.~\ref{fig:outputs}), against 2--10\% for the baselines. The 14B models write most calls as text, which the harness parses.
 
 \subsection{Resource use}
-Training took 5.3\,h (7B) and 9.0\,h (14B) on one 16\,GB GPU (lean: 2--3\,h) and converged within half an epoch (Fig.~\ref{fig:training}). The merged adapter adds no inference cost and halves the steps (4.0 to 2.1 at 7B), so prompt tokens halve and model time per question falls from 3.2 to 1.3\,s (p90: 5.9 to 1.7\,s). Output speed is unchanged (about 110 tokens/s at 7B, 60--65 at 14B), so the gain comes from fewer, shorter calls. Time to first token was not recorded, so prompt processing and decoding cannot be separated. Part of the saving comes from the adapter almost never calling \texttt{search\_values} (0.3\% of questions vs 92\%), which also causes errors (Section~\ref{sec:discussion}).
+Training took 5.3\,h (7B) and 9.0\,h (14B) on one 16\,GB GPU (lean: 2--3\,h) and converged within half an epoch (Fig.~\ref{fig:training}). The merged adapter adds no inference cost and halves the steps (4.1 to 2.1 at 7B), so prompt tokens halve and model time per question falls from 3.5 to 1.3\,s (p90: 6.8 to 1.7\,s). Output speed is unchanged (about 105--120 tokens/s at 7B, 60--67 at 14B), so the gain comes from fewer, shorter calls. Time to first token was not recorded, so prompt processing and decoding cannot be separated. Part of the saving comes from the adapter almost never calling \texttt{search\_values} (1\% of questions vs 92\%), which also causes errors (Section~\ref{sec:discussion}).
 
 \section{Discussion}\label{sec:discussion}
 
@@ -269,20 +264,20 @@ Training took 5.3\,h (7B) and 9.0\,h (14B) on one 16\,GB GPU (lean: 2--3\,h) and
 \end{figure}
 
 \subsection{Interpretation and error analysis}
-Fig.~\ref{fig:outputs} shows the typical change. The baseline follows its rules (it looks up ``Italy'' first) but then adds a grouping dimension that the question did not ask for, so the answer has three rows instead of one. Fig.~\ref{fig:errors} sorts every wrong answer into one category by fixed rules. The adapter almost removed failed runs (no valid query: 38 to 5 at 7B) and halved wrong filter values for the 14B model, while the share of questions that need SQL Cube cannot express stayed about 50: these are the ceiling of the approach, not a model error. The weak point is value lookup: only 22\% of training transcripts call \texttt{search\_values}, so the adapter learned to guess spellings (case B).
+Fig.~\ref{fig:outputs} shows the typical change. The baseline follows its rules (it looks up ``Italy'' first) but then adds a grouping dimension that the question did not ask for, so the answer has three rows instead of one. Fig.~\ref{fig:errors} sorts every wrong answer into one category by fixed rules. The adapter almost removed failed runs (no valid query: 45 to 4 at 7B) and cut wrong filter values (7B: 64 to 50, 14B: 48 to 39), while the questions that need SQL Cube cannot express stayed at about 55: these are the ceiling of the approach, not a model error. The weak point is value lookup: only 22\% of training transcripts call \texttt{search\_values}, so the adapter learned to guess spellings (case B).
 
 \begin{figure}[!htbp]
 \centering
 \includegraphics[width=0.62\linewidth]{figures/fig10_errors.pdf}
-\caption{Wrong answers by category (rules applied in order). The LoRA mainly removes failed runs, wrong filters and extra columns; about 50 per arm need SQL Cube cannot express.}
+\caption{Wrong answers by category (rules applied in order). The LoRA mainly removes failed runs, wrong filters and extra columns; about 55 per arm need SQL Cube cannot express.}
 \label{fig:errors}
 \end{figure}
 
 \subsection{Limitations and responsible use}
-Two test databases and one run per arm give about $\pm$5 points of uncertainty (95\%). The translator limits training to queries Cube can express; the noschema arm is database-specific. The quantised 14B adapter writes a stray token instead of Qwen's \texttt{<tool\_call>} tag; the harness parses such text calls, but other clients would fail. BIRD is public and holds no private personal data. A chart from a wrong filter (case B) looks as convincing as a right one, so the demo app always shows the Cube query and tool trace beside it.
+Two test databases and one run per arm give about $\pm$5 points of uncertainty (95\%). BIRD's standard setting gives the model the hint; with it every arm scores higher (LoRA 46.4\% at 7B, 49.7\% at 14B; runs in the repository), so our numbers are not comparable with BIRD leaderboards. The translator limits training to queries Cube can express; the noschema arm is database-specific. The quantised 14B adapter writes a stray token instead of Qwen's \texttt{<tool\_call>} tag; the harness parses such text calls, but other clients would fail. BIRD is public and holds no private personal data. A chart from a wrong filter (case B) looks as convincing as a right one, so the demo app always shows the Cube query and tool trace beside it.
 
 \section{Conclusion}
-Keeping the harness fixed and adding a LoRA adapter trained on 3,273 execution-verified transcripts raised strict execution accuracy on unseen databases from 27.7\% to 46.4\% (7B) and from 28.9\% to 49.7\% (14B), halved the model calls per question, and made a 7B model beat a 14B one. Most of the prompt can move into the weights: a lean prompt kept the 14B model within 2 points at 40\% of the prompt tokens, but the schema must stay for unseen databases. Without BIRD's hint the adapters lose about 9 points but still lead by 13--15. The main limitation is that the adapter stopped looking up values. Next: retrain with \texttt{search\_values} in every transcript that filters on text and with some hints removed, and measure time to first token.
+Keeping the harness fixed and adding a LoRA adapter trained on 3,273 execution-verified transcripts raised strict execution accuracy on unseen databases, with questions asked without BIRD's hint, from 21.4\% to 36.7\% (7B) and from 27.4\% to 40.7\% (14B), halved the model calls per question, and made a 7B model beat a 14B one. Most of the prompt can move into the weights: a lean prompt kept the 14B model within 2 points at 40\% of the prompt tokens, but the schema must stay for unseen databases. The main limitation is that the adapter stopped looking up values. Next: retrain with \texttt{search\_values} in every transcript that filters on text and with some hints removed, and measure time to first token.
 
 {\footnotesize
 \let\oldthebibliography\thebibliography
