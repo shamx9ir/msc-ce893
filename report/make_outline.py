@@ -112,7 +112,9 @@ NOTES = {
         "Answer the RQ directly with the two headline numbers and the halved steps.",
         "Most of the prompt can move into the weights (lean within 2 points at 14B, 40% of tokens); the schema must stay for unseen dbs.",
         "No hint: adapters lose about 9 points (more than baselines) but still lead by 13-15.",
-        "Main limitation: adapter stopped looking up values (worst without the hint). Next steps: retrain with search_values in every text-filter transcript and some hints removed; measure time to first token.",
+        "Main limitation: adapter stopped looking up values (worst without the hint). 7B retrained with search_values in every text-filter transcript: lookups back (38%), 0-row wrong answers halved, but no accuracy gain (120 vs 122 no hint, 144 vs 154 hint).",
+        "Why: the retrained adapter starts a turn with a stray token instead of <tool_call> (220/332 questions vs 2), so calls arrive as text; it is in the adapter, not quantisation (P(<tool_call>) = 0.0004 unquantised).",
+        "Future work: find why that first token is under-trained or let the harness accept such calls natively; then retrain the 14B, remove some hints, measure time to first token.",
     ],
 }
 
