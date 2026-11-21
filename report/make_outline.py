@@ -113,6 +113,17 @@ NOTES = {
 }
 
 
+# Text Shamir has written for the outline version: used as-is instead of the notes for that section.
+OWN_TEXT = {
+    "Motivation and context": r"""As open-weights models continue to gain capabilities, local Large Language Models (LLMs) are set to become more and more significant. Due to their smaller footprint, open-weights models are highly accessible for local fine-tuning, offering greater customization potential despite being less powerful than large-scale foundation models.
+
+Current industry practice is to build a harness around the model. LLM harness is the surrounding support components to turn a model to a reliable, goal oriented agent. Typically we would customise a local LLM to a specific use case with a specific workflow and deploy it within a constrained hardware in the most efficient way.
+
+To demonstrate this, we focus on a common business scenario involving data analysis on domain-specific datasets. Analysts submit questions to the LLM, which then query the underlying data source. Our implementation leverages a semantic layer powered by Cube~\cite{cube} to serve as the backend language in contrast to direct SQL. To guide the LLM in answering data-related queries, we will construct a prompt equipped with tools.
+""",
+}
+
+
 def esc(t):
     return (t.replace("\\", "/").replace("_", "\\_").replace("%", "\\%").replace("<", "\\textless{}")
              .replace(">", "\\textgreater{}").replace("~", "\\textasciitilde{}").replace("+/-", "$\\pm$"))
@@ -144,7 +155,10 @@ def main():
             if s.startswith("\\resultplaceholder"):
                 out.append(line)
                 continue
-            if current in NOTES and current not in emitted:
+            if current in OWN_TEXT and current not in emitted:
+                out.append(OWN_TEXT[current] + "\n")
+                emitted.add(current)
+            elif current in NOTES and current not in emitted:
                 out.append(bullets(NOTES[current]))
                 emitted.add(current)
             continue
