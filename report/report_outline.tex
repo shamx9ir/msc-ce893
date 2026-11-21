@@ -26,13 +26,8 @@ To demonstrate this, we focus on a common business scenario involving data analy
 
 
 \subsection{Related work}
-\resultplaceholder{\textbf{Write here:}\begin{itemize}[leftmargin=1.2em,itemsep=0.05em]
-  \item Benchmarks: Spider, then BIRD (real databases, evidence hint, execution accuracy).
-  \item Prompt-only systems (DIN-SQL) and agent loops (ReAct): our harness is in this family.
-  \item Fine-tuned text-to-SQL (CodeS) and API-call fine-tuning (Gorilla).
-  \item LoRA and QLoRA make it fit one 16 GB GPU.
-  \item Context distillation (Askell et al., Snell et al.): the idea behind moving the prompt into the weights.
-\end{itemize}}
+The evaluation of text-to-SQL tasks has progressed from Spider~\cite{yu2018spider} to BIRD~\cite{li2023bird}, a benchmark that incorporates substantial real-world databases, dirty values, and question-level ``evidence'' annotations to assess execution accuracy. In prompt-driven approaches, frameworks like DIN-SQL~\cite{pourreza2023din} implement task decomposition and self-correction, whereas ReAct~\cite{yao2023react} style agent loops enable models to evaluate queries dynamically prior to final response generation, an approach adopted by our harness. For open-weights architectures, specialized fine-tuned models such as CodeS~\cite{li2024codes} achieve competitive performance on BIRD even at smaller parameter scales, while Gorilla~\cite{patil2023gorilla} demonstrates that targeted fine-tuning outperforms pure prompting for accurate API invocation. Parameter-efficient methods like LoRA~\cite{hu2021lora} and QLoRA~\cite{dettmers2023qlora} facilitate this fine-tuning process on single consumer-grade GPUs. Lastly, context distillation~\cite{askell2021general,snell2022distilling} techniques enable models to emulate the behavior of extensive system prompts, providing the foundational concept behind moving the harness prompt into the LoRA weights.
+
 
 \subsection{Research question and contribution}
 \resultplaceholder{\textbf{RQ.} When the same agent harness (prompt + tools) is kept fixed, how much does a LoRA adapter trained on verified tool-use transcripts improve execution accuracy on unseen databases, and how much of the prompt (query guide, tool definitions, schema) can the adapter replace without losing accuracy? Questions are asked as an analyst would, without BIRD's hint.}
@@ -118,7 +113,7 @@ Final test & All BIRD dev questions on \texttt{formula\_1} (174) and \texttt{stu
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=0.78\linewidth]{figures/fig03_data.pdf}
+\includegraphics[width=0.7\linewidth]{figures/fig03_data.pdf}
 \caption{(a) From 8,003 BIRD training questions to 3,531 verified examples: 2,782 used SQL a semantic layer cannot express, 900 failed in Cube and 790 gave different or empty results. (b) One record, its verified Cube query and the transcript the model is trained on.}
 \label{fig:data}
 \end{figure}
@@ -140,7 +135,7 @@ Final test & All BIRD dev questions on \texttt{formula\_1} (174) and \texttt{stu
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=0.8\linewidth]{figures/fig04_harness_versions.pdf}
+\includegraphics[width=0.7\linewidth]{figures/fig04_harness_versions.pdf}
 \caption{Prompt-engineering progress for the 7B baseline (development runs, with BIRD's hint). (a) The three versions that were also run on the test set: strict accuracy doubled from v1 to v4.2. (b) The development loop used only tuning databases; on all 363 tuning questions v4.2 beat v3 (32.0\% vs 26.2\%, McNemar $p{=}0.011$), and the 14B model reached 38.8\%.}
 \label{fig:versions}
 \end{figure}
@@ -150,7 +145,6 @@ Final test & All BIRD dev questions on \texttt{formula\_1} (174) and \texttt{stu
   \item QLoRA with PEFT: 4-bit NF4 base, rank-16 adapters on all attention + MLP projections (Fig. 5).
   \item Export: merge, GGUF, Q4\_K\_M, base chat template, so only the adapter differs.
   \item Prompt profiles: lean (no guide, no tool schemas, compact schema) and noschema (needs \textasciitilde{}1,300 synthetic questions on the test schemas; no BIRD dev data used).
-  \item Fig. 6 (training curves) can be described here or in Results.
 \end{itemize}}
 
 \begin{figure}[!htbp]
@@ -184,7 +178,7 @@ Hardware & one RTX 5070 Ti (16\,GB), 32\,GB RAM, Windows; training 5.3\,h (7B) a
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=0.78\linewidth]{figures/fig06_training.pdf}
+\includegraphics[width=0.7\linewidth]{figures/fig06_training.pdf}
 \caption{Training progress for all six adapters. The loss drops within the first quarter epoch and then stays flat; validation loss on the three held-out databases follows it, so the adapters did not overfit. Lean and noschema adapters start higher because the model has never seen those short prompts.}
 \label{fig:training}
 \end{figure}
@@ -225,7 +219,6 @@ Significance & Exact McNemar test on paired per-question outcomes (strict)\\
 \subsection{Experimental procedure}
 \resultplaceholder{\textbf{Write here:}\begin{itemize}[leftmargin=1.2em,itemsep=0.05em]
   \item Order: freeze test split + scoring, tune harness on tuning dbs, freeze v4.2, train each adapter once (seed 7), run each arm once.
-  \item List what is identical across arms within a size.
 \end{itemize}}
 
 \section{Results}
@@ -303,7 +296,6 @@ Significance & Exact McNemar test on paired per-question outcomes (strict)\\
   \item Training time 5.3 h (7B), 9.0 h (14B), lean 2-3 h; one 16 GB GPU; converged within half an epoch (Fig. 6).
   \item Steps 4.1 to 2.1, prompt tokens per question halve, model time 3.5 s to 1.3 s (7B), p90 6.8 s to 1.7 s.
   \item Output speed unchanged (\textasciitilde{}105-120 tok/s 7B, 60-67 14B), so the saving is fewer and shorter calls.
-  \item Time to first token not measured: future work (would separate prompt processing from decoding).
   \item Caveat: part of the saving is because the adapter skips search\_values (1\% vs 92\%).
 \end{itemize}}
 
@@ -332,18 +324,17 @@ Significance & Exact McNemar test on paired per-question outcomes (strict)\\
 
 \subsection{Limitations and responsible use}
 \resultplaceholder{\textbf{Write here:}\begin{itemize}[leftmargin=1.2em,itemsep=0.05em]
-  \item Two dbs, one run per arm: about $\pm$5 points 95\% interval. With BIRD's hint (standard setting) all arms score higher (LoRA 46.4 / 49.7), so not comparable with leaderboards.
+  \item Two dbs, one run per arm (about $\pm$5 points). With BIRD's hint all arms score higher (LoRA 46.4 / 49.7); not comparable with leaderboards.
   \item Translator bias toward simple query shapes; noschema is database-specific.
-  \item Adapters often write a stray token instead of \textless{}tool\_call\textgreater{} (all 14B calls; also without quantisation); harness parses text calls.
-  \item Data: public, no private personal data. Use: wrong filter gives a convincing wrong chart, so the app shows query and trace.
+  \item Adapters often write a stray token instead of \textless{}tool\_call\textgreater{}; the harness parses text calls.
+  \item Public data only; a wrong filter gives a convincing wrong chart, so the app shows the query.
 \end{itemize}}
 
 \section{Conclusion}
 \resultplaceholder{\textbf{Write here:}\begin{itemize}[leftmargin=1.2em,itemsep=0.05em]
   \item Answer the RQ directly with the two headline numbers and the halved steps.
-  \item Most of the prompt can move into the weights (lean within \textasciitilde{}2 points at both sizes, n.s., 40\% of tokens); the schema must stay for unseen dbs.
-  \item Main limitation: adapter stopped looking up values.
-  \item Future work: search\_values retrain (7B) changed behaviour, not accuracy (36.1 vs 36.7, p=0.88): stray first token -\textgreater{} text fallback, malformed calls. Fix the first-token labels or accept text + JSON; retest; measure time to first token.
+  \item Most of the prompt can move into the weights; the schema must stay for unseen dbs.
+  \item Future work: retrain so the adapter looks up values; measure time to first token.
 \end{itemize}}
 
 {\footnotesize

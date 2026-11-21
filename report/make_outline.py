@@ -59,7 +59,6 @@ NOTES = {
         "QLoRA with PEFT: 4-bit NF4 base, rank-16 adapters on all attention + MLP projections (Fig. 5).",
         "Export: merge, GGUF, Q4_K_M, base chat template, so only the adapter differs.",
         "Prompt profiles: lean (no guide, no tool schemas, compact schema) and noschema (needs ~1,300 synthetic questions on the test schemas; no BIRD dev data used).",
-        "Fig. 6 (training curves) can be described here or in Results.",
     ],
     "Implementation details": [
         "One sentence introducing Table 3.",
@@ -75,7 +74,6 @@ NOTES = {
     ],
     "Experimental procedure": [
         "Order: freeze test split + scoring, tune harness on tuning dbs, freeze v4.2, train each adapter once (seed 7), run each arm once.",
-        "List what is identical across arms within a size.",
     ],
     "Main findings": [
         "All test runs without BIRD's hint. Lead with Table 5: +15.4 points (7B, 70 fixed vs 19 broken) and +13.3 points (14B, 58 vs 14).",
@@ -90,7 +88,6 @@ NOTES = {
         "Training time 5.3 h (7B), 9.0 h (14B), lean 2-3 h; one 16 GB GPU; converged within half an epoch (Fig. 6).",
         "Steps 4.1 to 2.1, prompt tokens per question halve, model time 3.5 s to 1.3 s (7B), p90 6.8 s to 1.7 s.",
         "Output speed unchanged (~105-120 tok/s 7B, 60-67 14B), so the saving is fewer and shorter calls.",
-        "Time to first token not measured: future work (would separate prompt processing from decoding).",
         "Caveat: part of the saving is because the adapter skips search_values (1% vs 92%).",
     ],
     "Interpretation and error analysis": [
@@ -99,16 +96,15 @@ NOTES = {
         "Explain the value-lookup weakness: only 22% of training transcripts had search_values.",
     ],
     "Limitations and responsible use": [
-        "Two dbs, one run per arm: about +/-5 points 95% interval. With BIRD's hint (standard setting) all arms score higher (LoRA 46.4 / 49.7), so not comparable with leaderboards.",
+        "Two dbs, one run per arm (about +/-5 points). With BIRD's hint all arms score higher (LoRA 46.4 / 49.7); not comparable with leaderboards.",
         "Translator bias toward simple query shapes; noschema is database-specific.",
-        "Adapters often write a stray token instead of <tool_call> (all 14B calls; also without quantisation); harness parses text calls.",
-        "Data: public, no private personal data. Use: wrong filter gives a convincing wrong chart, so the app shows query and trace.",
+        "Adapters often write a stray token instead of <tool_call>; the harness parses text calls.",
+        "Public data only; a wrong filter gives a convincing wrong chart, so the app shows the query.",
     ],
     "Conclusion": [
         "Answer the RQ directly with the two headline numbers and the halved steps.",
-        "Most of the prompt can move into the weights (lean within ~2 points at both sizes, n.s., 40% of tokens); the schema must stay for unseen dbs.",
-        "Main limitation: adapter stopped looking up values.",
-        "Future work: search_values retrain (7B) changed behaviour, not accuracy (36.1 vs 36.7, p=0.88): stray first token -> text fallback, malformed calls. Fix the first-token labels or accept text + JSON; retest; measure time to first token.",
+        "Most of the prompt can move into the weights; the schema must stay for unseen dbs.",
+        "Future work: retrain so the adapter looks up values; measure time to first token.",
     ],
 }
 
@@ -120,6 +116,8 @@ OWN_TEXT = {
 Current industry practice is to build a harness around the model. LLM harness is the surrounding support components to turn a model to a reliable, goal oriented agent. Typically we would customise a local LLM to a specific use case with a specific workflow and deploy it within a constrained hardware in the most efficient way.
 
 To demonstrate this, we focus on a common business scenario involving data analysis on domain-specific datasets. Analysts submit questions to the LLM, which then query the underlying data source. Our implementation leverages a semantic layer powered by Cube~\cite{cube} to serve as the backend language in contrast to direct SQL. To guide the LLM in answering data-related queries, we will construct a prompt equipped with tools.
+""",
+    "Related work": r"""The evaluation of text-to-SQL tasks has progressed from Spider~\cite{yu2018spider} to BIRD~\cite{li2023bird}, a benchmark that incorporates substantial real-world databases, dirty values, and question-level ``evidence'' annotations to assess execution accuracy. In prompt-driven approaches, frameworks like DIN-SQL~\cite{pourreza2023din} implement task decomposition and self-correction, whereas ReAct~\cite{yao2023react} style agent loops enable models to evaluate queries dynamically prior to final response generation, an approach adopted by our harness. For open-weights architectures, specialized fine-tuned models such as CodeS~\cite{li2024codes} achieve competitive performance on BIRD even at smaller parameter scales, while Gorilla~\cite{patil2023gorilla} demonstrates that targeted fine-tuning outperforms pure prompting for accurate API invocation. Parameter-efficient methods like LoRA~\cite{hu2021lora} and QLoRA~\cite{dettmers2023qlora} facilitate this fine-tuning process on single consumer-grade GPUs. Lastly, context distillation~\cite{askell2021general,snell2022distilling} techniques enable models to emulate the behavior of extensive system prompts, providing the foundational concept behind moving the harness prompt into the LoRA weights.
 """,
 }
 
@@ -170,6 +168,10 @@ def main():
     # title page summary -> notes
     text = re.sub(r"\\textbf\{Summary\.\}.*?\n", "\\\\textbf{Summary (to write).} " + esc(NOTES["TITLE"][0]).replace("\\", "\\\\") + "\n", text, count=1)
     text = text.replace("{\\footnotesize\n\\bibliographystyle", "{\\footnotesize\n\\nocite{*}\n\\bibliographystyle")
+    # The outline's notes run longer than the prose in places, so a few figures are smaller here to keep 10 pages.
+    for fig, (w_old, w_new) in {"fig03_data": ("0.78", "0.7"), "fig04_harness_versions": ("0.8", "0.7"),
+                                "fig06_training": ("0.78", "0.7")}.items():
+        text = text.replace(f"width={w_old}\\linewidth]{{figures/{fig}", f"width={w_new}\\linewidth]{{figures/{fig}")
     text = text.replace("% Full draft.", "% OUTLINE version, generated by make_outline.py from report.tex.")
     # sections whose only prose came after the floats still need notes
     for sec, items in NOTES.items():
