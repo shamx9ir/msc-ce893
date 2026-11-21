@@ -194,8 +194,13 @@ The model learned the habit (searches on 38-58% of questions, empty-result failu
 accuracy did not improve: the extra steps brought new failures (9 malformed tool calls, e.g. search_values
 arguments sent to run_query, 4 step-limit hits, 3 unanswered) and cost answer shape (relaxed falls). With the hint
 most literal values are already given, so the lookups add little. Validation loss was flat from epoch 0.5
-(0.293). The 14B was not retrained (it had no empty-result failures to fix). Next step (not done): debug
-the malformed tool calls in these runs and fix them in the data (or the text fallback), then retest. Runs:
+(0.293). The 14B was not retrained (it had no empty-result failures to fix). Partial diagnosis (not fixed): the sv2 adapter
+usually emits a stray token where `<tool_call>` should open an assistant turn (P(`<tool_call>`) about 0.0004 at
+that position, while the call body that follows is near-certain), so Ollama cannot parse the call and the harness's
+text fallback handles it (220/332 questions without the hint vs 2/332 for the original 7B LoRA). The same shows with
+the plain HF model + adapter, so it is the adapter, not the GGUF export or quantisation; the 14B LoRA's stray token
+is likely the same effect. Next step: find why that one position is not learned (check the labels at the first
+token of each assistant turn), or accept "short text + {\"name\": ...}" as a native call, then retest. Runs:
 `results/runs/test_nohint_lora_sv2_7b.jsonl.gz`, `results/runs/test_lora_sv2_7b.jsonl.gz`.
 
 ## Schema-offloading arms (prompt profiles)
