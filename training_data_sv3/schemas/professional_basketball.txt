@@ -1,0 +1,499 @@
+cube awards_players
+  dim  awards_players.row_key (string)
+  dim  awards_players.playerID (string) -- ID number identifying the unique number of the player
+  dim  awards_players.award (string) -- the name of the award
+  dim  awards_players.year (number) -- the time of this award
+  dim  awards_players.lgID (string) -- the name of the league mainly categories: "NBA" & "ABA"
+  dim  awards_players.note (string) -- notification ”null“ refers to that no special things ”tie“ represents that coaches are tied for some awards
+  dim  awards_players.pos (string) -- the position of the player C: Center F: Forward G: Guard
+  meas awards_players.count (count)
+cube coaches
+  dim  coaches.row_key (string)
+  dim  coaches.coachID (string) -- ID number identifying the unique number of the coach
+  dim  coaches.year (number)
+  dim  coaches.tmID (string) -- team name abbreviated name
+  dim  coaches.lgID (string) -- league name mainly categories: "NBA" & "ABA"
+  dim  coaches.stint (number) -- the period of the time coaching this team
+  dim  coaches.won (number) -- the number of won games 0: no wins
+  dim  coaches.lost (number) -- the number of lost games 0: win all the games
+  dim  coaches.post_wins (number) -- the number of games won in the post-season (playoffs) games 0: no wins If the team's post-season wins and losses are all zero, it implies that the team did not participate in the post-season (playoffs) that year.
+  dim  coaches.post_losses (number) -- the number of games lost in the post-season (playoffs) games 0: win all the games If the team's post-season wins and losses are all zero, it implies that the team did not participate in the post-season (playoffs) that year.
+  meas coaches.count (count)
+  meas coaches.sum_won (sum)
+  meas coaches.avg_won (avg)
+  meas coaches.min_won (min)
+  meas coaches.max_won (max)
+  meas coaches.sum_lost (sum)
+  meas coaches.avg_lost (avg)
+  meas coaches.min_lost (min)
+  meas coaches.max_lost (max)
+  meas coaches.sum_post_wins (sum)
+  meas coaches.avg_post_wins (avg)
+  meas coaches.min_post_wins (min)
+  meas coaches.max_post_wins (max)
+  meas coaches.sum_post_losses (sum)
+  meas coaches.avg_post_losses (avg)
+  meas coaches.min_post_losses (min)
+  meas coaches.max_post_losses (max)
+cube draft
+  dim  draft.id (number) -- the unique number to determine one row of the data
+  dim  draft.draftYear (number) -- which year does this draft happens
+  dim  draft.draftRound (number) -- the Round number of this draft If the value is 0, it means that there is no draft in this year 1 refers that this player was picked in the first round
+  dim  draft.draftSelection (number) -- the position that the player was picked 0：This signifies that it doesn't contain the draft information of this player 7：this player was selected in the 7th position in this round draftRound: 1; draftSelection: 7 represents: this player was selected in the round 1, 7th position.
+  dim  draft.draftOverall (number) -- The player's overall draft position for the year this is the overall draft rank of the player.
+  dim  draft.tmID (string) -- team name abbreviated name
+  dim  draft.firstName (string) -- the first name of the player
+  dim  draft.lastName (string) -- the last name of the player
+  dim  draft.suffixName (string) -- the suffix name of the player
+  dim  draft.playerID (string) -- ID number identifying the unique number of the player
+  dim  draft.draftFrom (string) -- the university that the drafted players come from the name of the university
+  dim  draft.lgID (string) -- the league name mainly categories: "NBA" & "ABA"
+  meas draft.count (count)
+  meas draft.sum_draftRound (sum)
+  meas draft.avg_draftRound (avg)
+  meas draft.min_draftRound (min)
+  meas draft.max_draftRound (max)
+  meas draft.sum_draftSelection (sum)
+  meas draft.avg_draftSelection (avg)
+  meas draft.min_draftSelection (min)
+  meas draft.max_draftSelection (max)
+  meas draft.sum_draftOverall (sum)
+  meas draft.avg_draftOverall (avg)
+  meas draft.min_draftOverall (min)
+  meas draft.max_draftOverall (max)
+cube player_allstar
+  dim  player_allstar.row_key (string)
+  dim  player_allstar.playerID (string) -- ID number identifying the unique number of the player
+  dim  player_allstar.last_name (string) -- the last name of the player
+  dim  player_allstar.first_name (string) -- the first name of the player
+  dim  player_allstar.season_id (number) -- the id number of the season
+  dim  player_allstar.conference (string) -- which conference that players belong to two categories: west; east
+  dim  player_allstar.league_id (string) -- the league name two categories: NBA; ABA
+  dim  player_allstar.games_played (number) -- how many all star games that this player played in this season mostly it's 1
+  dim  player_allstar.minutes (number) -- minutes of attendance 18：played in 18 minutes
+  dim  player_allstar.points (number) -- points 19: get 19 points； null --> doesn't get points
+  dim  player_allstar.o_rebounds (number) -- offense rebounds empty or null refers to none offense rebounds， 1: one offense rebound
+  dim  player_allstar.d_rebounds (number) -- defense rebounds empty or null refers to none defense rebounds， 1: one defense rebound
+  dim  player_allstar.rebounds (number) -- total rebounds empty or null refers to none total rebounds， 3: totally gets 3 rebounds including offence and defense rebounds commensense evidence: total rebounds = offense rebounds + defense rebounds
+  dim  player_allstar.assists (number) -- assistants null or empty refers to none 2: 2 assistants
+  dim  player_allstar.steals (number) -- steals null or empty refers to none 2: 2 steals
+  dim  player_allstar.blocks (number) -- blocks null or empty refers to none 2: 2 blocks
+  dim  player_allstar.turnovers (number) -- turnovers null or empty refers to none 2: 2 turnovers
+  dim  player_allstar.personal_fouls (number) -- personal fouls null or empty refers to none 2: 2 personal fouls
+  dim  player_allstar.fg_attempted (number) -- field goal attempted null or empty refers to none 2: 2 field goal attempts
+  dim  player_allstar.fg_made (number) -- field goal made null or empty refers to none 2: 2 field goal made
+  dim  player_allstar.ft_attempted (number) -- free throw attempted null or empty refers to none 2: 2 free throw attempts
+  dim  player_allstar.ft_made (number) -- free throw made null or empty refers to none 2: 2 free throw made
+  dim  player_allstar.three_attempted (number) -- three point attempted null or empty refers to none 2: 2 three point attempts
+  dim  player_allstar.three_made (number) -- three point made null or empty refers to none 2: 2 three point made
+  meas player_allstar.count (count)
+  meas player_allstar.sum_games_played (sum)
+  meas player_allstar.avg_games_played (avg)
+  meas player_allstar.min_games_played (min)
+  meas player_allstar.max_games_played (max)
+  meas player_allstar.sum_minutes (sum)
+  meas player_allstar.avg_minutes (avg)
+  meas player_allstar.min_minutes (min)
+  meas player_allstar.max_minutes (max)
+  meas player_allstar.sum_points (sum)
+  meas player_allstar.avg_points (avg)
+  meas player_allstar.min_points (min)
+  meas player_allstar.max_points (max)
+  meas player_allstar.sum_o_rebounds (sum)
+  meas player_allstar.avg_o_rebounds (avg)
+  meas player_allstar.min_o_rebounds (min)
+  meas player_allstar.max_o_rebounds (max)
+  meas player_allstar.sum_d_rebounds (sum)
+  meas player_allstar.avg_d_rebounds (avg)
+  meas player_allstar.min_d_rebounds (min)
+  meas player_allstar.max_d_rebounds (max)
+  meas player_allstar.sum_rebounds (sum)
+  meas player_allstar.avg_rebounds (avg)
+  meas player_allstar.min_rebounds (min)
+  meas player_allstar.max_rebounds (max)
+  meas player_allstar.sum_assists (sum)
+  meas player_allstar.avg_assists (avg)
+  meas player_allstar.min_assists (min)
+  meas player_allstar.max_assists (max)
+  meas player_allstar.sum_steals (sum)
+  meas player_allstar.avg_steals (avg)
+  meas player_allstar.min_steals (min)
+  meas player_allstar.max_steals (max)
+  meas player_allstar.sum_blocks (sum)
+  meas player_allstar.avg_blocks (avg)
+  meas player_allstar.min_blocks (min)
+  meas player_allstar.max_blocks (max)
+  meas player_allstar.sum_turnovers (sum)
+  meas player_allstar.avg_turnovers (avg)
+  meas player_allstar.min_turnovers (min)
+  meas player_allstar.max_turnovers (max)
+  meas player_allstar.sum_personal_fouls (sum)
+  meas player_allstar.avg_personal_fouls (avg)
+  meas player_allstar.min_personal_fouls (min)
+  meas player_allstar.max_personal_fouls (max)
+  meas player_allstar.sum_fg_attempted (sum)
+  meas player_allstar.avg_fg_attempted (avg)
+  meas player_allstar.min_fg_attempted (min)
+  meas player_allstar.max_fg_attempted (max)
+  meas player_allstar.sum_fg_made (sum)
+  meas player_allstar.avg_fg_made (avg)
+  meas player_allstar.min_fg_made (min)
+  meas player_allstar.max_fg_made (max)
+  meas player_allstar.sum_ft_attempted (sum)
+  meas player_allstar.avg_ft_attempted (avg)
+  meas player_allstar.min_ft_attempted (min)
+  meas player_allstar.max_ft_attempted (max)
+  meas player_allstar.sum_ft_made (sum)
+  meas player_allstar.avg_ft_made (avg)
+  meas player_allstar.min_ft_made (min)
+  meas player_allstar.max_ft_made (max)
+  meas player_allstar.sum_three_attempted (sum)
+  meas player_allstar.avg_three_attempted (avg)
+  meas player_allstar.min_three_attempted (min)
+  meas player_allstar.max_three_attempted (max)
+  meas player_allstar.sum_three_made (sum)
+  meas player_allstar.avg_three_made (avg)
+  meas player_allstar.min_three_made (min)
+  meas player_allstar.max_three_made (max)
+cube players
+  dim  players.playerID (string) -- ID number identifying the unique number of the player
+  dim  players.useFirst (string) -- not useful
+  dim  players.firstName (string) -- the first name of the player
+  dim  players.middleName (string) -- the middle name of the player
+  dim  players.lastName (string) -- the last name of the player
+  dim  players.nameGiven (string) -- not useful
+  dim  players.fullGivenName (string) -- not useful
+  dim  players.nameSuffix (string) -- the suffix name of the player
+  dim  players.nameNick (string)
+  dim  players.pos (string) -- the position of the player C: Center F: Forward G: Guard some player can have two positions simultaneously
+  dim  players.firstseason (number) -- nothing special
+  dim  players.lastseason (number) -- nothing special
+  dim  players.height (number) -- inch inch
+  dim  players.weight (number) -- lb null or empty means it doesn't have this information
+  dim  players.college (string) -- college null or empty means it doesn't have this information which colledge does this player graduate from
+  dim  players.collegeOther (string) -- the college that transferred from some players may have the record of transferring from other colleges
+  dim  players.birthDate (time) -- birthdate
+  dim  players.birthCity (string) -- birthcity null / empty refers to not recorded
+  dim  players.birthState (string) -- birth state
+  dim  players.birthCountry (string) -- birth country
+  dim  players.highSchool (string) -- high school null / empty refers to not recorded
+  dim  players.hsCity (string) -- high school city null / empty refers to not recorded
+  dim  players.hsState (string) -- high school state null / empty refers to not recorded
+  dim  players.hsCountry (string) -- high school country null / empty refers to not recorded
+  dim  players.deathDate (time) -- deathdate 0000-00-00 means this player is still alive within clear date： 2011-11-10, which means this guy was died on "2011-11-10"
+  dim  players.race (string) -- B：black, W: white null or empty: nothing
+  meas players.count (count)
+  meas players.sum_firstseason (sum)
+  meas players.avg_firstseason (avg)
+  meas players.min_firstseason (min)
+  meas players.max_firstseason (max)
+  meas players.sum_lastseason (sum)
+  meas players.avg_lastseason (avg)
+  meas players.min_lastseason (min)
+  meas players.max_lastseason (max)
+  meas players.sum_height (sum)
+  meas players.avg_height (avg)
+  meas players.min_height (min)
+  meas players.max_height (max)
+  meas players.sum_weight (sum)
+  meas players.avg_weight (avg)
+  meas players.min_weight (min)
+  meas players.max_weight (max)
+cube teams
+  dim  teams.row_key (string)
+  dim  teams.year (number) -- year
+  dim  teams.lgID (string) -- league name main categories: NBA, ABA
+  dim  teams.tmID (string) -- team id abbreviated name
+  dim  teams.franchID (string) -- not useful
+  dim  teams.confID (string) -- not useful
+  dim  teams.divID (string) -- division ID
+  dim  teams.rank (number) -- rank less is better
+  dim  teams.confRank (number) -- not useful
+  dim  teams.playoff (string) -- another name: post season for brevity, if the value is not null or empty, it means this team attends the playoffs, otherwise, means not attend
+  dim  teams.name (string) -- full name of the team
+  dim  teams.o_fgm (number) -- how many offense field goal made by this team in this season
+  dim  teams.o_ftm (number) -- how many offense free throw made by this team in this season
+  dim  teams.o_pts (number) -- offense points
+  dim  teams.d_pts (number) -- defense points
+  dim  teams.homeWon (number) -- wins in the home
+  dim  teams.homeLost (number) -- loses in the home
+  dim  teams.awayWon (number) -- wins in the away
+  dim  teams.awayLost (number) -- loses in the away
+  dim  teams.won (number) -- total wins of this team in this year.
+  dim  teams.lost (number) -- total losts of this team in this year.
+  dim  teams.games (number) -- total number of games that this team played in this year (season)
+  dim  teams.arena (string) -- arena null or empty refers to the fact that this team doesn't have individual arenas, otherwise, it has individual arenas
+  meas teams.count (count)
+  meas teams.sum_rank (sum)
+  meas teams.avg_rank (avg)
+  meas teams.min_rank (min)
+  meas teams.max_rank (max)
+  meas teams.sum_confRank (sum)
+  meas teams.avg_confRank (avg)
+  meas teams.min_confRank (min)
+  meas teams.max_confRank (max)
+  meas teams.sum_o_fgm (sum)
+  meas teams.avg_o_fgm (avg)
+  meas teams.min_o_fgm (min)
+  meas teams.max_o_fgm (max)
+  meas teams.sum_o_ftm (sum)
+  meas teams.avg_o_ftm (avg)
+  meas teams.min_o_ftm (min)
+  meas teams.max_o_ftm (max)
+  meas teams.sum_o_pts (sum)
+  meas teams.avg_o_pts (avg)
+  meas teams.min_o_pts (min)
+  meas teams.max_o_pts (max)
+  meas teams.sum_d_pts (sum)
+  meas teams.avg_d_pts (avg)
+  meas teams.min_d_pts (min)
+  meas teams.max_d_pts (max)
+  meas teams.sum_homeWon (sum)
+  meas teams.avg_homeWon (avg)
+  meas teams.min_homeWon (min)
+  meas teams.max_homeWon (max)
+  meas teams.sum_homeLost (sum)
+  meas teams.avg_homeLost (avg)
+  meas teams.min_homeLost (min)
+  meas teams.max_homeLost (max)
+  meas teams.sum_awayWon (sum)
+  meas teams.avg_awayWon (avg)
+  meas teams.min_awayWon (min)
+  meas teams.max_awayWon (max)
+  meas teams.sum_awayLost (sum)
+  meas teams.avg_awayLost (avg)
+  meas teams.min_awayLost (min)
+  meas teams.max_awayLost (max)
+  meas teams.sum_won (sum)
+  meas teams.avg_won (avg)
+  meas teams.min_won (min)
+  meas teams.max_won (max)
+  meas teams.sum_lost (sum)
+  meas teams.avg_lost (avg)
+  meas teams.min_lost (min)
+  meas teams.max_lost (max)
+  meas teams.sum_games (sum)
+  meas teams.avg_games (avg)
+  meas teams.min_games (min)
+  meas teams.max_games (max)
+cube awards_coaches
+  dim  awards_coaches.id (number) -- id of this row of data
+  dim  awards_coaches.year (number) -- which year did the coach receive the honor?
+  dim  awards_coaches.coachID (string) -- id number of the coaches
+  dim  awards_coaches.award (string) -- the award names mainly categories: "NBA" & "ABA"
+  dim  awards_coaches.lgID (string) -- the name of the league mainly categories: "NBA" & "ABA"
+  dim  awards_coaches.note (string) -- special notification ”null“ refers to that no special things ”tie“ represents that coaches are tied for some awards
+  meas awards_coaches.count (count)
+cube players_teams
+  dim  players_teams.id (number) -- the unique number to identify this record
+  dim  players_teams.playerID (string) -- ID number identifying the unique number of the player
+  dim  players_teams.year (number) -- year
+  dim  players_teams.stint (number) -- the period of the time player spent played for this team
+  dim  players_teams.tmID (string) -- team name abbreviated name
+  dim  players_teams.lgID (string)
+  dim  players_teams.GP (number) -- game presentatons (attendance) min: 0, max: 82 if this number is equal to 82, means full attendance
+  dim  players_teams.GS (number) -- game starting min: 0, max: 82, when GP = GS, it means that this player plays as the stating lineup fully.
+  dim  players_teams.minutes (number) -- minutes
+  dim  players_teams.points (number) -- points
+  dim  players_teams.oRebounds (number) -- offense rebounds empty or null refers to none offense rebounds， 1: one offense rebound
+  dim  players_teams.dRebounds (number) -- defense rebounds empty or null refers to none defense rebounds， 1: one defense rebound
+  dim  players_teams.rebounds (number) -- total rebounds empty or null refers to none total rebounds， 3: totally gets 3 rebounds including offense and defense rebounds commensense evidence: total rebounds = offense rebounds + defense rebounds
+  dim  players_teams.assists (number) -- assistants null or empty refers to none 2: 2 assistants
+  dim  players_teams.steals (number) -- steals null or empty refers to none 2: 2 steals
+  dim  players_teams.blocks (number) -- blocks null or empty refers to none 2: 2 blocks
+  dim  players_teams.turnovers (number) -- turnovers null or empty refers to none 2: 2 turnovers
+  dim  players_teams.PF (number) -- personal fouls null or empty refers to none 2: 2 personal fouls
+  dim  players_teams.fgAttempted (number) -- field goal attempted null or empty refers to none 2: 2 field goal attempts
+  dim  players_teams.fgMade (number) -- field goal made null or empty refers to none 2: 2 field goal made
+  dim  players_teams.ftAttempted (number) -- free throw attempted null or empty refers to none 2: 2 free throw attempts
+  dim  players_teams.ftMade (number) -- free throw made null or empty refers to none 2: 2 free throw made
+  dim  players_teams.threeAttempted (number) -- three point attempted null or empty refers to none 2: 2 three point attempts
+  dim  players_teams.threeMade (number) -- three point made null or empty refers to none 2: 2 three point made
+  dim  players_teams.PostGP (number) -- post season game presentations 0: this player doesn't present in the post season (playoffs)
+  dim  players_teams.PostGS (number) -- post season game starting
+  dim  players_teams.PostMinutes (number) -- post season minutes
+  dim  players_teams.PostPoints (number) -- post season points
+  dim  players_teams.PostoRebounds (number) -- post season offense rebounds null or empty refers to none 1: 1 offense rebounds in the post season
+  dim  players_teams.PostdRebounds (number) -- post season defense rebounds null or empty refers to none 1: 1 defense rebounds in the post season
+  dim  players_teams.PostRebounds (number) -- post season defense rebounds null or empty refers to none 3: 3 rebounds in the post season totally
+  dim  players_teams.PostAssists (number) -- null or empty refers to none 1: 1 assistance in the post season
+  dim  players_teams.PostSteals (number) -- null or empty refers to none 1: 1 offense steals in the post season
+  dim  players_teams.PostBlocks (number) -- null or empty refers to none 1: 1 block in the post season
+  dim  players_teams.PostTurnovers (number) -- null or empty refers to none 1: 1 turnover in the post season
+  dim  players_teams.PostPF (number) -- null or empty refers to none 1: 2 personal fouls in the post season
+  dim  players_teams.PostfgAttempted (number) -- null or empty refers to none 1: 1 field goal attempts in the post season
+  dim  players_teams.PostfgMade (number) -- null or empty refers to none 1: 1 field goal made in the post season
+  dim  players_teams.PostftAttempted (number) -- null or empty refers to none 1: 1 free throw attempts in the post season
+  dim  players_teams.PostftMade (number) -- null or empty refers to none 1: 1 free throw made in the post season
+  dim  players_teams.PostthreeAttempted (number) -- null or empty refers to none 1: 1 three point attempts in the post season
+  dim  players_teams.PostthreeMade (number) -- null or empty refers to none 1: 1 three point made in the post season
+  dim  players_teams.note (string)
+  meas players_teams.count (count)
+  meas players_teams.sum_stint (sum)
+  meas players_teams.avg_stint (avg)
+  meas players_teams.min_stint (min)
+  meas players_teams.max_stint (max)
+  meas players_teams.sum_GP (sum)
+  meas players_teams.avg_GP (avg)
+  meas players_teams.min_GP (min)
+  meas players_teams.max_GP (max)
+  meas players_teams.sum_GS (sum)
+  meas players_teams.avg_GS (avg)
+  meas players_teams.min_GS (min)
+  meas players_teams.max_GS (max)
+  meas players_teams.sum_minutes (sum)
+  meas players_teams.avg_minutes (avg)
+  meas players_teams.min_minutes (min)
+  meas players_teams.max_minutes (max)
+  meas players_teams.sum_points (sum)
+  meas players_teams.avg_points (avg)
+  meas players_teams.min_points (min)
+  meas players_teams.max_points (max)
+  meas players_teams.sum_oRebounds (sum)
+  meas players_teams.avg_oRebounds (avg)
+  meas players_teams.min_oRebounds (min)
+  meas players_teams.max_oRebounds (max)
+  meas players_teams.sum_dRebounds (sum)
+  meas players_teams.avg_dRebounds (avg)
+  meas players_teams.min_dRebounds (min)
+  meas players_teams.max_dRebounds (max)
+  meas players_teams.sum_rebounds (sum)
+  meas players_teams.avg_rebounds (avg)
+  meas players_teams.min_rebounds (min)
+  meas players_teams.max_rebounds (max)
+  meas players_teams.sum_assists (sum)
+  meas players_teams.avg_assists (avg)
+  meas players_teams.min_assists (min)
+  meas players_teams.max_assists (max)
+  meas players_teams.sum_steals (sum)
+  meas players_teams.avg_steals (avg)
+  meas players_teams.min_steals (min)
+  meas players_teams.max_steals (max)
+  meas players_teams.sum_blocks (sum)
+  meas players_teams.avg_blocks (avg)
+  meas players_teams.min_blocks (min)
+  meas players_teams.max_blocks (max)
+  meas players_teams.sum_turnovers (sum)
+  meas players_teams.avg_turnovers (avg)
+  meas players_teams.min_turnovers (min)
+  meas players_teams.max_turnovers (max)
+  meas players_teams.sum_PF (sum)
+  meas players_teams.avg_PF (avg)
+  meas players_teams.min_PF (min)
+  meas players_teams.max_PF (max)
+  meas players_teams.sum_fgAttempted (sum)
+  meas players_teams.avg_fgAttempted (avg)
+  meas players_teams.min_fgAttempted (min)
+  meas players_teams.max_fgAttempted (max)
+  meas players_teams.sum_fgMade (sum)
+  meas players_teams.avg_fgMade (avg)
+  meas players_teams.min_fgMade (min)
+  meas players_teams.max_fgMade (max)
+  meas players_teams.sum_ftAttempted (sum)
+  meas players_teams.avg_ftAttempted (avg)
+  meas players_teams.min_ftAttempted (min)
+  meas players_teams.max_ftAttempted (max)
+  meas players_teams.sum_ftMade (sum)
+  meas players_teams.avg_ftMade (avg)
+  meas players_teams.min_ftMade (min)
+  meas players_teams.max_ftMade (max)
+  meas players_teams.sum_threeAttempted (sum)
+  meas players_teams.avg_threeAttempted (avg)
+  meas players_teams.min_threeAttempted (min)
+  meas players_teams.max_threeAttempted (max)
+  meas players_teams.sum_threeMade (sum)
+  meas players_teams.avg_threeMade (avg)
+  meas players_teams.min_threeMade (min)
+  meas players_teams.max_threeMade (max)
+  meas players_teams.sum_PostGP (sum)
+  meas players_teams.avg_PostGP (avg)
+  meas players_teams.min_PostGP (min)
+  meas players_teams.max_PostGP (max)
+  meas players_teams.sum_PostGS (sum)
+  meas players_teams.avg_PostGS (avg)
+  meas players_teams.min_PostGS (min)
+  meas players_teams.max_PostGS (max)
+  meas players_teams.sum_PostMinutes (sum)
+  meas players_teams.avg_PostMinutes (avg)
+  meas players_teams.min_PostMinutes (min)
+  meas players_teams.max_PostMinutes (max)
+  meas players_teams.sum_PostPoints (sum)
+  meas players_teams.avg_PostPoints (avg)
+  meas players_teams.min_PostPoints (min)
+  meas players_teams.max_PostPoints (max)
+  meas players_teams.sum_PostoRebounds (sum)
+  meas players_teams.avg_PostoRebounds (avg)
+  meas players_teams.min_PostoRebounds (min)
+  meas players_teams.max_PostoRebounds (max)
+  meas players_teams.sum_PostdRebounds (sum)
+  meas players_teams.avg_PostdRebounds (avg)
+  meas players_teams.min_PostdRebounds (min)
+  meas players_teams.max_PostdRebounds (max)
+  meas players_teams.sum_PostRebounds (sum)
+  meas players_teams.avg_PostRebounds (avg)
+  meas players_teams.min_PostRebounds (min)
+  meas players_teams.max_PostRebounds (max)
+  meas players_teams.sum_PostAssists (sum)
+  meas players_teams.avg_PostAssists (avg)
+  meas players_teams.min_PostAssists (min)
+  meas players_teams.max_PostAssists (max)
+  meas players_teams.sum_PostSteals (sum)
+  meas players_teams.avg_PostSteals (avg)
+  meas players_teams.min_PostSteals (min)
+  meas players_teams.max_PostSteals (max)
+  meas players_teams.sum_PostBlocks (sum)
+  meas players_teams.avg_PostBlocks (avg)
+  meas players_teams.min_PostBlocks (min)
+  meas players_teams.max_PostBlocks (max)
+  meas players_teams.sum_PostTurnovers (sum)
+  meas players_teams.avg_PostTurnovers (avg)
+  meas players_teams.min_PostTurnovers (min)
+  meas players_teams.max_PostTurnovers (max)
+  meas players_teams.sum_PostPF (sum)
+  meas players_teams.avg_PostPF (avg)
+  meas players_teams.min_PostPF (min)
+  meas players_teams.max_PostPF (max)
+  meas players_teams.sum_PostfgAttempted (sum)
+  meas players_teams.avg_PostfgAttempted (avg)
+  meas players_teams.min_PostfgAttempted (min)
+  meas players_teams.max_PostfgAttempted (max)
+  meas players_teams.sum_PostfgMade (sum)
+  meas players_teams.avg_PostfgMade (avg)
+  meas players_teams.min_PostfgMade (min)
+  meas players_teams.max_PostfgMade (max)
+  meas players_teams.sum_PostftAttempted (sum)
+  meas players_teams.avg_PostftAttempted (avg)
+  meas players_teams.min_PostftAttempted (min)
+  meas players_teams.max_PostftAttempted (max)
+  meas players_teams.sum_PostftMade (sum)
+  meas players_teams.avg_PostftMade (avg)
+  meas players_teams.min_PostftMade (min)
+  meas players_teams.max_PostftMade (max)
+  meas players_teams.sum_PostthreeAttempted (sum)
+  meas players_teams.avg_PostthreeAttempted (avg)
+  meas players_teams.min_PostthreeAttempted (min)
+  meas players_teams.max_PostthreeAttempted (max)
+  meas players_teams.sum_PostthreeMade (sum)
+  meas players_teams.avg_PostthreeMade (avg)
+  meas players_teams.min_PostthreeMade (min)
+  meas players_teams.max_PostthreeMade (max)
+cube series_post
+  dim  series_post.id (number) -- unique number of this record
+  dim  series_post.year (number) -- year
+  dim  series_post.round (string) -- round known abbreviations： F：final SF: semi-final QF：quater-final 1/4 DF：division-final DSF：division semi-final
+  dim  series_post.series (string) -- not useful
+  dim  series_post.tmIDWinner (string) -- team id winner
+  dim  series_post.lgIDWinner (string) -- league id winner
+  dim  series_post.tmIDLoser (string) -- team id loser
+  dim  series_post.lgIDLoser (string) -- league id loser
+  dim  series_post.W (number) -- wins
+  dim  series_post.L (number) -- loses
+  meas series_post.count (count)
+  meas series_post.sum_W (sum)
+  meas series_post.avg_W (avg)
+  meas series_post.min_W (min)
+  meas series_post.max_W (max)
+  meas series_post.sum_L (sum)
+  meas series_post.avg_L (avg)
+  meas series_post.min_L (min)
+  meas series_post.max_L (max)

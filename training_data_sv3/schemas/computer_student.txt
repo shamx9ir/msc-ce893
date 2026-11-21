@@ -1,0 +1,30 @@
+cube course
+  dim  course.course_id (number) -- unique id number identifying courses
+  dim  course.courseLevel (string) -- course level  Level_300: basic or medium undergraduate courses.  Level_400: high-level or harder undergraduate course.  Level_500: professional or master/graduate courses
+  meas course.count (count)
+cube person
+  dim  person.p_id (number) -- the unique number identifying each person
+  dim  person.professor (number) -- whether the person is a professor 0: professor 1: student
+  dim  person.student (number) -- whether the person is a student 0: professor 1: student
+  dim  person.hasPosition (string) -- whether the person has a position in the faculty 0: the person is not a faculty member Common Sense evidence: faculty_aff: affiliated faculty faculty_eme: faculty employee
+  dim  person.inPhase (string) -- the phase of qualification the person is undergoing 0: the person is not undergoing the phase of qualification
+  dim  person.yearsInProgram (string) -- the year of the program the person is at 0: the person is not in any programs Common Sense evidence: yearX means the person is on the Xth year of the program
+  meas person.count (count)
+  meas person.sum_professor (sum)
+  meas person.avg_professor (avg)
+  meas person.min_professor (min)
+  meas person.max_professor (max)
+  meas person.sum_student (sum)
+  meas person.avg_student (avg)
+  meas person.min_student (min)
+  meas person.max_student (max)
+cube advisedBy
+  dim  advisedBy.row_key (string)
+  dim  advisedBy.p_id (number) -- id number identifying each person
+  dim  advisedBy.p_id_dummy (number) -- the id number identifying the advisor
+  meas advisedBy.count (count)
+cube taughtBy
+  dim  taughtBy.row_key (string)
+  dim  taughtBy.course_id (number) -- the identification number identifying each course
+  dim  taughtBy.p_id (number) -- the identification number identifying each person
+  meas taughtBy.count (count)

@@ -1,0 +1,116 @@
+cube customers
+  dim  customers.CustomerID (number) -- the unique id for the customer
+  dim  customers.First (string) -- the first name of the customer
+  dim  customers.Last (string) -- the last name of the customer
+  dim  customers.StreetAddress (string) -- the address of the customer
+  dim  customers.City (string) -- the city where the customer lives
+  dim  customers.State (string) -- the state code please refer to https://www23.statcan.gc.ca/imdb/p3VD.pl?Function=getVD&TVD=53971 and mention its corresponding state name in the question. i.e. New York-- NY
+  dim  customers.ZipCode (number) -- the zip code
+  dim  customers.Email (string) -- the customer's email
+  dim  customers.PhoneNumber (string) -- the customer's phone number
+  dim  customers.FirstPurchaseDate (time) -- the first purchase date of the customer yyyy-mm-dd
+  dim  customers.SubscribedToEmailList (string) -- whether the customer subscribe to the email list 'true' means the user permits the company to send regular emails to them.
+  dim  customers.Gender (string) -- the customer's gender
+  meas customers.count (count)
+  meas customers.sum_ZipCode (sum)
+  meas customers.avg_ZipCode (avg)
+  meas customers.min_ZipCode (min)
+  meas customers.max_ZipCode (max)
+cube geolocation
+  dim  geolocation.LocationID (number) -- the id of the location
+  dim  geolocation.Latitude (number) -- the latitude of the location
+  dim  geolocation.Longitude (number) -- the longitude of the location precise location / coordinate = POINT(latitude, longitude)
+  meas geolocation.count (count)
+  meas geolocation.sum_Latitude (sum)
+  meas geolocation.avg_Latitude (avg)
+  meas geolocation.min_Latitude (min)
+  meas geolocation.max_Latitude (max)
+  meas geolocation.sum_Longitude (sum)
+  meas geolocation.avg_Longitude (avg)
+  meas geolocation.min_Longitude (min)
+  meas geolocation.max_Longitude (max)
+cube location
+  dim  location.LocationID (number) -- the unique id for the location
+  dim  location.LocationName (string) -- the name of the location
+  dim  location.StreetAddress (string) -- the street address
+  dim  location.City (string) -- the city where the location locates
+  dim  location.State (string) -- the state code
+  dim  location.ZipCode (number) -- the zip code of the location
+  meas location.count (count)
+  meas location.sum_ZipCode (sum)
+  meas location.avg_ZipCode (avg)
+  meas location.min_ZipCode (min)
+  meas location.max_ZipCode (max)
+cube rootbeerbrand
+  dim  rootbeerbrand.BrandID (number) -- the unique id for the brand
+  dim  rootbeerbrand.BrandName (string) -- the brand name
+  dim  rootbeerbrand.FirstBrewedYear (number) -- the first brewed year of the brand brand with earlier first brewed year has a much longer brewed history
+  dim  rootbeerbrand.BreweryName (string) -- the brewery name
+  dim  rootbeerbrand.City (string) -- the city where the brewery locates
+  dim  rootbeerbrand.State (string) -- the state code
+  dim  rootbeerbrand.Country (string) -- the country where the brewery locates can find its corresponding continent. e.g., U.S.--> North America
+  dim  rootbeerbrand.Description (string) -- the description of the brand
+  dim  rootbeerbrand.CaneSugar (string) -- whether the drink contains cane sugar
+  dim  rootbeerbrand.CornSyrup (string) -- whether the drink contains the corn syrup
+  dim  rootbeerbrand.Honey (string) -- whether the drink contains the honey if the beer has honey, it means this beer is sweeter or has sweetness
+  dim  rootbeerbrand.ArtificialSweetener (string) -- whether the drink contains the artificial sweetener if the beer has artificial sweetener, it means this beer is sweeter or has sweetness
+  dim  rootbeerbrand.Caffeinated (string) -- whether the drink is caffeinated
+  dim  rootbeerbrand.Alcoholic (string) -- whether the drink is alcoholic
+  dim  rootbeerbrand.AvailableInCans (string) -- whether the drink is available in cans
+  dim  rootbeerbrand.AvailableInBottles (string) -- whether the drink is available in bottles
+  dim  rootbeerbrand.AvailableInKegs (string) -- whether the drink is available in kegs
+  dim  rootbeerbrand.Website (string) -- the website of the brand
+  dim  rootbeerbrand.FacebookPage (string) -- the facebook page of the brand if not, it means this brand doesn't advertise on facebook
+  dim  rootbeerbrand.Twitter (string) -- the twitter of the brand if not, it means this brand doesn't advertise on twitter
+  dim  rootbeerbrand.WholesaleCost (number) -- the wholesale cost
+  dim  rootbeerbrand.CurrentRetailPrice (number) -- the current retail price The unit profit available to wholesalers = current retail price - wholesale cost
+  meas rootbeerbrand.count (count)
+  meas rootbeerbrand.sum_FirstBrewedYear (sum)
+  meas rootbeerbrand.avg_FirstBrewedYear (avg)
+  meas rootbeerbrand.min_FirstBrewedYear (min)
+  meas rootbeerbrand.max_FirstBrewedYear (max)
+  meas rootbeerbrand.sum_WholesaleCost (sum)
+  meas rootbeerbrand.avg_WholesaleCost (avg)
+  meas rootbeerbrand.min_WholesaleCost (min)
+  meas rootbeerbrand.max_WholesaleCost (max)
+  meas rootbeerbrand.sum_CurrentRetailPrice (sum)
+  meas rootbeerbrand.avg_CurrentRetailPrice (avg)
+  meas rootbeerbrand.min_CurrentRetailPrice (min)
+  meas rootbeerbrand.max_CurrentRetailPrice (max)
+cube rootbeer
+  dim  rootbeer.RootBeerID (number) -- the unique id for the root beer
+  dim  rootbeer.BrandID (number) -- the brand id
+  dim  rootbeer.ContainerType (string) -- the type of the container
+  dim  rootbeer.LocationID (number) -- the location id of the selling company
+  dim  rootbeer.PurchaseDate (time) -- the purchase date of the root beer
+  meas rootbeer.count (count)
+cube rootbeerreview
+  dim  rootbeerreview.row_key (string)
+  dim  rootbeerreview.CustomerID (number) -- the id of the customer
+  dim  rootbeerreview.BrandID (number) -- the id of the brand
+  dim  rootbeerreview.StarRating (number) -- the star rating of the root beer root beer with higher star rating has higher market evaluation and acceptance
+  dim  rootbeerreview.ReviewDate (time) -- the review date yyyy-mm-dd
+  dim  rootbeerreview.Review (string) -- the specific review content
+  meas rootbeerreview.count (count)
+  meas rootbeerreview.sum_StarRating (sum)
+  meas rootbeerreview.avg_StarRating (avg)
+  meas rootbeerreview.min_StarRating (min)
+  meas rootbeerreview.max_StarRating (max)
+cube transaction
+  dim  transaction.TransactionID (number) -- the unique id for the transaction
+  dim  transaction.CreditCardNumber (number) -- the number of the credit card used for payment
+  dim  transaction.CustomerID (number) -- the customer id
+  dim  transaction.TransactionDate (time) -- the transaction date yyyy-mm-dd
+  dim  transaction.CreditCardType (string) -- the credit card type
+  dim  transaction.LocationID (number) -- the location id of the selling company
+  dim  transaction.RootBeerID (number) -- the root beer id
+  dim  transaction.PurchasePrice (number) -- the unit purchase price of the root beer us dollars
+  meas transaction.count (count)
+  meas transaction.sum_CreditCardNumber (sum)
+  meas transaction.avg_CreditCardNumber (avg)
+  meas transaction.min_CreditCardNumber (min)
+  meas transaction.max_CreditCardNumber (max)
+  meas transaction.sum_PurchasePrice (sum)
+  meas transaction.avg_PurchasePrice (avg)
+  meas transaction.min_PurchasePrice (min)
+  meas transaction.max_PurchasePrice (max)

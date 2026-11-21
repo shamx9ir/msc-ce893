@@ -6,7 +6,11 @@ examples, and the trained models almost stopped calling the tool. This version:
   2. searches with a short, lower-case piece of the wording (as a model would type it after
      reading the question), not with the exact stored value; it falls back to longer text when
      the short piece does not bring the right value into the first 20 results,
-  3. turns a share of the examples into recovery examples: the first run_query uses a plausible
+  3. (--second-filter-share) for examples with two lookups, the recovery can be on the second filter:
+     the model searched the first value (which was right), the query still returns 0 rows, and the
+     trained next step searches the OTHER filter instead of repeating the first search. This targets
+     the search/run loops seen in the first sv2 adapter.
+  4. turns a share of the examples into recovery examples: the first run_query uses a plausible
      wrong spelling (the question's own casing, or a case change), gets 0 rows, then the model
      calls search_values and reruns with the stored value. Only queries with dimensions are used,
      so an empty result is certain, and the wrong spelling is checked not to be stored.
@@ -70,13 +74,17 @@ def main() -> None:
     ap.add_argument("--bird-train", type=Path, default=Path("data/bird_train/train_databases"))
     ap.add_argument("--recovery-share", type=float, default=0.18,
                     help="share of eligible examples turned into 0-rows -> search -> retry examples")
+    ap.add_argument("--second-filter-share", type=float, default=0.0,
+                    help="share of the examples with two lookups whose recovery is on the SECOND filter: search A, "
+                         "run_query with B misspelt -> 0 rows, then search B (not A again) and fix the query")
     ap.add_argument("--max-searches", type=int, default=2)
     ap.add_argument("--seed", type=int, default=7)
     args = ap.parse_args()
     rng = random.Random(args.seed)
+    rng2 = random.Random(args.seed + 1)
     recs = [json.loads(l) for l in open(args.data / "verified.jsonl", encoding="utf-8")]
     cons, maps = {}, {}
-    stats = {"filters": 0, "searched": 0, "fallback_full": 0, "not_found": 0, "recovery": 0}
+    stats = {"filters": 0, "searched": 0, "fallback_full": 0, "not_found": 0, "recovery": 0, "second_filter": 0}
     for r in recs:
         r["searches"] = []
         r.pop("recovery", None)
@@ -116,8 +124,14 @@ def main() -> None:
                 stats["not_found"] += 1
         # recovery: only for non-aggregate queries (dimensions, no measures), so 0 rows is certain
         q = r["cube_query"]
-        if r["searches"] and q.get("dimensions") and not q.get("measures") and rng.random() < args.recovery_share:
-            s = r["searches"][0]
+        s = None
+        if r["searches"] and q.get("dimensions") and not q.get("measures"):
+            draw = rng.random()  # drawn as before, so --second-filter-share 0 reproduces training_data_sv2
+            if len(r["searches"]) >= 2 and rng2.random() < args.second_filter_share:
+                s = r["searches"][1]  # the value searched first was right; the empty result comes from another filter
+            elif draw < args.recovery_share:
+                s = r["searches"][0]
+        if s:
             t, c = maps[db][s["dimension"]]
             right = next(f["values"][0] for f in q["filters"] if isinstance(f, dict) and f.get("member") == s["dimension"]
                          and f.get("operator") == "equals")
@@ -126,6 +140,7 @@ def main() -> None:
             if wrong:
                 r["recovery"] = {"member": s["dimension"], "wrong": wrong, "right": right}
                 stats["recovery"] += 1
+                stats["second_filter"] += s is not r["searches"][0]
     args.out.mkdir(parents=True, exist_ok=True)
     with open(args.out / "verified.jsonl", "w", encoding="utf-8") as fh:
         for r in recs:

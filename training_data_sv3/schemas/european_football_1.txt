@@ -1,0 +1,28 @@
+cube divisions
+  dim  divisions.division (string) -- division id
+  dim  divisions.name (string) -- name of the division
+  dim  divisions.country (string) -- country of the division
+  meas divisions.count (count)
+cube matchs
+  dim  matchs.row_key (string)
+  dim  matchs.Div (string) -- Division Id
+  dim  matchs.Date (time) -- Match Date YYYY-MM-DD
+  dim  matchs.HomeTeam (string) -- Name of Home Team
+  dim  matchs.AwayTeam (string) -- Name of Away Team
+  dim  matchs.FTHG (number) -- Final-time Home-team Goals
+  dim  matchs.FTAG (number) -- Final-time Away-team Goals
+  dim  matchs.FTR (string) -- Final-time Results H stands for home victory, which means FTHG is higher than FTAG A stands for away victory, which means FTAG is higher than FTHG D stands for draft, which means FTHG equals to FTAG
+  dim  matchs.season (number) -- season of the match
+  meas matchs.count (count)
+  meas matchs.sum_FTHG (sum)
+  meas matchs.avg_FTHG (avg)
+  meas matchs.min_FTHG (min)
+  meas matchs.max_FTHG (max)
+  meas matchs.sum_FTAG (sum)
+  meas matchs.avg_FTAG (avg)
+  meas matchs.min_FTAG (min)
+  meas matchs.max_FTAG (max)
+  meas matchs.sum_season (sum)
+  meas matchs.avg_season (avg)
+  meas matchs.min_season (min)
+  meas matchs.max_season (max)
