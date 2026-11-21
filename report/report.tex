@@ -14,7 +14,7 @@
 \vfill
 \begin{minipage}{0.88\linewidth}
 \color{essexpurple}\rule{\linewidth}{1.2pt}\par\smallskip
-\textbf{Summary.} A local Qwen2.5-Coder model answers questions about a database by writing queries for a Cube semantic layer, inside a tool-using agent built with Google's ADK. Fine-tuning the same model with a LoRA adapter, while keeping the prompt and tools identical, raised strict execution accuracy on 332 held-out BIRD questions, asked without BIRD's hint, from 21.4\% to 36.7\% (7B) and from 27.4\% to 40.7\% (14B). A LoRA trained on a shorter prompt kept most of that gain while sending 2.4 times fewer prompt tokens per model call.
+\textbf{Summary.} A local Qwen2.5-Coder model answers questions about a database by writing queries for a Cube semantic layer, inside a tool-using agent built with Google's ADK. Fine-tuning the same model with a LoRA adapter, while keeping the prompt and tools identical, raised strict execution accuracy on 332 held-out BIRD questions, asked without BIRD's hint, from 21.4\% to 36.7\% (7B) and from 27.4\% to 40.7\% (14B). A LoRA trained on a shorter prompt matched that accuracy while sending 2.4 times fewer prompt tokens per model call.
 \par\smallskip\color{essexpurple}\rule{\linewidth}{1.2pt}
 \end{minipage}
 \end{center}
@@ -201,11 +201,11 @@ The test split and scoring rule were frozen first; the harness was developed on 
 \midrule
 7B harness only (baseline) & 21.4 & 27.7 & 15,929 & 4.1 & 3.5\,/\,2.3\,/\,6.8 & 121 & --\\
 7B LoRA + harness & \textbf{36.7} & \textbf{40.7} & 7,672 & 2.1 & 1.3\,/\,1.2\,/\,1.7 & 104 & $5{\times}10^{-8}$\\
-7B lean LoRA & 41.9 & 45.5 & 3,257 & 2.2 & 1.3\,/\,1.2\,/\,1.6 & 109 & $1{\times}10^{-6}$\\
+7B lean LoRA & 34.6 & 36.7 & 3,242 & 2.2 & 1.4\,/\,1.2\,/\,1.5 & 110 & $3{\times}10^{-6}$\\
 \midrule
 14B harness only (baseline) & 27.4 & 35.8 & 11,952 & 3.2 & 4.6\,/\,3.8\,/\,7.0 & 67 & --\\
-14B LoRA + harness & \textbf{40.7} & \textbf{45.5} & 7,344 & 2.0 & 2.4\,/\,2.3\,/\,3.2 & 61 & $2{\times}10^{-7}$\\
-14B lean LoRA & 47.6 & \textbf{57.2} & 3,153 & 2.1 & 2.4\,/\,2.1\,/\,3.1 & 64 & $2{\times}10^{-12}$\\
+14B LoRA + harness & \textbf{40.7} & 45.5 & 7,344 & 2.0 & 2.4\,/\,2.3\,/\,3.2 & 61 & $2{\times}10^{-7}$\\
+14B lean LoRA & 40.1 & \textbf{46.1} & 2,988 & 2.0 & 2.3\,/\,2.2\,/\,3.3 & 65 & $1{\times}10^{-6}$\\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -221,13 +221,12 @@ The test split and scoring rule were frozen first; the harness was developed on 
 The adapter is the main effect (Table~\ref{tab:main}, Fig.~\ref{fig:main}). At 7B it raised strict accuracy by 15.4 points: 70 questions became correct and 19 became wrong. At 14B the gain was 13.3 points (58 vs 14). The 7B LoRA beats the 14B baseline by 9.3 points ($p{=}0.0009$), while the 14B LoRA is only 3.9 points above the 7B LoRA ($p{=}0.09$, not significant). The baseline 14B model has a much higher relaxed than strict score (35.8 vs 27.4): it often returns the right rows with extra columns, a habit the adapter mostly removed.
 
 
-% TODO(no-hint): update with the no-hint prompt-offloading runs
-Fig.~\ref{fig:offload} answers the second part of the RQ. The lean LoRA sends 1.5k prompt tokens per call instead of 3.6--3.9k and loses 2.1 points at 14B ($p{=}0.21$, n.s.) but 4.5 points at 7B ($p{=}0.008$). Removing the schema entirely costs much more (14B: 38.3\%), because the model then invents members; adding the short schema back to the noschema adapter recovers 47.9\% (14B). A full-prompt LoRA given the lean prompt without retraining scored 0\%: the adapter learned its prompt, not the task in general.
+Fig.~\ref{fig:offload} answers the second part of the RQ. The lean LoRA sends 1.5k prompt tokens per call instead of 3.6k and loses only 2.1 points at 7B ($p{=}0.30$) and 0.6 at 14B ($p{=}0.83$), neither significant. Removing the schema entirely costs much more (7B: 18.1\%, 14B: 24.7\%), because the model then invents members (an ``unknown member'' error in 114 of 332 14B runs); with the short schema back, the noschema adapter matches the full LoRA (37.0\% and 41.0\%). A full-prompt LoRA given the lean prompt without retraining scored 0\%: the adapter learned its prompt, not the task in general.
 
 \begin{figure}[!htbp]
 \centering
 \includegraphics[width=0.74\linewidth]{figures/fig08_offload.pdf}
-\caption{Accuracy against prompt cost (up and left is better). The lean adapters (green) keep most of the full LoRA's accuracy at 40\% of its prompt tokens; dropping the schema altogether (triangles) saves more tokens but loses 9--15 points.}
+\caption{Accuracy against prompt cost (up and left is better). The lean adapters (green) match the full LoRA's accuracy at 40\% of its prompt tokens; dropping the schema altogether (triangles) saves more tokens but loses 16--19 points.}
 \label{fig:offload}
 \end{figure}
 
@@ -277,7 +276,7 @@ Fig.~\ref{fig:outputs} shows the typical change. The baseline follows its rules 
 Two test databases and one run per arm give about $\pm$5 points of uncertainty (95\%). BIRD's standard setting gives the model the hint; with it every arm scores higher (LoRA 46.4\% at 7B, 49.7\% at 14B; runs in the repository), so our numbers are not comparable with BIRD leaderboards. The translator limits training to queries Cube can express; the noschema arm is database-specific. The adapters often write a stray token instead of Qwen's \texttt{<tool\_call>} tag (all calls of the 14B adapter; also seen without quantisation); the harness parses such text calls, but other clients would fail. BIRD is public and holds no private personal data. A chart from a wrong filter (case B) looks as convincing as a right one, so the demo app always shows the Cube query and tool trace beside it.
 
 \section{Conclusion}
-Keeping the harness fixed and adding a LoRA adapter trained on 3,273 execution-verified transcripts raised strict execution accuracy on unseen databases, with questions asked without BIRD's hint, from 21.4\% to 36.7\% (7B) and from 27.4\% to 40.7\% (14B), halved the model calls per question, and made a 7B model beat a 14B one. Most of the prompt can move into the weights: a lean prompt kept the 14B model within 2 points at 40\% of the prompt tokens, but the schema must stay for unseen databases. The main limitation is that the adapter stopped looking up values. A first retrain of the 7B adapter with \texttt{search\_values} in more transcripts changed the behaviour (lookups on 38\% of questions, half as many empty answers) but not the accuracy (36.1\% vs 36.7\%, $p{=}0.88$): it emits a stray token instead of \texttt{<tool\_call>} at the start of its turns, so most calls go through the text fallback and some are malformed. Future work: find why that first token is not learned (check its training labels) or accept a short text prefix before a JSON call, then retest; and measure time to first token.
+Keeping the harness fixed and adding a LoRA adapter trained on 3,273 execution-verified transcripts raised strict execution accuracy on unseen databases, with questions asked without BIRD's hint, from 21.4\% to 36.7\% (7B) and from 27.4\% to 40.7\% (14B), halved the model calls per question, and made a 7B model beat a 14B one. Most of the prompt can move into the weights: a lean prompt kept both models within about 2 points (not significant) at 40\% of the prompt tokens, but the schema must stay for unseen databases. The main limitation is that the adapter stopped looking up values. A first retrain of the 7B adapter with \texttt{search\_values} in more transcripts changed the behaviour (lookups on 38\% of questions, half as many empty answers) but not the accuracy (36.1\% vs 36.7\%, $p{=}0.88$): it emits a stray token instead of \texttt{<tool\_call>} at the start of its turns, so most calls go through the text fallback and some are malformed. Future work: find why that first token is not learned (check its training labels) or accept a short text prefix before a JSON call, then retest; and measure time to first token.
 
 {\footnotesize
 \let\oldthebibliography\thebibliography

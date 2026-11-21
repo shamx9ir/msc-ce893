@@ -10,7 +10,7 @@ HERE = Path(__file__).parent
 
 NOTES = {
     "TITLE": [
-        "Summary (3 sentences): task (questions to Cube queries with an ADK agent), intervention (LoRA, harness fixed), headline numbers (7B 27.7 to 46.4, 14B 28.9 to 49.7 strict) and the prompt-offloading result (lean prompt, 2.4x fewer tokens per call).",
+        "Summary (3 sentences): task (questions to Cube queries with an ADK agent), intervention (LoRA, harness fixed), headline numbers without BIRD's hint (7B 21.4 to 36.7, 14B 27.4 to 40.7 strict) and the prompt-offloading result (lean prompt matches it with 2.4x fewer tokens per call).",
     ],
     "Motivation and context": [
         "Who asks: analysts/managers who want a number or a chart, not SQL.",
@@ -78,42 +78,37 @@ NOTES = {
         "List what is identical across arms within a size.",
     ],
     "Main findings": [
-        "Lead with Table 5: +18.7 points (7B, 78 fixed vs 16 broken) and +20.8 points (14B, 77 vs 8).",
-        "7B LoRA beats 14B baseline by 17.5 points; 14B LoRA vs 7B LoRA not significant (p=0.12).",
-        "14B baseline relaxed >> strict (extra columns); adapter mostly removes this.",
-        "Training curves (Fig. 6): converged within half an epoch, val loss 1.00 to 0.27 (7B), no overfitting.",
-        "Fig. 8: lean = 1.5k tokens per call vs 3.6-3.9k; loses 2.1 points at 14B (n.s.) and 4.5 at 7B (p=0.008). No schema: 38.3% (invented members). Full LoRA given lean prompt without retraining: 0%.",
+        "All test runs without BIRD's hint. Lead with Table 5: +15.4 points (7B, 70 fixed vs 19 broken) and +13.3 points (14B, 58 vs 14).",
+        "7B LoRA beats 14B baseline by 9.3 points (p=0.0009); 14B LoRA vs 7B LoRA not significant (p=0.09).",
+        "14B baseline relaxed >> strict (35.8 vs 27.4, extra columns); adapter mostly removes this.",
+        "Fig. 8: lean = 1.5k tokens per call vs 3.6k; loses 2.1 (7B, p=0.30) and 0.6 points (14B, p=0.83), n.s. No schema: 18.1% / 24.7% (invented members, 114/332 unknown-member errors at 14B); noschema + short schema 37.0 / 41.0. Full LoRA given lean prompt without retraining: 0%.",
     ],
-    "Without the hint": [
-        "Table 6: hiding the hint costs the adapters -9.6 (7B) and -9.0 (14B) points strict vs -6.3 and -1.5 (n.s.) for the baselines.",
-        "Why: adapters were trained with hints and never call search_values, so they guess values; empty answers 7.5% to 13.0% (7B). Baselines look up more (1.6 to 2.0 per q at 7B).",
-        "LoRA still leads by 15.3 (7B) and 13.3 (14B) points, both p<1e-6.",
-        "Tool use: 7B baseline has 0.8-1.1 rejected calls per q, adapters about 0.1; 14B models write most calls as text (71% / 100%).",
+    "Tool use": [
+        "Table 6: 7B baseline ~2 lookups, ~1 rejected call per q; adapters draft once and submit. But they never look values up: 13% of answers from an empty draft vs 2-10%. 14B models write most calls as text.",
     ],
     "Resource use": [
-        "Training time 5.3 h (7B), 9.0 h (14B), lean 2-3 h; one 16 GB GPU.",
-        "Steps 4.0 to 2.1, prompt tokens per question halve, model time 3.2 s to 1.3 s (7B).",
-        "Latency columns in Table 5: p90 5.9 s to 1.7 s (7B); output speed unchanged (~110 tok/s 7B, 60-65 14B), so the saving is fewer and shorter calls.",
+        "Training time 5.3 h (7B), 9.0 h (14B), lean 2-3 h; one 16 GB GPU; converged within half an epoch (Fig. 6).",
+        "Steps 4.1 to 2.1, prompt tokens per question halve, model time 3.5 s to 1.3 s (7B), p90 6.8 s to 1.7 s.",
+        "Output speed unchanged (~105-120 tok/s 7B, 60-67 14B), so the saving is fewer and shorter calls.",
         "Time to first token not measured: future work (would separate prompt processing from decoding).",
-        "Caveat: part of the saving is because the adapter skips search_values (0.3% vs 92%).",
+        "Caveat: part of the saving is because the adapter skips search_values (1% vs 92%).",
     ],
     "Interpretation and error analysis": [
         "Walk through Fig. 9 case A (extra grouping dimension) and case B (guessed value, empty result) and case C (invented member without schema).",
-        "Fig. 10: failed runs 38 to 5 (7B); wrong filters 27 to 15 (14B); ~50 per arm need SQL Cube cannot express (ceiling, not a model error).",
+        "Fig. 10: failed runs 45 to 4 (7B); wrong filters 64 to 50 (7B), 48 to 39 (14B); ~55 per arm need SQL Cube cannot express (ceiling, not a model error).",
         "Explain the value-lookup weakness: only 22% of training transcripts had search_values.",
     ],
     "Limitations and responsible use": [
-        "Two dbs, one run per arm: about +/-5 points 95% interval.",
+        "Two dbs, one run per arm: about +/-5 points 95% interval. With BIRD's hint (standard setting) all arms score higher (LoRA 46.4 / 49.7), so not comparable with leaderboards.",
         "Translator bias toward simple query shapes; noschema is database-specific.",
         "Adapters often write a stray token instead of <tool_call> (all 14B calls; also without quantisation); harness parses text calls.",
         "Data: public, no private personal data. Use: wrong filter gives a convincing wrong chart, so the app shows query and trace.",
     ],
     "Conclusion": [
         "Answer the RQ directly with the two headline numbers and the halved steps.",
-        "Most of the prompt can move into the weights (lean within 2 points at 14B, 40% of tokens); the schema must stay for unseen dbs.",
-        "No hint: adapters lose about 9 points (more than baselines) but still lead by 13-15.",
-        "Main limitation: adapter stopped looking up values (worst without the hint). Next steps: retrain with search_values in every text-filter transcript and some hints removed; measure time to first token.",
-        "Future work: search_values retrain (7B) changed behaviour (lookups 38% of q, half the empty answers) but not accuracy (36.1 vs 36.7, p=0.88) because of the stray first token -> text fallback, some malformed calls. Fix: check labels of the first token of each assistant turn, or accept short text + JSON as a native call; retest. Also measure time to first token.",
+        "Most of the prompt can move into the weights (lean within ~2 points at both sizes, n.s., 40% of tokens); the schema must stay for unseen dbs.",
+        "Main limitation: adapter stopped looking up values.",
+        "Future work: search_values retrain (7B) changed behaviour, not accuracy (36.1 vs 36.7, p=0.88): stray first token -> text fallback, malformed calls. Fix the first-token labels or accept text + JSON; retest; measure time to first token.",
     ],
 }
 
