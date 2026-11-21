@@ -163,7 +163,7 @@ baseline only by the adapter. The 7B was trained on examples up to 8,192 tokens;
 `--max-len 4096` (2,621 train / 139 val examples), so it saw about 10% fewer examples. `--quantize` is optional:
 without it Ollama would quantise, but Ollama 0.40 cannot make Q4_K_M, so we used llama.cpp's `llama-quantize` (release b12376).
 
-### search_values v2 (retraining, in progress)
+### search_values v2 (7B retrain, 2026-11-21: no gain)
 
 The first adapters almost stopped calling `search_values` (7B: 1 of 332 test questions, 14B: 0; harness-only 92%),
 because only 769 of the 3,531 training examples (22%) had a lookup. On 7B, wrong answers whose final query returned
@@ -179,6 +179,23 @@ keeps it as context but does not train the model to write it.
 python scripts/make_sft.py --data training_data_sv2 --out data/sft_sv2
 python scripts/train_lora.py --base Qwen/Qwen2.5-Coder-7B-Instruct --data data/sft_sv2 --out lora/qwen7b-sv2
 ```
+
+Result (7B, same settings as the first 7B LoRA: 2,929 train examples at max-len 8,192, 2 epochs; Ollama
+`qwen7b-cube-sv2`; test set, 332 questions):
+
+| 7B LoRA | Hint | Strict | Relaxed | Calls search_values | Wrong with 0-row last query |
+|---|---|---|---|---|---|
+| original | no | 36.7% | 40.7% | 0.9% | 43 |
+| **sv2** | no | **36.1%** (McNemar p = 0.88) | 37.7% | 38.0% | 21 |
+| original | yes | 46.4% | 52.1% | 0.3% | 25 |
+| sv2 | yes | 43.4% (p = 0.12) | 45.2% | 57.5% | 21 |
+
+The model learned the habit (searches on 38-58% of questions, empty-result failures halved without the hint), but
+accuracy did not improve: the extra steps brought new failures (9 malformed tool calls, e.g. search_values
+arguments sent to run_query, 4 step-limit hits, 3 unanswered) and cost answer shape (relaxed falls). With the hint
+most literal values are already given, so the lookups add little. Validation loss was flat from epoch 0.5
+(0.293). The 14B was not retrained (it had no empty-result failures to fix). Runs:
+`results/runs/test_nohint_lora_sv2_7b.jsonl.gz`, `results/runs/test_lora_sv2_7b.jsonl.gz`.
 
 ## Schema-offloading arms (prompt profiles)
 
