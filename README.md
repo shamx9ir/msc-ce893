@@ -163,7 +163,7 @@ baseline only by the adapter. The 7B was trained on examples up to 8,192 tokens;
 `--max-len 4096` (2,621 train / 139 val examples), so it saw about 10% fewer examples. `--quantize` is optional:
 without it Ollama would quantise, but Ollama 0.40 cannot make Q4_K_M, so we used llama.cpp's `llama-quantize` (release b12376).
 
-### search_values v2 (retraining, in progress)
+### search_values v2 (7B retrained; 14B not trained)
 
 The first adapters almost stopped calling `search_values` (7B: 1 of 332 test questions, 14B: 0; harness-only 92%),
 because only 769 of the 3,531 training examples (22%) had a lookup. On 7B, wrong answers whose final query returned
@@ -179,6 +179,19 @@ keeps it as context but does not train the model to write it.
 python scripts/make_sft.py --data training_data_sv2 --out data/sft_sv2
 python scripts/train_lora.py --base Qwen/Qwen2.5-Coder-7B-Instruct --data data/sft_sv2 --out lora/qwen7b-sv2
 ```
+
+Result (7B, `qwen7b-cube-sv2`, test set): no gain. Without the hint 120/332 strict (first LoRA 122, McNemar
+p = 0.88); with the hint 144/332 (first LoRA 154, p = 0.12). It now calls `search_values` on 38% / 58% of
+questions, and 0-row wrong answers halved without the hint (43 to 21), but this is offset by broken tool calls.
+The 14B sv2 adapter was not trained.
+
+**Next step (not done): fix the sv2 tool-call format.** In 220/332 no-hint questions (first LoRA: 2) the sv2 model
+writes a junk token (e.g. `คู่`, `鸟成长记`) where `<tool_call>` should start the turn, so Ollama does not parse the
+call and it goes through the harness text fallback (source of the `Unknown query keys ['dimension', 'text']`
+errors). It is in the adapter, not the export: with HF base + adapter (no GGUF) the first token of an assistant
+turn is almost flat (P(`<tool_call>`) about 0.0004), while the call body that follows is near-certain. Options:
+find why that label position is under-trained (check `encode`'s label span and the loss on that token), or let
+the harness accept "short text + `{"name": ...}`" as a native tool call.
 
 ## Schema-offloading arms (prompt profiles)
 
