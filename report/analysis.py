@@ -34,7 +34,13 @@ TEST_RUNS = {
     "noschema_14b": ("test_noschema_14b", "14B no-schema LoRA, no schema"),
     "noschema_lean_7b": ("test_noschema_lean_prompt_7b", "7B no-schema LoRA, lean prompt"),
     "noschema_lean_14b": ("test_noschema_lean_prompt_14b", "14B no-schema LoRA, lean prompt"),
+    # the four main arms again with BIRD's hint hidden from the model (evaluate.py --no-evidence)
+    "nohint_harness_7b": ("test_nohint_harness_7b", "7B harness only, no hint"),
+    "nohint_harness_14b": ("test_nohint_harness_14b", "14B harness only, no hint"),
+    "nohint_lora_7b": ("test_nohint_lora_7b", "7B LoRA + harness, no hint"),
+    "nohint_lora_14b": ("test_nohint_lora_14b", "14B LoRA + harness, no hint"),
 }
+MAIN_ARMS = ["harness_7b", "lora_7b", "harness_14b", "lora_14b"]
 TUNE_RUNS = {
     "v2": "tune120_harness_v2_7b", "v3": "tune120_harness_v3_7b", "v4": "tune120_harness_v4_7b",
     "v4.1": "tune120_harness_v4_1_7b",
@@ -71,8 +77,68 @@ def summary(df: pd.DataFrame) -> dict:
         "steps": df["steps"].mean(),
         "latency_s": df["llm_latency_s"].mean(),
         "latency_median_s": df["llm_latency_s"].median(),
+        "latency_p90_s": df["llm_latency_s"].quantile(0.9),
+        # output tokens per second of model time (decoding speed incl. prompt processing)
+        "tokens_per_s": df["completion_tokens"].sum() / df["llm_latency_s"].sum(),
         "search_values_pct": 100 * df["called_search_values"].mean(),
     }
+
+
+def _tool_steps(trace):
+    """(tool, reply) for each tool reply, plus a final text-written submit (which gets no reply)."""
+    out, pending = [], None
+    for s in trace or []:
+        if s.get("role") == "tool":
+            out.append((s["name"].split("(")[0], s.get("content") or "", s["name"].endswith("(text)")))
+            pending = None
+        elif s.get("role") == "assistant":
+            pending = None
+        elif s.get("role") == "cube_analyst" and '"submit_answer"' in (s.get("content") or ""):
+            pending = ("submit_answer", "Accepted.", True)
+    if pending:
+        out.append(pending)
+    return out
+
+
+def _rejected(tool: str, reply: str) -> bool:
+    """A call the harness or Cube turned back (bad member, wrong type, repeat, Cube error)."""
+    if tool == "run_query":
+        return not reply.startswith('{"row_count"')
+    if tool == "submit_answer":
+        return not reply.startswith("Accepted")
+    return not (reply.startswith("[") or reply.startswith("No value"))   # search_values
+
+
+def tool_metrics(df: pd.DataFrame) -> dict:
+    """Tool use per question: calls per tool, rejected calls, text-written calls, empty-result answers."""
+    n = len(df)
+    calls = {"search_values": 0, "run_query": 0, "submit_answer": 0}
+    rejected = text = empty = 0
+    for _, row in df.iterrows():
+        steps = _tool_steps(row["trace"])
+        for tool, reply, is_text in steps:
+            calls[tool] = calls.get(tool, 0) + 1
+            rejected += _rejected(tool, reply)
+            text += is_text
+        drafts = [r for t, r, _ in steps if t == "run_query" and r.startswith('{"row_count"')]
+        if row["pred_query"] and drafts and json.loads(drafts[-1].split(', "rows"')[0] + "}")["row_count"] == 0:
+            empty += 1
+    total = sum(calls.values())
+    return {
+        "search_values_per_q": calls["search_values"] / n,
+        "run_query_per_q": calls["run_query"] / n,
+        "submit_per_q": calls["submit_answer"] / n,
+        "rejected_per_q": rejected / n,
+        "text_calls_pct": 100 * text / max(total, 1),
+        "no_answer_pct": 100 * (~df["pred_query"].astype(bool)).mean(),
+        "empty_answer_pct": 100 * empty / n,   # last draft before the answer returned 0 rows
+    }
+
+
+def tool_table(names=None) -> pd.DataFrame:
+    names = names or MAIN_ARMS
+    return pd.DataFrame([{"run": TEST_RUNS[k][1], **tool_metrics(test_run(k))} for k in names],
+                        index=names)
 
 
 def summary_table(names=None) -> pd.DataFrame:
