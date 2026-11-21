@@ -187,8 +187,8 @@ vector for each token's embedding and lm_head row (saved as `token_deltas.safete
 **3. Tool schemas in the prompt** (`scripts/make_literal_tools_modelfile.py`). Ollama renders the `tools` it is
 sent through its own structs, which drop `title`/`additionalProperties` and change the instruction line. The sv3
 adapter fits the training format so closely that on Ollama's rendering it wrote `run_query` without the `"query"`
-wrapper (108/332 questions unanswered). The `-nt` Modelfiles write `harness/tool_schema.json` literally, exactly as
-in training. For a fair comparison the original LoRA was also run with this template (`lora-nt`). The harness
+wrapper (108/332 questions unanswered). The `-nt` Modelfiles write `harness/tool_schema.json` literally, as in
+training (one instruction line keeps Ollama's wording; see the script). For a fair comparison the original LoRA was also run with this template (`lora-nt`). The harness
 (v4.2) is unchanged throughout.
 
 ```bash
