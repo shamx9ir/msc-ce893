@@ -249,6 +249,28 @@ McNemar exact (strict): 7B lean vs full p=0.008; 14B lean vs full p=0.21; 14B no
 14B noschema (no schema) vs full p=4e-6; 7B vs 14B noschema p=0.004. Without the schema the model invents
 members (an "Unknown members" error in 120 of 332 14B runs), mostly on student_club (14B 44.9% vs 63.9% lean).
 
+## Without BIRD's hint, latency and tool use
+
+The four main arms were also run with BIRD's evidence hint hidden from the model (`--no-evidence`;
+the result files still store the hint text, the model never sees it). The adapters were trained with hints.
+Test set, 332 questions, 2026-11-20. Latency is model time per question; tool counts are per question.
+
+| Arm | Hint | Strict | Relaxed | p (vs hint) | Latency mean / median / p90 (s) | Output tok/s | Lookups | Drafts | Rejected calls | Empty answers |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 7B harness only | yes | 27.7 | 34.0 | | 3.2 / 2.2 / 5.9 | 118 | 1.59 | 0.86 | 0.83 | 3.0% |
+| 7B harness only | no | 21.4 | 27.7 | 0.010 | 3.5 / 2.3 / 6.8 | 121 | 1.97 | 0.69 | 1.09 | 2.4% |
+| 7B LoRA | yes | 46.4 | 52.1 | | 1.3 / 1.2 / 1.7 | 103 | 0.00 | 1.09 | 0.13 | 7.5% |
+| 7B LoRA | no | 36.7 | 40.7 | 9e-7 | 1.3 / 1.2 / 1.7 | 104 | 0.01 | 1.09 | 0.11 | 13.0% |
+| 14B harness only | yes | 28.9 | 41.3 | | 4.0 / 3.5 / 5.7 | 67 | 0.66 | 0.94 | 0.10 | 10.5% |
+| 14B harness only | no | 27.4 | 35.8 | 0.58 | 4.6 / 3.8 / 7.0 | 67 | 0.95 | 0.95 | 0.14 | 10.2% |
+| 14B LoRA | yes | 49.7 | 56.9 | | 2.5 / 2.4 / 3.3 | 58 | 0.00 | 0.98 | 0.00 | 5.4% |
+| 14B LoRA | no | 40.7 | 45.5 | 1e-6 | 2.4 / 2.3 / 3.2 | 61 | 0.00 | 0.97 | 0.00 | 13.3% |
+
+Lookups = `search_values` calls, drafts = `run_query` calls, rejected = calls the harness checks or Cube
+turned back, empty = answers whose last draft returned no rows. Without the hint the LoRA still beats the
+harness-only arm (7B p=5e-8, 14B p=2e-7). Time to first token is not recorded, so prompt processing and
+decoding cannot be separated. All of this comes from `report/analysis.py` (`summary_table`, `tool_table`).
+
 ## Demo app
 
 Ask a question in plain English, pick a model (or compare the four main arms, or the four
