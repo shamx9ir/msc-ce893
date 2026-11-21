@@ -109,6 +109,10 @@ NOTES = {
 }
 
 
+# Shamir's research question, used in the outline's RQ box.
+OWN_RQ = r"\resultplaceholder{\textbf{RQ.} With the agent harness held constant, to what extent can training a LoRA adapter on verified tool-use transcripts boost execution accuracy on unfamiliar databases? Additionally, how much of the prompt---comprising the query guide, tool definitions, and database schema---can be offloaded into the LoRA adapter without compromising performance in terms of accuracy, saved tokens, and generation speed?}"
+
+
 # Text Shamir has written for the outline version: used as-is instead of the notes for that section.
 OWN_TEXT = {
     "Motivation and context": r"""As open-weights models continue to gain capabilities, local Large Language Models (LLMs) are set to become more and more significant. Due to their smaller footprint, open-weights models are highly accessible for local fine-tuning, offering greater customization potential despite being less powerful than large-scale foundation models.
@@ -151,7 +155,7 @@ def main():
                 in_env == 0 and current and s.startswith("\\resultplaceholder")):
             # prose paragraph (or RQ box kept) -> replace with notes once per subsection
             if s.startswith("\\resultplaceholder"):
-                out.append(line)
+                out.append(OWN_RQ + "\n" if s.startswith("\\resultplaceholder{\\textbf{RQ.}") else line)
                 continue
             if current in OWN_TEXT and current not in emitted:
                 out.append(OWN_TEXT[current] + "\n")
