@@ -194,7 +194,8 @@ The model learned the habit (searches on 38-58% of questions, empty-result failu
 accuracy did not improve: the extra steps brought new failures (9 malformed tool calls, e.g. search_values
 arguments sent to run_query, 4 step-limit hits, 3 unanswered) and cost answer shape (relaxed falls). With the hint
 most literal values are already given, so the lookups add little. Validation loss was flat from epoch 0.5
-(0.293). The 14B was not retrained (it had no empty-result failures to fix). Runs:
+(0.293). The 14B was not retrained (it had no empty-result failures to fix). Next step (not done): debug
+the malformed tool calls in these runs and fix them in the data (or the text fallback), then retest. Runs:
 `results/runs/test_nohint_lora_sv2_7b.jsonl.gz`, `results/runs/test_lora_sv2_7b.jsonl.gz`.
 
 ## Schema-offloading arms (prompt profiles)
