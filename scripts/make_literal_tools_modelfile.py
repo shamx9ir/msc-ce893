@@ -5,7 +5,9 @@ Ollama renders the `tools` it receives through its own Go structs, which drop fi
 fits the training format so tightly that, on Ollama's rendering, it writes run_query calls without
 the "query" wrapper. This template writes harness/tool_schema.json literally (json.dumps of each
 entry, one per line, as in the Qwen chat template used for training) whenever tools are present.
-The <tool_call> tags are kept, so Ollama still returns native tool calls.
+The <tool_call> tags are kept, so Ollama still returns native tool calls. One line keeps Ollama's
+wording ("within <tools></tools>:" where training says "... XML tags:"); the reported -nt runs used
+exactly this template, for the sv3 and the baseline model alike.
 
 Usage (a GGUF that export_ollama.py already made, or an existing Ollama model):
     python scripts/make_literal_tools_modelfile.py --from E:/lora-export/qwen7b-cube-sv3/model-Q4_K_M.gguf --out Modelfile
@@ -29,7 +31,7 @@ TEMPLATE = r'''{{- if .Suffix }}<|fim_prefix|>{{ .Prompt }}<|fim_suffix|>{{ .Suf
 
 You may call one or more functions to assist with the user query.
 
-You are provided with function signatures within <tools></tools> XML tags:
+You are provided with function signatures within <tools></tools>:
 <tools>
 @TOOLS@
 </tools>
