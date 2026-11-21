@@ -105,7 +105,7 @@ NOTES = {
     "Limitations and responsible use": [
         "Two dbs, one run per arm: about +/-5 points 95% interval.",
         "Translator bias toward simple query shapes; noschema is database-specific.",
-        "14B quantised adapter writes a stray token instead of <tool_call>; harness parses text calls.",
+        "Adapters often write a stray token instead of <tool_call> (all 14B calls; also without quantisation); harness parses text calls.",
         "Data: public, no private personal data. Use: wrong filter gives a convincing wrong chart, so the app shows query and trace.",
     ],
     "Conclusion": [
@@ -113,6 +113,7 @@ NOTES = {
         "Most of the prompt can move into the weights (lean within 2 points at 14B, 40% of tokens); the schema must stay for unseen dbs.",
         "No hint: adapters lose about 9 points (more than baselines) but still lead by 13-15.",
         "Main limitation: adapter stopped looking up values (worst without the hint). Next steps: retrain with search_values in every text-filter transcript and some hints removed; measure time to first token.",
+        "Future work: search_values retrain (7B) changed behaviour (lookups 38% of q, half the empty answers) but not accuracy (36.1 vs 36.7, p=0.88) because of the stray first token -> text fallback, some malformed calls. Fix: check labels of the first token of each assistant turn, or accept short text + JSON as a native call; retest. Also measure time to first token.",
     ],
 }
 
