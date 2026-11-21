@@ -7,8 +7,9 @@ queries** instead of SQL. We compare two setups on identical prompts and tools:
 1. **Pure harness**: base model + prompt + Cube tools (harness v4.2, frozen)
 2. **LoRA + harness**: the same model with a LoRA adapter, the same harness
 
-Both were run with Qwen2.5-Coder 7B and 14B. On the 332 test questions, strict / relaxed accuracy:
-7B 27.7% / 34.0% → 46.4% / 52.1% with LoRA; 14B 28.9% / 41.3% → 49.7% / 56.9% with LoRA.
+Both were run with Qwen2.5-Coder 7B and 14B. All reported test runs hide BIRD's evidence hint from the
+model (`--no-evidence`), as a real user would only type the question. On the 332 test questions, strict / relaxed accuracy:
+7B 21.4% / 27.7% → 36.7% / 40.7% with LoRA; 14B 27.4% / 35.8% → 40.7% / 45.5% with LoRA.
 The write-up is in `report/` and the notebook that reproduces its numbers is `notebook/CE893_evaluation.ipynb`.
 
 Accuracy is *execution accuracy*: the Cube query's result must equal the result
@@ -75,14 +76,16 @@ In another terminal:
 ```bash
 ollama pull qwen2.5-coder:7b
 python -m pytest tests -q                       # sanity check (needs Cube running)
-python -m harness.evaluate --db student_club --db formula_1 --model ollama_chat/qwen2.5-coder:7b \
+python -m harness.evaluate --db student_club --db formula_1 --no-evidence --model ollama_chat/qwen2.5-coder:7b \
     --setup harness --out runs/harness_qwen7b.jsonl
 ```
 
 Each line of the output file records the question, the predicted Cube query, whether it was
 correct, the number of steps, tokens and latency, and the full tool trace. Runs resume if interrupted.
 `--model` is a LiteLLM id (`ollama_chat/...` for Ollama, `openai/<name>` with `--base-url http://localhost:8000/v1` for vLLM).
-Use `--limit 10` for a quick trial and `--mode single` for the no-tools baseline.
+Use `--limit 10` for a quick trial and `--mode single` for the no-tools baseline. `--no-evidence` hides BIRD's
+hint from the model (the output still stores the hint text); every reported test run uses it, while the
+harness development runs and the training transcripts keep the hint.
 
 ## Scoring
 
@@ -121,6 +124,8 @@ length (Qwen tokenizer, with the search_values steps): 2,621 training examples f
 
 ## Harness versions
 
+Development history, all with BIRD's hint (the reported test results are without it).
+
 Tune on the three tuning databases, report on `splits/test_ids.json`. Early comparisons (v2 to v4.1) used the
 120-question sample `splits/tune_ids.json`; it proved too noisy, so v3 and v4.2 were also compared on all 363 dev
 questions of those databases (drop `--ids-file`). The tuning databases need their own DuckDB copy and Cube models:
@@ -153,8 +158,8 @@ python scripts/train_lora.py --base Qwen/Qwen2.5-Coder-7B-Instruct --out lora/qw
 python scripts/train_lora.py --base Qwen/Qwen2.5-Coder-7B-Instruct --out lora/qwen7b
 python scripts/export_ollama.py --base Qwen/Qwen2.5-Coder-7B-Instruct --adapter lora/qwen7b/final \
     --llama-cpp ../llama.cpp --quantize ../llama.cpp/build/bin/llama-quantize --ollama-base qwen2.5-coder:7b --name qwen7b-cube-lora
-python -m harness.evaluate --db formula_1 --db student_club --ids-file splits/test_ids.json \
-    --model ollama_chat/qwen7b-cube-lora --setup lora-v4.2-7b --out runs/test_lora_7b.jsonl
+python -m harness.evaluate --db formula_1 --db student_club --ids-file splits/test_ids.json --no-evidence \
+    --model ollama_chat/qwen7b-cube-lora --setup lora-v4.2-7b-nohint --out runs/test_nohint_lora_7b.jsonl
 ```
 
 The same with `Qwen2.5-Coder-14B-Instruct` / `qwen2.5-coder:14b` for the 14B arm. Both arms use harness v4.2,
@@ -192,50 +197,46 @@ python scripts/train_lora.py --data data/sft_lean --out lora/qwen7b-lean
 python -m harness.evaluate ... --profile lean --model ollama_chat/qwen7b-cube-lean
 ```
 
-### Results (test set, 332 questions, 2026-11-17/19)
+### Results (test set, 332 questions, no hint, 2026-11-20/21)
 
 Prompt tokens are summed over all model calls of a question. Strict / relaxed execution accuracy.
 
 | Model | Arm | Strict | Relaxed | Prompt tokens / q | Steps |
 |---|---|---|---|---|---|
-| 7B | harness only (full prompt) | 27.7 | 34.0 | 15,742 | 4.0 |
-| 7B | LoRA, full prompt | 46.4 | 52.1 | 7,798 | 2.1 |
-| 7B | full-prompt LoRA given lean prompt (no retrain) | 0.0 | 0.0 | 5,409 | 3.5 |
-| 7B | LoRA trained + run on lean prompt | 41.9 | 45.5 | 3,257 | 2.2 |
-| 7B | noschema LoRA, no schema in prompt | 31.0 | 33.7 | 1,312 | 3.8 |
-| 7B | noschema LoRA, lean prompt | 44.3 | 49.7 | 3,364 | 2.2 |
-| 14B | harness only (full prompt) | 28.9 | 41.3 | 10,766 | 2.9 |
-| 14B | LoRA, full prompt | 49.7 | 56.9 | 7,341 | 2.0 |
-| 14B | full-prompt LoRA given lean prompt (127 q, stopped) | 0.0 | 0.0 | 10,169 | 3.2 |
-| 14B | LoRA trained + run on lean prompt | 47.6 | 57.2 | 3,153 | 2.1 |
-| 14B | noschema LoRA, no schema in prompt | 38.3 | 42.8 | 1,024 | 2.6 |
-| 14B | noschema LoRA, lean prompt | 47.9 | 56.0 | 3,086 | 2.0 |
+| 7B | harness only (full prompt) | 21.4 | 27.7 | 15,929 | 4.1 |
+| 7B | LoRA, full prompt | 36.7 | 40.7 | 7,672 | 2.1 |
+| 7B | full-prompt LoRA given lean prompt (no retrain) | 0.0 | 0.0 | 5,429 | 3.5 |
+| 7B | LoRA trained + run on lean prompt | 34.6 | 36.7 | 3,242 | 2.2 |
+| 7B | noschema LoRA, no schema in prompt | 18.1 | 19.9 | 1,616 | 4.5 |
+| 7B | noschema LoRA, lean prompt | 37.0 | 39.2 | 3,201 | 2.2 |
+| 14B | harness only (full prompt) | 27.4 | 35.8 | 11,952 | 3.2 |
+| 14B | LoRA, full prompt | 40.7 | 45.5 | 7,344 | 2.0 |
+| 14B | LoRA trained + run on lean prompt | 40.1 | 46.1 | 2,988 | 2.0 |
+| 14B | noschema LoRA, no schema in prompt | 24.7 | 25.6 | 1,140 | 2.7 |
+| 14B | noschema LoRA, lean prompt | 41.0 | 45.5 | 2,929 | 1.9 |
 
-McNemar exact (strict): 7B lean vs full p=0.008; 14B lean vs full p=0.21; 14B noschema+lean vs full p=0.35;
-14B noschema (no schema) vs full p=4e-6; 7B vs 14B noschema p=0.004. Without the schema the model invents
-members (an "Unknown members" error in 120 of 332 14B runs), mostly on student_club (14B 44.9% vs 63.9% lean).
+McNemar exact (strict): lean vs full LoRA 7B p=0.30, 14B p=0.83; noschema + lean prompt vs full 7B p=1.0, 14B p=1.0;
+noschema (no schema) vs full 7B p=1e-12, 14B p=7e-11. Without the schema the model invents members (an
+"Unknown members" error in 114 of 332 14B runs), mostly on student_club (14B 22.2% vs 53.2% lean). The 14B
+control (full LoRA on the lean prompt) was only run with the hint (stopped at 127 questions, 0 correct).
 
-## Without BIRD's hint, latency and tool use
+## Main results: latency and tool use
 
-The four main arms were also run with BIRD's evidence hint hidden from the model (`--no-evidence`;
-the result files still store the hint text, the model never sees it). The adapters were trained with hints.
-Test set, 332 questions, 2026-11-20. Latency is model time per question; tool counts are per question.
+Test set, 332 questions, no hint (2026-11-20). Latency is model time per question; tool counts are per question.
 
-| Arm | Hint | Strict | Relaxed | p (vs hint) | Latency mean / median / p90 (s) | Output tok/s | Lookups | Drafts | Rejected calls | Empty answers |
-|---|---|---|---|---|---|---|---|---|---|---|
-| 7B harness only | yes | 27.7 | 34.0 | | 3.2 / 2.2 / 5.9 | 118 | 1.59 | 0.86 | 0.83 | 3.0% |
-| 7B harness only | no | 21.4 | 27.7 | 0.010 | 3.5 / 2.3 / 6.8 | 121 | 1.97 | 0.69 | 1.09 | 2.4% |
-| 7B LoRA | yes | 46.4 | 52.1 | | 1.3 / 1.2 / 1.7 | 103 | 0.00 | 1.09 | 0.13 | 7.5% |
-| 7B LoRA | no | 36.7 | 40.7 | 9e-7 | 1.3 / 1.2 / 1.7 | 104 | 0.01 | 1.09 | 0.11 | 13.0% |
-| 14B harness only | yes | 28.9 | 41.3 | | 4.0 / 3.5 / 5.7 | 67 | 0.66 | 0.94 | 0.10 | 10.5% |
-| 14B harness only | no | 27.4 | 35.8 | 0.58 | 4.6 / 3.8 / 7.0 | 67 | 0.95 | 0.95 | 0.14 | 10.2% |
-| 14B LoRA | yes | 49.7 | 56.9 | | 2.5 / 2.4 / 3.3 | 58 | 0.00 | 0.98 | 0.00 | 5.4% |
-| 14B LoRA | no | 40.7 | 45.5 | 1e-6 | 2.4 / 2.3 / 3.2 | 61 | 0.00 | 0.97 | 0.00 | 13.3% |
+| Arm | Strict | Relaxed | p (vs harness) | Latency mean / median / p90 (s) | Output tok/s | Lookups | Drafts | Rejected calls | Empty answers |
+|---|---|---|---|---|---|---|---|---|---|
+| 7B harness only | 21.4 | 27.7 | | 3.5 / 2.3 / 6.8 | 121 | 1.97 | 0.69 | 1.09 | 2.4% |
+| 7B LoRA | 36.7 | 40.7 | 5e-8 | 1.3 / 1.2 / 1.7 | 104 | 0.01 | 1.09 | 0.11 | 13.0% |
+| 14B harness only | 27.4 | 35.8 | | 4.6 / 3.8 / 7.0 | 67 | 0.95 | 0.95 | 0.14 | 10.2% |
+| 14B LoRA | 40.7 | 45.5 | 2e-7 | 2.4 / 2.3 / 3.2 | 61 | 0.00 | 0.97 | 0.00 | 13.3% |
 
 Lookups = `search_values` calls, drafts = `run_query` calls, rejected = calls the harness checks or Cube
-turned back, empty = answers whose last draft returned no rows. Without the hint the LoRA still beats the
-harness-only arm (7B p=5e-8, 14B p=2e-7). Time to first token is not recorded, so prompt processing and
-decoding cannot be separated. All of this comes from `report/analysis.py` (`summary_table`, `tool_table`).
+turned back, empty = answers whose last draft returned no rows. Time to first token is not recorded, so
+prompt processing and decoding cannot be separated. From `report/analysis.py` (`summary_table`, `tool_table`).
+
+With BIRD's hint (the benchmark's standard setting, runs kept in `results/runs/test_*.jsonl.gz` without
+`nohint`), every arm scores higher: 7B 27.7 → 46.4, 14B 28.9 → 49.7 strict.
 
 ## Demo app
 
