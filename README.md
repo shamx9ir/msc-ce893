@@ -163,6 +163,46 @@ baseline only by the adapter. The 7B was trained on examples up to 8,192 tokens;
 `--max-len 4096` (2,621 train / 139 val examples), so it saw about 10% fewer examples. `--quantize` is optional:
 without it Ollama would quantise, but Ollama 0.40 cannot make Q4_K_M, so we used llama.cpp's `llama-quantize` (release b12376).
 
+### search_values v2 (7B retrain, 2026-11-21: no gain)
+
+The first adapters almost stopped calling `search_values` (7B: 1 of 332 test questions, 14B: 0; harness-only 92%),
+because only 769 of the 3,531 training examples (22%) had a lookup. On 7B, wrong answers whose final query returned
+0 rows went from 10 to 25. `scripts/add_value_searches_v2.py` rebuilds the lookups: one for every string `equals`
+filter on a text column (68% of examples, up from 22%) (up to 2 per example), searched with a short lower-case word from the question/value rather
+than the exact stored value, plus 312 recovery examples (first `run_query` with a plausible wrong spelling,
+0 rows, `search_values`, corrected query). The wrong first query is marked `"train": false`, so `train_lora.py`
+keeps it as context but does not train the model to write it.
+
+```bash
+# training_data_sv2/ is in git (2,386 of 3,531 examples with a lookup, 312 recovery examples); rebuild with:
+# python scripts/add_value_searches_v2.py --data training_data --out training_data_sv2 --bird-train data/bird_train/train_databases --recovery-share 0.18
+python scripts/make_sft.py --data training_data_sv2 --out data/sft_sv2
+python scripts/train_lora.py --base Qwen/Qwen2.5-Coder-7B-Instruct --data data/sft_sv2 --out lora/qwen7b-sv2
+```
+
+Result (7B, same settings as the first 7B LoRA: 2,929 train examples at max-len 8,192, 2 epochs; Ollama
+`qwen7b-cube-sv2`; test set, 332 questions):
+
+| 7B LoRA | Hint | Strict | Relaxed | Calls search_values | Wrong with 0-row last query |
+|---|---|---|---|---|---|
+| original | no | 36.7% | 40.7% | 0.9% | 43 |
+| **sv2** | no | **36.1%** (McNemar p = 0.88) | 37.7% | 38.0% | 21 |
+| original | yes | 46.4% | 52.1% | 0.3% | 25 |
+| sv2 | yes | 43.4% (p = 0.12) | 45.2% | 57.5% | 21 |
+
+The model learned the habit (searches on 38-58% of questions, empty-result failures halved without the hint), but
+accuracy did not improve: the extra steps brought new failures (9 malformed tool calls, e.g. search_values
+arguments sent to run_query, 4 step-limit hits, 3 unanswered) and cost answer shape (relaxed falls). With the hint
+most literal values are already given, so the lookups add little. Validation loss was flat from epoch 0.5
+(0.293). The 14B was not retrained (it had no empty-result failures to fix). Partial diagnosis (not fixed): the sv2 adapter
+usually emits a stray token where `<tool_call>` should open an assistant turn (P(`<tool_call>`) about 0.0004 at
+that position, while the call body that follows is near-certain), so Ollama cannot parse the call and the harness's
+text fallback handles it (220/332 questions without the hint vs 2/332 for the original 7B LoRA). The same shows with
+the plain HF model + adapter, so it is the adapter, not the GGUF export or quantisation; the 14B LoRA's stray token
+is likely the same effect. Next step: find why that one position is not learned (check the labels at the first
+token of each assistant turn), or accept "short text + {\"name\": ...}" as a native call, then retest. Runs:
+`results/runs/test_nohint_lora_sv2_7b.jsonl.gz`, `results/runs/test_lora_sv2_7b.jsonl.gz`.
+
 ## Schema-offloading arms (prompt profiles)
 
 Can the LoRA carry what the prompt spells out, so each question costs fewer tokens?

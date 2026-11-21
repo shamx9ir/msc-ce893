@@ -1,0 +1,26 @@
+cube geographic
+  dim  geographic.city (string) -- the city
+  dim  geographic.county (string) -- the country the city belongs to
+  dim  geographic.region (string) -- corresponding regions
+  meas geographic.count (count)
+cube generalinfo
+  dim  generalinfo.id_restaurant (number) -- the unique id for the restaurant
+  dim  generalinfo.label (string) -- the label of the restaurant
+  dim  generalinfo.food_type (string) -- the food type
+  dim  generalinfo.city (string) -- the city where the restaurant is located in
+  dim  generalinfo.review (number) -- the review of the restaurant the review rating is from 0.0 to 5.0 The high review rating is positively correlated with the overall level of the restaurant. The restaurant with higher review rating is usually more popular among diners.
+  meas generalinfo.count (count)
+  meas generalinfo.sum_review (sum)
+  meas generalinfo.avg_review (avg)
+  meas generalinfo.min_review (min)
+  meas generalinfo.max_review (max)
+cube location
+  dim  location.id_restaurant (number) -- the unique id for the restaurant
+  dim  location.street_num (number) -- the street number of the restaurant
+  dim  location.street_name (string) -- the street name of the restaurant
+  dim  location.city (string) -- the city where the restaurant is located in
+  meas location.count (count)
+  meas location.sum_street_num (sum)
+  meas location.avg_street_num (avg)
+  meas location.min_street_num (min)
+  meas location.max_street_num (max)

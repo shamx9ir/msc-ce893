@@ -1,0 +1,99 @@
+cube state
+  dim  state.StateCode (string)
+  dim  state.State (string)
+  dim  state.Region (string)
+  meas state.count (count)
+cube callcenterlogs
+  dim  callcenterlogs.Date_received (time) -- complaint date
+  dim  callcenterlogs.Complaint_ID (string) -- unique id number representing each complaint
+  dim  callcenterlogs.rand_client (string) -- client id
+  dim  callcenterlogs.phonefinal (string) -- final phone number
+  dim  callcenterlogs.vru_line (string) -- voice response unit line
+  dim  callcenterlogs.call_id (number) -- id number identifying the call
+  dim  callcenterlogs.priority (number) -- priority of the complaint 0, 1, 2, null: not available, higher: -> higher priority, -> more serious/urgent complaint
+  dim  callcenterlogs.type (string) -- type of complaint
+  dim  callcenterlogs.outcome (string) -- the outcome of processing of complaints
+  dim  callcenterlogs.server (string) -- server
+  dim  callcenterlogs.ser_start (string) -- server start time HH:MM:SS
+  dim  callcenterlogs.ser_exit (string) -- server exit time
+  dim  callcenterlogs.ser_time (string) -- server time longer server time referring to more verbose/longer complaint
+  meas callcenterlogs.count (count)
+  meas callcenterlogs.sum_priority (sum)
+  meas callcenterlogs.avg_priority (avg)
+  meas callcenterlogs.min_priority (min)
+  meas callcenterlogs.max_priority (max)
+cube client
+  dim  client.client_id (string) -- unique id client number
+  dim  client.sex (string) -- sex of client
+  dim  client.day (number) -- day of the birthday
+  dim  client.month (number) -- month of the birthday
+  dim  client.year (number) -- year when is born
+  dim  client.age (number) -- age teenager: 13-19 adult: 19-65 elder: > 65
+  dim  client.social (string) -- social number ssn: us id number for each person
+  dim  client.first (string) -- first name
+  dim  client.middle (string) -- middle name
+  dim  client.last (string) -- last name
+  dim  client.phone (string) -- phone number
+  dim  client.email (string) -- email google email / account: @gamil.com microsoft email / account: xxx@outlook.com
+  dim  client.address_1 (string) -- address 1
+  dim  client.address_2 (string) -- address 2 entire address = (address_1, address_2)
+  dim  client.city (string) -- city
+  dim  client.state (string) -- state code
+  dim  client.zipcode (number) -- zipcode
+  dim  client.district_id (number) -- district id number
+  meas client.count (count)
+  meas client.sum_day (sum)
+  meas client.avg_day (avg)
+  meas client.min_day (min)
+  meas client.max_day (max)
+  meas client.sum_month (sum)
+  meas client.avg_month (avg)
+  meas client.min_month (min)
+  meas client.max_month (max)
+  meas client.sum_year (sum)
+  meas client.avg_year (avg)
+  meas client.min_year (min)
+  meas client.max_year (max)
+  meas client.sum_age (sum)
+  meas client.avg_age (avg)
+  meas client.min_age (min)
+  meas client.max_age (max)
+  meas client.sum_zipcode (sum)
+  meas client.avg_zipcode (avg)
+  meas client.min_zipcode (min)
+  meas client.max_zipcode (max)
+cube district
+  dim  district.district_id (number) -- unique id number representing district
+  dim  district.city (string) -- city
+  dim  district.state_abbrev (string) -- state abbreviated code
+  dim  district.division (string) -- division
+  meas district.count (count)
+cube events
+  dim  events.row_key (string)
+  dim  events.Date_received (time) -- Date received
+  dim  events.Product (string) -- complaining about which product
+  dim  events.Sub_product (string) -- sub product if exists detailed product
+  dim  events.Issue (string) -- problems leading to this complaints
+  dim  events.Sub_issue (string) -- sub problems leading to this complaints if exists more detailed issue
+  dim  events.Consumer_complaint_narrative (string) -- Consumer complaint narrative
+  dim  events.Tags (string) -- tags of client
+  dim  events.Consumer_consent_provided (string) -- whether the tags labeled under permission of the clients  null, 'N/A' or empty value: indicating that the company didn't get the permission of consent.  if the value is not empty: customers provide the consent for this tag.
+  dim  events.Submitted_via (string) -- Submitted via
+  dim  events.Date_sent_to_company (time) -- Date sent to company delay of the complaints = 'Date sent to company'
+  dim  events.Company_response_to_consumer (string) -- Company response to consumer
+  dim  events.Timely_response (string) -- whether the response of the company is timely
+  dim  events.Consumer_disputed (string) -- whether the consumer dispute about the response from the company.
+  dim  events.Complaint_ID (string) -- id number indicating which complaint
+  dim  events.Client_ID (string) -- id number indicating which client
+  meas events.count (count)
+cube reviews
+  dim  reviews.Date (time)
+  dim  reviews.Stars (number)
+  dim  reviews.Reviews (string)
+  dim  reviews.Product (string)
+  dim  reviews.district_id (number)
+  meas reviews.count (count)
+  meas reviews.sum_Stars (sum)
+  meas reviews.avg_Stars (avg)
+  meas reviews.min_Stars (min)
+  meas reviews.max_Stars (max)

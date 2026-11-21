@@ -1,0 +1,30 @@
+cube location
+  dim  location.locationID (number) -- the unique id for location
+  dim  location.locationcity (string) -- the location city
+  dim  location.address (string) -- the detailed address of the location
+  dim  location.state (string) -- the state abbreviation
+  dim  location.zipcode (number) -- zip code of the location
+  dim  location.officephone (string) -- the office phone number of the location
+  meas location.count (count)
+  meas location.sum_zipcode (sum)
+  meas location.avg_zipcode (avg)
+  meas location.min_zipcode (min)
+  meas location.max_zipcode (max)
+cube position
+  dim  position.positionID (number) -- the unique id for position
+  dim  position.positiontitle (string) -- the position title
+  dim  position.educationrequired (string) -- the required education year Generally, more complex work requires more education year.
+  dim  position.minsalary (string) -- minimum salary of this position
+  dim  position.maxsalary (string) -- maximum salary of this position
+  meas position.count (count)
+cube employee
+  dim  employee.ssn (string) -- employee's ssn
+  dim  employee.lastname (string) -- employee's last name
+  dim  employee.firstname (string) -- employee's first name employee's full name is firstname lastname .
+  dim  employee.hiredate (string) -- employee's hire date yyyy-mm-dd
+  dim  employee.salary (string) -- employee's salary the unit is dollar per year
+  dim  employee.gender (string) -- employee's gender
+  dim  employee.performance (string) -- employee's performance Good / Average/ Poor
+  dim  employee.positionID (number) -- the unique id for position
+  dim  employee.locationID (number) -- the unique id for location
+  meas employee.count (count)

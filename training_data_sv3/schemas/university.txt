@@ -1,0 +1,62 @@
+cube country
+  dim  country.id (number) -- unique id number identifying country
+  dim  country.country_name (string) -- the name of the country
+  meas country.count (count)
+cube ranking_system
+  dim  ranking_system.id (number) -- unique id number identifying ranking system
+  dim  ranking_system.system_name (string) -- id number identifying ranking system
+  meas ranking_system.count (count)
+cube ranking_criteria
+  dim  ranking_criteria.id (number) -- unique id number identifying ranking criteria
+  dim  ranking_criteria.ranking_system_id (number) -- id number identifying ranking system
+  dim  ranking_criteria.criteria_name (string) -- name of the criteria
+  meas ranking_criteria.count (count)
+cube university
+  dim  university.id (number) -- unique id number identifying university
+  dim  university.country_id (number) -- the country where the university locates
+  dim  university.university_name (string) -- name of the university
+  meas university.count (count)
+cube university_ranking_year
+  dim  university_ranking_year.row_key (string)
+  dim  university_ranking_year.university_id (number) -- the id of the university
+  dim  university_ranking_year.ranking_criteria_id (number) -- the id of the ranking criteria
+  dim  university_ranking_year.year (number) -- ranking year
+  dim  university_ranking_year.score (number) -- ranking score
+  meas university_ranking_year.count (count)
+  meas university_ranking_year.sum_year (sum)
+  meas university_ranking_year.avg_year (avg)
+  meas university_ranking_year.min_year (min)
+  meas university_ranking_year.max_year (max)
+  meas university_ranking_year.sum_score (sum)
+  meas university_ranking_year.avg_score (avg)
+  meas university_ranking_year.min_score (min)
+  meas university_ranking_year.max_score (max)
+cube university_year
+  dim  university_year.row_key (string)
+  dim  university_year.university_id (number) -- id of the university
+  dim  university_year.year (number)
+  dim  university_year.num_students (number) -- the total number of students for the year
+  dim  university_year.student_staff_ratio (number) -- student_staff_ratio = number of students / number of staff
+  dim  university_year.pct_international_students (number) -- the percentage of international students among all students pct_international_student = number of interbational students / number of students
+  dim  university_year.pct_female_students (number) -- the percentage of female students pct_female_students = number of female students / number of students
+  meas university_year.count (count)
+  meas university_year.sum_year (sum)
+  meas university_year.avg_year (avg)
+  meas university_year.min_year (min)
+  meas university_year.max_year (max)
+  meas university_year.sum_num_students (sum)
+  meas university_year.avg_num_students (avg)
+  meas university_year.min_num_students (min)
+  meas university_year.max_num_students (max)
+  meas university_year.sum_student_staff_ratio (sum)
+  meas university_year.avg_student_staff_ratio (avg)
+  meas university_year.min_student_staff_ratio (min)
+  meas university_year.max_student_staff_ratio (max)
+  meas university_year.sum_pct_international_students (sum)
+  meas university_year.avg_pct_international_students (avg)
+  meas university_year.min_pct_international_students (min)
+  meas university_year.max_pct_international_students (max)
+  meas university_year.sum_pct_female_students (sum)
+  meas university_year.avg_pct_female_students (avg)
+  meas university_year.min_pct_female_students (min)
+  meas university_year.max_pct_female_students (max)

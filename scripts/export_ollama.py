@@ -47,6 +47,15 @@ def merge_by_shard(base: str, adapter: Path, out: Path) -> None:
         if ".lora_A." in k:
             name = k.replace("base_model.model.", "", 1).replace(".lora_A.weight", ".weight")
             pairs[name] = (v, lora[k.replace(".lora_A.", ".lora_B.")])
+    deltas = {}  # base weight name -> {row: vector}, from train_lora.py --train-tokens
+    dfile = adapter / "token_deltas.safetensors"
+    if dfile.exists():
+        with safe_open(str(dfile), framework="pt") as f:
+            ids = json.loads(f.metadata()["token_ids"])
+            d_in, d_out = f.get_tensor("delta_in"), f.get_tensor("delta_out")
+        deltas["model.embed_tokens.weight"] = dict(zip(ids, d_in))
+        deltas["lm_head.weight"] = dict(zip(ids, d_out))
+        print(f"adding trained embedding/lm_head corrections for tokens {ids}")
     out.mkdir(parents=True, exist_ok=True)
     done = set()
     for shard in sorted(src.glob("*.safetensors")):
@@ -58,12 +67,17 @@ def merge_by_shard(base: str, adapter: Path, out: Path) -> None:
                     a, b = pairs[name]
                     w = (w.float() + scale * (b.float() @ a.float())).to(w.dtype)
                     done.add(name)
+                if name in deltas:
+                    w = w.clone()
+                    for row, vec in deltas[name].items():
+                        w[row] = (w[row].float() + vec.float()).to(w.dtype)
+                    done.add(name)
                 tensors[name] = w
             meta = f.metadata()
         save_file(tensors, str(out / shard.name), metadata=meta or {"format": "pt"})
         print(f"merged {shard.name}", flush=True)
         del tensors
-    missing = set(pairs) - done
+    missing = (set(pairs) | set(deltas)) - done
     if missing:
         raise SystemExit(f"{len(missing)} LoRA weights had no base weight, e.g. {sorted(missing)[:3]}")
     for f in src.iterdir():

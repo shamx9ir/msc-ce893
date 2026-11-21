@@ -1,0 +1,151 @@
+cube film_text
+  dim  film_text.film_id (number) -- unique id number identifying the film
+  dim  film_text.title (string) -- title of the film
+  dim  film_text.description (string) -- main content of the film
+  meas film_text.count (count)
+cube actor
+  dim  actor.actor_id (number) -- unique id number identifying the actor
+  dim  actor.first_name (string) -- First name of the actor
+  dim  actor.last_name (string) -- Last name of the actor
+  dim  actor.last_update (time) -- The time of the latest update
+  meas actor.count (count)
+cube address
+  dim  address.address_id (number) -- unique id number identifying the address
+  dim  address.address (string) -- The first address line
+  dim  address.address2 (string) -- the second address line address2 is the additional address if any
+  dim  address.district (string)
+  dim  address.city_id (number)
+  dim  address.postal_code (string) -- a postal code is a series of letters or digits or both, sometimes including spaces or punctuation, included in a postal address for the purpose of sorting mail.
+  dim  address.phone (string) -- phone number
+  dim  address.last_update (time) -- The time of the latest update
+  meas address.count (count)
+cube category
+  dim  category.category_id (number) -- unique id number identifying the category
+  dim  category.name (string) -- name of the category
+  dim  category.last_update (time) -- The time of the latest update
+  meas category.count (count)
+cube city
+  dim  city.city_id (number) -- unique id number identifying the city
+  dim  city.city (string) -- name of the city
+  dim  city.country_id (number) -- number identifying the country which the city belongs to
+  dim  city.last_update (time) -- The time of the latest update
+  meas city.count (count)
+cube country
+  dim  country.country_id (number) -- unique id number identifying the country
+  dim  country.country (string) -- number identifying the country  Africa: (Algeria, Angola, Cameroon, Chad, Congo, The Democratic Republic of the, Egypt, Ethiopia, Gambia...)  Asia: (Afghanistan, Armenia, Azerbaijan, Bahrain, Bangladesh, Brunei, Cambodia, China, Hong Kong, India, Indonesia, Iran, Iraq, Israel...)  Oceania (American Samoa, Australia, French Polynesia...)  North America (Anguilla, Canada, Dominican Republic, Ecu
+  dim  country.last_update (time) -- The time of the latest update
+  meas country.count (count)
+cube customer
+  dim  customer.customer_id (number) -- unique id number identifying the country
+  dim  customer.store_id (number) -- unique id number identifying the store
+  dim  customer.first_name (string) -- First name of the customer
+  dim  customer.last_name (string) -- Last name of the customer
+  dim  customer.email (string) -- Email address of the customer
+  dim  customer.address_id (number) -- Address id number of the customer.
+  dim  customer.active (number) -- Wether the customer is active or not. 1: active 0: not active
+  dim  customer.create_date (time) -- The date when the record is created.
+  dim  customer.last_update (time) -- The time of the latest update
+  meas customer.count (count)
+  meas customer.sum_active (sum)
+  meas customer.avg_active (avg)
+  meas customer.min_active (min)
+  meas customer.max_active (max)
+cube film
+  dim  film.film_id (number) -- unique id number identifying the film
+  dim  film.title (string) -- title of the film
+  dim  film.description (string) -- main content of the film
+  dim  film.release_year (string) -- the year when the film is released
+  dim  film.language_id (number) -- the language id of the film
+  dim  film.original_language_id (number) -- the original language id of the film
+  dim  film.rental_duration (number) -- how long this film can be rent at once days price / day = rental_rate / retal_duration
+  dim  film.rental_rate (number) -- the rate of renting this film higher -> expensive
+  dim  film.length (number) -- Duration time of the film screening minutes
+  dim  film.replacement_cost (number) -- cost of replacing this film
+  dim  film.rating (string) -- The Motion Picture Association film rating G ?General Audiences PG ? Parental Guidance Suggested PG-13 ? Parents Strongly Cautioned R ? Restricted NC-17 ? Adults Only
+  dim  film.special_features (string) -- features of this film
+  dim  film.last_update (time) -- The time of the latest update
+  meas film.count (count)
+  meas film.sum_rental_duration (sum)
+  meas film.avg_rental_duration (avg)
+  meas film.min_rental_duration (min)
+  meas film.max_rental_duration (max)
+  meas film.sum_rental_rate (sum)
+  meas film.avg_rental_rate (avg)
+  meas film.min_rental_rate (min)
+  meas film.max_rental_rate (max)
+  meas film.sum_length (sum)
+  meas film.avg_length (avg)
+  meas film.min_length (min)
+  meas film.max_length (max)
+  meas film.sum_replacement_cost (sum)
+  meas film.avg_replacement_cost (avg)
+  meas film.min_replacement_cost (min)
+  meas film.max_replacement_cost (max)
+cube film_actor
+  dim  film_actor.row_key (string)
+  dim  film_actor.actor_id (number) -- unique id number identifying the actor
+  dim  film_actor.film_id (number) -- id number identifying the film
+  dim  film_actor.last_update (time) -- The time of the latest update
+  meas film_actor.count (count)
+cube film_category
+  dim  film_category.row_key (string)
+  dim  film_category.film_id (number) -- unique id number identifying the film
+  dim  film_category.category_id (number) -- id number identifying the category
+  dim  film_category.last_update (time) -- The time of the latest update
+  meas film_category.count (count)
+cube inventory
+  dim  inventory.inventory_id (number) -- unique id number identifying the inventory
+  dim  inventory.film_id (number) -- unique id number identifying the film
+  dim  inventory.store_id (number) -- id of the store
+  dim  inventory.last_update (time) -- the last update time of the film
+  meas inventory.count (count)
+cube language
+  dim  language.language_id (number) -- unique id number identifying the language
+  dim  language.name (string) -- name of the language
+  dim  language.last_update (time) -- The time of the latest update
+  meas language.count (count)
+cube payment
+  dim  payment.payment_id (number) -- unique id number identifying the payment
+  dim  payment.customer_id (number) -- unique id number identifying the customer
+  dim  payment.staff_id (number) -- unique id number identifying the staff
+  dim  payment.rental_id (number) -- unique id number identifying the rental
+  dim  payment.amount (number) -- unique id number identifying the amount
+  dim  payment.payment_date (time) -- the date when the payment ocurs
+  dim  payment.last_update (time) -- The time of the latest update
+  meas payment.count (count)
+  meas payment.sum_amount (sum)
+  meas payment.avg_amount (avg)
+  meas payment.min_amount (min)
+  meas payment.max_amount (max)
+cube rental
+  dim  rental.rental_id (number) -- unique id number identifying the rental
+  dim  rental.rental_date (time) -- date when the rental occurs
+  dim  rental.inventory_id (number) -- id number identifying the inventory
+  dim  rental.customer_id (number) -- id number identifying the customer
+  dim  rental.return_date (time) -- date when the rental returns
+  dim  rental.staff_id (number) -- id number identifying the staff
+  dim  rental.last_update (time) -- The time of the latest update
+  meas rental.count (count)
+cube staff
+  dim  staff.staff_id (number) -- unique id number identifying the staff
+  dim  staff.first_name (string) -- First name of the actor
+  dim  staff.last_name (string) -- Last name of the actor full name = (first name, last name)
+  dim  staff.address_id (number) -- id number identifying the address
+  dim  staff.picture (string)
+  dim  staff.email (string)
+  dim  staff.store_id (number) -- id number identifying the store
+  dim  staff.active (number) -- Whether the staff is active or not. 1: active 0: not active
+  dim  staff.username (string) -- username to login the staff
+  dim  staff.password (string) -- password to login the staff
+  dim  staff.last_update (time) -- The time of the latest update
+  meas staff.count (count)
+  meas staff.sum_active (sum)
+  meas staff.avg_active (avg)
+  meas staff.min_active (min)
+  meas staff.max_active (max)
+cube store
+  dim  store.store_id (number) -- unique id number identifying the store
+  dim  store.manager_staff_id (number) -- id number identifying the manager staff
+  dim  store.address_id (number) -- id number identifying the address
+  dim  store.last_update (time) -- The time of the latest update
+  meas store.count (count)

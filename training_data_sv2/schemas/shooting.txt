@@ -1,0 +1,32 @@
+cube incidents
+  dim  incidents.case_number (string)
+  dim  incidents.date (time)
+  dim  incidents.location (string)
+  dim  incidents.subject_statuses (string)
+  dim  incidents.subject_weapon (string)
+  dim  incidents.subjects (string)
+  dim  incidents.subject_count (number)
+  dim  incidents.officers (string)
+  meas incidents.count (count)
+  meas incidents.sum_subject_count (sum)
+  meas incidents.avg_subject_count (avg)
+  meas incidents.min_subject_count (min)
+  meas incidents.max_subject_count (max)
+cube officers
+  dim  officers.row_key (string)
+  dim  officers.case_number (string) -- case number
+  dim  officers.race (string) -- race
+  dim  officers.gender (string) -- gender M: male; F: female
+  dim  officers.last_name (string) -- last name
+  dim  officers.first_name (string) -- first name
+  dim  officers.full_name (string) -- full name
+  meas officers.count (count)
+cube subjects
+  dim  subjects.row_key (string)
+  dim  subjects.case_number (string) -- case number
+  dim  subjects.race (string) -- race
+  dim  subjects.gender (string) -- gender M: male; F: female
+  dim  subjects.last_name (string) -- last name
+  dim  subjects.first_name (string) -- first name
+  dim  subjects.full_name (string) -- full name
+  meas subjects.count (count)
