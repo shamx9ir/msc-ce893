@@ -15,6 +15,7 @@ import argparse
 import json
 import math
 import random
+import sys
 from pathlib import Path
 
 
@@ -62,6 +63,53 @@ def encode(tok, row: dict, max_len: int) -> dict | None:
     return {"input_ids": ids, "attention_mask": [1] * len(ids), "labels": labels}
 
 
+class TokenDeltas:
+    """Trainable corrections to the input embedding and lm_head rows of a few tokens.
+
+    Qwen2.5-Coder-Instruct never trained <tool_call>/</tool_call>: their input embeddings are zero
+    and their lm_head rows equal those of thousands of unused tokens, so a LoRA on attention/MLP
+    can only tie them with junk tokens (P about 0.0004 at the start of every assistant turn).
+    This adds a learned vector to those rows (input side via an embedding forward hook, output
+    side inside labelled_loss); export_ollama.py adds them to the base weights when merging."""
+
+    def __init__(self, model, token_ids: list[int]):
+        import torch
+        base = model.get_base_model()
+        emb = base.model.embed_tokens
+        hidden = emb.weight.shape[1]
+        dev = emb.weight.device
+        self.ids = torch.tensor(token_ids, device=dev)
+        self.d_in = torch.nn.Parameter(torch.zeros(len(token_ids), hidden, device=dev, dtype=torch.float32))
+        self.d_out = torch.nn.Parameter(torch.zeros(len(token_ids), hidden, device=dev, dtype=torch.float32))
+        # register on the PEFT model so Trainer's optimizer sees them
+        model.register_parameter("tok_delta_in", self.d_in)
+        model.register_parameter("tok_delta_out", self.d_out)
+        self.token_ids = token_ids
+        emb.register_forward_hook(self._embed_hook)
+
+    def _embed_hook(self, module, args, out):
+        import torch
+        input_ids = args[0]
+        hit = input_ids.unsqueeze(-1) == self.ids  # [b, L, k]
+        if not bool(hit.any()):
+            return out
+        add = hit.to(self.d_in.dtype) @ self.d_in  # [b, L, hidden]
+        return out + add.to(out.dtype)
+
+    def logits_extra(self, h):
+        """[n, k] additions to the logits of the k tokens for hidden states h [n, hidden]."""
+        return h.float() @ self.d_out.t()
+
+    def save(self, path):
+        from safetensors.torch import save_file
+        save_file({"delta_in": self.d_in.detach().cpu().contiguous(), "delta_out": self.d_out.detach().cpu().contiguous()},
+                  str(path / "token_deltas.safetensors"),
+                  metadata={"token_ids": json.dumps(self.token_ids)})
+
+
+TOKEN_DELTAS = None  # set in main() when --train-tokens is used
+
+
 def labelled_loss(model, inputs):
     """Cross-entropy over the labelled (assistant) positions only.
 
@@ -75,7 +123,10 @@ def labelled_loss(model, inputs):
     hidden = base.model(input_ids=inputs["input_ids"], attention_mask=mask).last_hidden_state
     labels = inputs["labels"][:, 1:]
     keep = labels != -100
-    logits = base.lm_head(hidden[:, :-1][keep]).float()
+    h = hidden[:, :-1][keep]
+    logits = base.lm_head(h).float()
+    if TOKEN_DELTAS is not None:
+        logits = logits.index_add(1, TOKEN_DELTAS.ids, TOKEN_DELTAS.logits_extra(h))
     return F.cross_entropy(logits, labels[keep])
 
 
@@ -114,6 +165,9 @@ def main() -> None:
     ap.add_argument("--match", type=Path,
                     help="keep only the BIRD examples whose --match (e.g. full-profile) version fits --max-len, "
                          "so a shorter-prompt arm trains on the same questions as the arm it is compared with")
+    ap.add_argument("--train-tokens", default="",
+                    help="comma-separated tokens whose embedding/lm_head rows get a trainable correction, "
+                         "e.g. '<tool_call>,</tool_call>' (untrained in Qwen2.5-Coder-Instruct)")
     ap.add_argument("--dry-run", action="store_true", help="tokenise, show one masked example, and stop")
     args = ap.parse_args()
 
@@ -156,6 +210,12 @@ def main() -> None:
     model = get_peft_model(model, LoraConfig(
         r=args.rank, lora_alpha=args.alpha, lora_dropout=0.05, task_type="CAUSAL_LM",
         target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]))
+    if args.train_tokens:
+        global TOKEN_DELTAS
+        ids = [tok.convert_tokens_to_ids(t) for t in args.train_tokens.split(",")]
+        assert all(isinstance(i, int) and i != tok.unk_token_id for i in ids), ids
+        TOKEN_DELTAS = TokenDeltas(model, ids)
+        print(f"training embedding/lm_head corrections for tokens {ids}")
     model.print_trainable_parameters()
 
     steps_per_epoch = math.ceil(len(data["train"]) / (args.batch * args.grad_accum))
@@ -165,11 +225,14 @@ def main() -> None:
         gradient_accumulation_steps=args.grad_accum, lr_scheduler_type="cosine", warmup_ratio=0.03,
         bf16=True, logging_steps=10, eval_strategy="steps", eval_steps=max(10, steps_per_epoch // 2),
         save_strategy="steps", save_steps=max(10, steps_per_epoch // 2), save_total_limit=2,
-        load_best_model_at_end=True, metric_for_best_model="eval_loss",
+        load_best_model_at_end=not args.train_tokens,  # checkpoints hold only the LoRA, not the token corrections
+        metric_for_best_model="eval_loss",
         optim="paged_adamw_8bit", group_by_length=True, report_to="none", seed=args.seed,
         prediction_loss_only=True)
     trainer = LabelledLossTrainer(model=model, args=targs, train_dataset=data["train"], eval_dataset=data["val"],
                       data_collator=DataCollatorForSeq2Seq(tok, padding=True, label_pad_token_id=-100))
+    if args.resume and TOKEN_DELTAS is not None:
+        sys.exit("--resume does not restore --train-tokens corrections; start a new run")
     if not args.resume:
         # Fail in minutes, not hours, if evaluation or saving is broken; also gives the step-0 val loss.
         print("eval before training:", trainer.evaluate())
@@ -178,6 +241,8 @@ def main() -> None:
     final = args.out / "final"
     trainer.model.save_pretrained(final)
     tok.save_pretrained(final)
+    if TOKEN_DELTAS is not None:
+        TOKEN_DELTAS.save(final)
     json.dump({**{k: str(v) for k, v in vars(args).items()},
                "train_examples": len(data["train"]), "val_examples": len(data["val"]),
                "log": trainer.state.log_history}, open(args.out / "train_info.json", "w"), indent=1)
