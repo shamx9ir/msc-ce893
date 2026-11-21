@@ -30,7 +30,7 @@ The evaluation of text-to-SQL tasks has progressed from Spider~\cite{yu2018spide
 
 
 \subsection{Research question and contribution}
-\resultplaceholder{\textbf{RQ.} With the agent harness held constant, to what extent can training a LoRA adapter on verified tool-use transcripts boost execution accuracy on unfamiliar databases? Additionally, how much of the prompt, comprising the query guide, tool definitions, and database schema, can be offloaded into the LoRA adapter without compromising performance in terms of accuracy, saved tokens, and generation speed?}
+\resultplaceholder{With the agent harness held constant, to what extent can training a LoRA adapter on verified tool-use transcripts boost execution accuracy on unfamiliar databases? How much of the prompt, comprising the query guide, tool definitions, and database schema, can be offloaded into the LoRA adapter without compromising performance in terms of accuracy, saved tokens, and generation speed?}
 
 A key feature of this experiment is that the evaluation harness remains strictly fixed while only model weights are varied. Every test arm utilizes the identical 4-bit model file hosted in Ollama, alongside identical prompts and available tools, ensuring that any performance variations stem directly from the LoRA adapter. Departing from traditional text-to-SQL paradigms, the model generates queries targeted at a semantic-layer API. Furthermore, we evaluate the extent to which the adapter can absorb components of the harness prompt, including the query guide, tool definitions, and schema details. All assessments are conducted across two unseen databases using realistic, analyst-style questions.
 
