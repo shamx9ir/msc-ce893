@@ -61,7 +61,7 @@ The baseline is a \textbf{prompt-engineering harness}: a system prompt with a Cu
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=0.7\linewidth]{figures/fig02_pipeline.pdf}
+\includegraphics[width=0.76\linewidth]{figures/fig02_pipeline.pdf}
 \caption{Steps from input to output. The agent loops between the model and the tools until it submits a query (max.\ 8 calls). The submitted query is scored against the gold SQL (5a) and shown as a chart in the demo app (5b). Every arm uses this same pipeline.}
 \label{fig:pipeline}
 \end{figure}
@@ -91,7 +91,7 @@ BIRD gives, for each question, an English question, a gold SQL query and the SQL
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=0.7\linewidth]{figures/fig03_data.pdf}
+\includegraphics[width=0.78\linewidth]{figures/fig03_data.pdf}
 \caption{(a) From 8,003 BIRD training questions to 3,531 verified examples: 2,782 used SQL a semantic layer cannot express, 900 failed in Cube and 790 gave different or empty results. (b) One record, its verified Cube query and the transcript the model is trained on.}
 \label{fig:data}
 \end{figure}
@@ -106,7 +106,7 @@ Both arms use \texttt{Qwen2.5-Coder-7B-Instruct} and \texttt{-14B-Instruct}~\cit
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=0.7\linewidth]{figures/fig04_harness_versions.pdf}
+\includegraphics[width=0.8\linewidth]{figures/fig04_harness_versions.pdf}
 \caption{Prompt-engineering progress for the 7B baseline (development runs, with BIRD's hint). (a) The three versions that were also run on the test set: strict accuracy doubled from v1 to v4.2. (b) The development loop used only tuning databases; on all 363 tuning questions v4.2 beat v3 (32.0\% vs 26.2\%, McNemar $p{=}0.011$), and the 14B model reached 38.8\%.}
 \label{fig:versions}
 \end{figure}
@@ -116,7 +116,7 @@ We fine-tune with QLoRA~\cite{dettmers2023qlora} using PEFT~\cite{peft}: the bas
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=0.7\linewidth]{figures/fig05_method.pdf}
+\includegraphics[width=0.75\linewidth]{figures/fig05_method.pdf}
 \caption{Fine-tuning pipeline (top) and the three prompt profiles (bottom). Only the adapter and the prompt profile change between arms.}
 \label{fig:method}
 \end{figure}
@@ -142,7 +142,7 @@ Hardware & one RTX 5070 Ti (16\,GB), 32\,GB RAM, Windows; training 5.3\,h (7B) a
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=0.7\linewidth]{figures/fig06_training.pdf}
+\includegraphics[width=0.78\linewidth]{figures/fig06_training.pdf}
 \caption{Training progress for all six adapters. The loss drops within the first quarter epoch and then stays flat; validation loss on the three held-out databases follows it, so the adapters did not overfit. Lean and noschema adapters start higher because the model has never seen those short prompts.}
 \label{fig:training}
 \end{figure}
@@ -210,7 +210,7 @@ The test split and scoring rule were frozen first; the harness was developed on 
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=0.62\linewidth]{figures/fig07_main.pdf}
+\includegraphics[width=0.68\linewidth]{figures/fig07_main.pdf}
 \caption{Before and after fine-tuning (higher is better). (a) The LoRA adds 13--15 points of strict accuracy at both sizes, more than doubling the model size does. (b) The gain holds on both databases and is largest on questions that need a join (7B: 20\% to 35\%, 14B: 23\% to 41\%).}
 \label{fig:main}
 \end{figure}
@@ -223,7 +223,7 @@ Fig.~\ref{fig:offload} answers the second part of the RQ. The lean LoRA sends 1.
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=0.68\linewidth]{figures/fig08_offload.pdf}
+\includegraphics[width=0.74\linewidth]{figures/fig08_offload.pdf}
 \caption{Accuracy against prompt cost (up and left is better). The lean adapters (green) match the full LoRA's accuracy at 40\% of its prompt tokens; dropping the schema altogether (triangles) saves more tokens but loses 16--19 points.}
 \label{fig:offload}
 \end{figure}
@@ -260,7 +260,7 @@ Training took 5.3\,h (7B) and 9.0\,h (14B) on one 16\,GB GPU (lean: 2--3\,h) and
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=0.6\linewidth]{figures/fig09_outputs.pdf}
+\includegraphics[width=0.7\linewidth]{figures/fig09_outputs.pdf}
 \caption{Real tool traces from the test runs (\texttt{>} model call, \texttt{<} tool reply; long lines cut). A: the baseline groups by circuit and returns three rows, the LoRA asks for the single count. B: the LoRA skips the value lookup, filters on a value that does not exist and submits an empty result. C: without a schema the model invents \texttt{student.phone} and repeats it; the lean adapter writes \texttt{member.phone} (here as text, which the harness parses).}
 \label{fig:outputs}
 \end{figure}
@@ -270,7 +270,7 @@ In Fig.~\ref{fig:outputs}A the baseline looks up ``Italy'' as its rules say, the
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=0.52\linewidth]{figures/fig10_errors.pdf}
+\includegraphics[width=0.62\linewidth]{figures/fig10_errors.pdf}
 \caption{Wrong answers by category (rules applied in order). The LoRA mainly removes failed runs, wrong filters and extra columns; about 55 per arm need SQL Cube cannot express.}
 \label{fig:errors}
 \end{figure}
