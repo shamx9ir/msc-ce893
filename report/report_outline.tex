@@ -234,11 +234,10 @@ The test split and scoring were frozen first, and the harness was tuned on tunin
 \end{table}
 
 \subsection{Main findings}
-\resultplaceholder{\textbf{Write here:}\begin{itemize}[leftmargin=1.2em,itemsep=0.05em]
-  \item Lead with Table 5: +15.4 points (7B, 70 fixed vs 19 broken) and +13.3 points (14B, 58 vs 14).
-  \item 7B LoRA beats 14B baseline by 9.3 points (p=0.0009); 14B LoRA vs 7B LoRA not significant (p=0.09).
-  \item Fig. 8: lean = 1.5k vs 3.6k tokens per call, loses 2.1 / 0.6 points (n.s.). No schema: 18.1 / 24.7\%; noschema + short schema 37.0 / 41.0. Full LoRA on lean prompt: 0\%.
-\end{itemize}}
+The introduction of the adapter serves as the primary driver of performance improvements (Table~\ref{tab:main}, Fig.~\ref{fig:main}). For the 7B model, strict accuracy increased by 15.4 percentage points, with 70 previously incorrect questions turning correct against 19 regressions. Similarly, the 14B model demonstrated a gain of 13.3 points (58 gains versus 14 losses). Notably, the 7B LoRA model outperformed the 14B baseline model by 9.3 points ($p{=}0.0009$). In contrast, the performance gap between the 14B LoRA and 7B LoRA models was only 3.9 points, which is not statistically significant ($p{=}0.09$). A key issue with the 14B baseline was its tendency to output correct data rows alongside redundant columns (reflected in a relaxed accuracy of 35.8 vs.\ a strict accuracy of 27.4); integrating the adapter largely eliminated these extraneous columns.
+
+Addressing the second component of the Research Question, Fig.~\ref{fig:offload} illustrates the efficiency of prompt reduction. The lean LoRA setup decreases context usage from 3.6k to 1.5k prompt tokens per call. This reduction incurs minor, statistically insignificant accuracy drops of 2.1 points at 7B ($p{=}0.30$) and 0.6 points at 14B ($p{=}0.83$). Conversely, entirely eliminating the schema results in substantial performance penalties, dropping accuracy to 18.1\% at 7B and 24.7\% at 14B, primarily because the model begins hallucinating non-existent database entities (evidenced by ``unknown member'' errors in 114 out of 332 runs on the 14B model). Reintroducing a condensed schema to the noschema adapter restores performance to levels comparable with the full LoRA (37.0\% for 7B and 41.0\% for 14B). Finally, applying the lean prompt to a full-prompt LoRA without retraining yielded a 0\% success rate, proving that the adapter specialised to its specific prompt structure rather than mastering general task execution.
+
 
 
 
