@@ -37,7 +37,7 @@ A key feature of this experiment is that the evaluation harness remains strictly
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=0.7\linewidth]{figures/fig01_glance.pdf}
+\includegraphics[width=0.62\linewidth]{figures/fig01_glance.pdf}
 \caption{Project at a glance. A question goes to the agent, which writes a Cube query; Cube runs it and the rows become the answer (a stat tile here, a chart in the app). The two arms differ only in the LoRA adapter.}
 \label{fig:glance}
 \end{figure}
@@ -88,9 +88,9 @@ On the tuning databases, most baseline failures were not missing knowledge but p
 \toprule
 \textbf{Split} & \textbf{Purpose} & \textbf{Items} & \textbf{Databases}\\
 \midrule
-LoRA training & BIRD train questions turned into verified Cube transcripts & 3,273 & 55\\
-LoRA validation & Transcripts from three other BIRD train databases; only for picking the best checkpoint & 258 & 3\\
-Harness tuning & BIRD dev questions used to develop the prompt and tools & 363 & 3\\
+LoRA training & BIRD train questions turned into verified Cube transcripts (database list in the repository) & 3,273 & 55\\
+LoRA validation & Transcripts from three other BIRD train databases (\texttt{soccer\_2016}, \texttt{public\_review\_platform}, \texttt{movie\_3}); only for picking the best checkpoint & 258 & 3\\
+Harness tuning & BIRD dev questions on \texttt{superhero}, \texttt{toxicology} and \texttt{california\_schools}, used to develop the prompt and tools & 363 & 3\\
 Final test & All BIRD dev questions on \texttt{formula\_1} (174) and \texttt{student\_club} (158); run once per arm & 332 & 2\\
 \bottomrule
 \end{tabularx}
@@ -105,7 +105,7 @@ Final test & All BIRD dev questions on \texttt{formula\_1} (174) and \texttt{stu
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=0.7\linewidth]{figures/fig03_data.pdf}
+\includegraphics[width=0.64\linewidth]{figures/fig03_data.pdf}
 \caption{(a) From 8,003 BIRD training questions to 3,531 verified examples: 2,782 used SQL a semantic layer cannot express, 900 failed in Cube and 790 gave different or empty results. (b) One record, its verified Cube query and the transcript the model is trained on.}
 \label{fig:data}
 \end{figure}
@@ -133,13 +133,13 @@ Final test & All BIRD dev questions on \texttt{formula\_1} (174) and \texttt{stu
 \subsection{Chosen method}
 \resultplaceholder{\textbf{Write here:}\begin{itemize}[leftmargin=1.2em,itemsep=0.05em]
   \item QLoRA with PEFT: 4-bit NF4 base, rank-16 adapters on all attention + MLP projections (Fig. 5).
-  \item Export: merge, GGUF, Q4\_K\_M, base chat template, so only the adapter differs.
-  \item Prompt profiles: lean (no guide, no tool schemas, compact schema) and noschema (needs \textasciitilde{}1,300 synthetic questions on the test schemas; no BIRD dev data used).
+  \item Export: merge, GGUF, Q4\_K\_M, base chat template.
+  \item Prompt profiles: lean and noschema (needs \textasciitilde{}1,300 synthetic questions on the test schemas).
 \end{itemize}}
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=0.7\linewidth]{figures/fig05_method.pdf}
+\includegraphics[width=0.6\linewidth]{figures/fig05_method.pdf}
 \caption{Fine-tuning pipeline (top) and the three prompt profiles (bottom). Only the adapter and the prompt profile change between arms.}
 \label{fig:method}
 \end{figure}
@@ -208,7 +208,7 @@ Significance & Exact McNemar test on paired per-question outcomes (strict)\\
 
 \subsection{Experimental procedure}
 \resultplaceholder{\textbf{Write here:}\begin{itemize}[leftmargin=1.2em,itemsep=0.05em]
-  \item Order: freeze test split + scoring, tune harness on tuning dbs, freeze v4.2, train each adapter once (seed 7), run each arm once.
+  \item Order: freeze test split, tune harness, freeze v4.2, train each adapter once, run each arm once.
 \end{itemize}}
 
 \section{Results}
@@ -287,7 +287,6 @@ Significance & Exact McNemar test on paired per-question outcomes (strict)\\
   \item Extra arm (retrained for lookups): causes = only 22\% of transcripts had a lookup + untrained \textless{}tool\_call\textgreater{} tokens in Qwen2.5-Coder-Instruct. Fix: lookup before every text filter, train those token rows, tool schemas in template. 7B 41.9\% (+5.1, p=0.019), 14B 44.9\% (+4.2, p=0.020); lookups \textasciitilde{}70\%, empty answers 4-5\%; more tokens/steps.
 \end{itemize}}
 
-\textbf{Retraining for lookups (extra arm).} Only 22\% of training transcripts looked a value up, and Qwen2.5-Coder-Instruct's \texttt{<tool\_call>} tokens are untrained, so the adapters wrote a stray token and fell back to text. The retrain adds a lookup before every text filter (plus recovery examples), trains those tokens' embedding and output rows, and lists the tool schemas in the Ollama template as in training. It looks values up on about 70\% of questions, makes no text calls and cuts empty answers to 4--5\%, gaining 5.1 points at 7B ($p{=}0.019$ against the original LoRA) and 4.2 at 14B ($p{=}0.020$). The cost is more steps and prompt tokens, as the template re-adds the tool schemas; it is an extra arm because data and template changed, not only the adapter.
 
 \subsection{Resource use}
 \resultplaceholder{\textbf{Write here:}\begin{itemize}[leftmargin=1.2em,itemsep=0.05em]
@@ -300,7 +299,7 @@ Significance & Exact McNemar test on paired per-question outcomes (strict)\\
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=0.6\linewidth]{figures/fig09_outputs.pdf}
+\includegraphics[width=0.52\linewidth]{figures/fig09_outputs.pdf}
 \caption{Real tool traces from the test runs (\texttt{>} model call, \texttt{<} tool reply; long lines cut). A: the baseline groups by circuit and returns three rows, the LoRA asks for the single count. B: the LoRA skips the value lookup, filters on a value that does not exist and submits an empty result. C: without a schema the model invents \texttt{student.phone} and repeats it; the lean adapter writes \texttt{member.phone} (here as text, which the harness parses).}
 \label{fig:outputs}
 \end{figure}
@@ -313,7 +312,7 @@ Significance & Exact McNemar test on paired per-question outcomes (strict)\\
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=0.52\linewidth]{figures/fig10_errors.pdf}
+\includegraphics[width=0.48\linewidth]{figures/fig10_errors.pdf}
 \caption{Wrong answers by category (rules applied in order). The LoRA mainly removes failed runs, wrong filters and extra columns; about 55 per arm need SQL Cube cannot express.}
 \label{fig:errors}
 \end{figure}

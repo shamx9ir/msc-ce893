@@ -78,9 +78,9 @@ The baseline's errors on development data were dimensions placed under \texttt{m
 \toprule
 \textbf{Split} & \textbf{Purpose} & \textbf{Items} & \textbf{Databases}\\
 \midrule
-LoRA training & BIRD train questions turned into verified Cube transcripts & 3,273 & 55\\
-LoRA validation & Transcripts from three other BIRD train databases; only for picking the best checkpoint & 258 & 3\\
-Harness tuning & BIRD dev questions used to develop the prompt and tools & 363 & 3\\
+LoRA training & BIRD train questions turned into verified Cube transcripts (database list in the repository) & 3,273 & 55\\
+LoRA validation & Transcripts from three other BIRD train databases (\texttt{soccer\_2016}, \texttt{public\_review\_platform}, \texttt{movie\_3}); only for picking the best checkpoint & 258 & 3\\
+Harness tuning & BIRD dev questions on \texttt{superhero}, \texttt{toxicology} and \texttt{california\_schools}, used to develop the prompt and tools & 363 & 3\\
 Final test & All BIRD dev questions on \texttt{formula\_1} (174) and \texttt{student\_club} (158); run once per arm & 332 & 2\\
 \bottomrule
 \end{tabularx}

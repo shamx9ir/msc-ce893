@@ -55,8 +55,8 @@ NOTES = {
     ],
     "Chosen method": [
         "QLoRA with PEFT: 4-bit NF4 base, rank-16 adapters on all attention + MLP projections (Fig. 5).",
-        "Export: merge, GGUF, Q4_K_M, base chat template, so only the adapter differs.",
-        "Prompt profiles: lean (no guide, no tool schemas, compact schema) and noschema (needs ~1,300 synthetic questions on the test schemas; no BIRD dev data used).",
+        "Export: merge, GGUF, Q4_K_M, base chat template.",
+        "Prompt profiles: lean and noschema (needs ~1,300 synthetic questions on the test schemas).",
     ],
     "Implementation details": [
         "One sentence introducing Table 3.",
@@ -71,7 +71,7 @@ NOTES = {
         "332 test questions, 2 unseen dbs, difficulty mix 218/91/23, 77% need a join. Introduce Table 4.",
     ],
     "Experimental procedure": [
-        "Order: freeze test split + scoring, tune harness on tuning dbs, freeze v4.2, train each adapter once (seed 7), run each arm once.",
+        "Order: freeze test split, tune harness, freeze v4.2, train each adapter once, run each arm once.",
     ],
     "Main findings": [
         "Lead with Table 5: +15.4 points (7B, 70 fixed vs 19 broken) and +13.3 points (14B, 58 vs 14).",
@@ -152,7 +152,7 @@ def main():
             current = m.group(2)
             out.append(line)
             continue
-        if in_env == 0 and current and s and not s.startswith(("\\", "%", "{", "}")) or (
+        if in_env == 0 and current and s and (not s.startswith(("\\", "%", "{", "}")) or s.startswith("\\textbf{")) or (
                 in_env == 0 and current and s.startswith("\\resultplaceholder")):
             # prose paragraph (or RQ box kept) -> replace with notes once per subsection
             if s.startswith("\\resultplaceholder"):
@@ -174,8 +174,7 @@ def main():
     text = re.sub(r"\\textbf\{Summary\.\}.*?\n", "\\\\textbf{Summary (to write).} " + esc(NOTES["TITLE"][0]).replace("\\", "\\\\") + "\n", text, count=1)
     text = text.replace("{\\footnotesize\n\\bibliographystyle", "{\\footnotesize\n\\nocite{*}\n\\bibliographystyle")
     # The outline's notes run longer than the prose in places, so a few figures are smaller here to keep 10 pages.
-    for fig, (w_old, w_new) in {"fig03_data": ("0.78", "0.7"), "fig04_harness_versions": ("0.8", "0.7"),
-                                "fig06_training": ("0.78", "0.7")}.items():
+    for fig, (w_old, w_new) in {"fig01_glance": ("0.7", "0.62"), "fig03_data": ("0.7", "0.64"), "fig05_method": ("0.7", "0.6"), "fig09_outputs": ("0.6", "0.52"), "fig10_errors": ("0.52", "0.48")}.items():
         text = text.replace(f"width={w_old}\\linewidth]{{figures/{fig}", f"width={w_new}\\linewidth]{{figures/{fig}")
     # Shamir: in the outline, Fig. 2 sits before the Proposed solution subsection.
     m = re.search(r"\\begin\{figure\}\[!htbp\]\n(?:(?!\\end\{figure\}).)*fig02_pipeline.*?\\end\{figure\}\n\n?", text, flags=re.S)
