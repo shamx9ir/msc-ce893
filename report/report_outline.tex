@@ -287,10 +287,8 @@ Training took 5.3\,h (7B) and 9.0\,h (14B) on one 16\,GB GPU (2--3\,h for the le
 \end{figure}
 
 \subsection{Interpretation and error analysis}
-\resultplaceholder{\textbf{Write here:}\begin{itemize}[leftmargin=1.2em,itemsep=0.05em]
-  \item Walk through Fig. 9: A extra grouping, B guessed value, C invented member.
-  \item Fig. 10: failed runs 45 to 4 (7B); wrong filters 64 to 50; \textasciitilde{}55 per arm need SQL Cube cannot express.
-\end{itemize}}
+As shown in Fig.~\ref{fig:outputs}A, the baseline follows its rules by looking up ``Italy'', but then adds a grouping the question did not ask for, returning three rows rather than one. Fig.~\ref{fig:errors} sorts each wrong answer into one category by fixed rules. The adapter sharply reduced failed runs (invalid queries fell from 45 to 4 at 7B) and cut wrong filter values from 64 to 50 at 7B and from 48 to 39 at 14B. However, about 55 questions per arm need SQL operations that Cube cannot express, which sets the upper limit of this approach. Value lookup remains the main weakness: since only 22\% of training transcripts call \texttt{search\_values}, the adapter learned to guess spellings (case B), though the retrained arm (Section~\ref{sec:tooluse}) largely fixes this.
+
 
 \begin{figure}[!htbp]
 \centering
