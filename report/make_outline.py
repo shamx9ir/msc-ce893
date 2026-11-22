@@ -58,9 +58,6 @@ NOTES = {
         "Export: merge, GGUF, Q4_K_M, base chat template.",
         "Prompt profiles: lean and noschema (needs ~1,300 synthetic questions on the test schemas).",
     ],
-    "Implementation details": [
-        "One sentence introducing Table 3.",
-    ],
     "Compared systems": [
         "Baseline: base model + harness v4.2 (full prompt).",
         "Proposed: same model file + LoRA, same harness and prompt.",
