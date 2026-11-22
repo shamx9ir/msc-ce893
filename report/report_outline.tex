@@ -97,11 +97,8 @@ Final test & All BIRD dev questions on \texttt{formula\_1} (174) and \texttt{stu
 \end{table}
 
 \subsection{Source and preparation}
-\resultplaceholder{\textbf{Write here:}\begin{itemize}[leftmargin=1.2em,itemsep=0.05em]
-  \item BIRD fields: question, gold SQL, SQLite db. Copied to DuckDB; Cube models generated from schema, foreign keys and column descriptions.
-  \item Rule-based SQL to Cube translator; keep a pair only if Cube rows = gold rows and non-empty (Fig. 3a funnel: 8,003 to 3,531).
-  \item Chat transcript format, loss on assistant turns only; 769 transcripts include a search\_values call.
-\end{itemize}}
+Each question in the BIRD dataset includes an English prompt, a corresponding SQLite database, and a gold SQL query. After migrating every database into DuckDB, we automatically generated Cube models based on their schema, foreign key relationships, and column descriptions provided by BIRD. To construct our training set, a rule-based translation engine converted each gold SQL query into a Cube equivalent. We retained only the query pairs whose execution outputs matched identically without producing empty results (Fig.~\ref{fig:data}a). These validated pairs were then compiled into full conversation transcripts featuring the exact system prompt of the harness, the initial user prompt, and sequential tool executions: \texttt{run\_query} followed by \texttt{submit\_answer}. Additionally, 769 of these transcripts incorporated an initial \texttt{search\_values} call to retrieve filtered text values. Hints from BIRD were preserved in the user messages during training, whereas they were omitted during evaluation. Finally, loss computation was restricted strictly to the assistant's turns.
+
 
 \begin{figure}[!htbp]
 \centering
