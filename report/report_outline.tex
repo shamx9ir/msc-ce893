@@ -276,7 +276,7 @@ The 7B baseline makes about two value lookups and has about one call rejected by
 
 
 \subsection{Resource use}
-Training took 5.3\,h (7B) and 9.0\,h (14B) on one 16\,GB GPU (2--3\,h for the lean setup) and converged within half an epoch (Fig.~\ref{fig:training}). The merged adapter adds no inference cost and halves the steps (4.1 to 2.1 at 7B), so prompt tokens halve and model time per question falls from 3.5 to 1.3\,s (p90: 6.8 to 1.7\,s). Output speed is unchanged (105--120 tokens/s at 7B, 60--67 at 14B), so the saving comes from fewer, shorter calls, partly because the adapter skips \texttt{search\_values} (1\% of questions vs 92\%).
+Training took 5.3\,h (7B) and 9.0\,h (14B) on one 16\,GB GPU (2--3\,h for the lean setup) and converged within half an epoch (Fig.~\ref{fig:training}). The merged adapter adds no inference cost and halves the model calls per question (4.1 to 2.1 at 7B), so prompt tokens halve and model time per question falls from 3.5 to 1.3\,s (p90: 6.8 to 1.7\,s). Output speed is unchanged (105--120 tokens/s at 7B, 60--67 at 14B), so the saving comes from fewer, shorter calls, partly because the adapter skips \texttt{search\_values} (1\% of questions vs 92\%).
 
 
 \section{Discussion}\label{sec:discussion}
