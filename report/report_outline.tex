@@ -306,7 +306,7 @@ Integrating a LoRA adapter trained on the 3,273-transcript, execution-verified t
 
 The findings demonstrate that key prompt instructions can be successfully offloaded into model weights. Transitioning to a lean prompt reduced context usage to 40\% of the original prompt tokens while maintaining accuracy within approximately 2 percentage points (a non-significant difference); however, retaining the database schema remains essential. Incorporating value lookups and trained tool-call tokens during retraining further enhanced strict accuracy, reaching 41.9\% for the 7B variant and 44.9\% for the 14B model.
 
-Promising directions for future work include:
+Directions for future work include:
 \begin{itemize}[nosep,leftmargin=1.5em]
 \item Applying the retraining procedure to lean adapter configurations.
 \item Training tool-call tokens for baseline models to isolate call formatting from domain-specific task knowledge.
