@@ -180,6 +180,10 @@ def main():
         text = text.replace(f"width={w_old}\\linewidth]{{figures/{fig}", f"width={w_new}\\linewidth]{{figures/{fig}")
     # Shamir: Fig. 9 in the outline uses the wider two-column layout (shorter traces, larger text).
     text = text.replace("{figures/fig09_outputs.pdf}", "{figures/fig09_outputs_wide.pdf}", 1)
+    # Shamir: Fig. 9 caption beside the figure (outline only), to avoid white space at the sides.
+    text = re.sub(r"\\centering\n\\includegraphics\[width=[0-9.]+\\linewidth\]\{figures/fig09_outputs_wide\.pdf\}\n(\\caption\{.*?\})\n(\\label\{fig:outputs\})",
+                  lambda m: "\\begin{minipage}[c]{0.68\\linewidth}\\includegraphics[width=\\linewidth]{figures/fig09_outputs_wide.pdf}\\end{minipage}\\hfill\n"
+                            "\\begin{minipage}[c]{0.3\\linewidth}\\small\\raggedright " + m.group(1) + m.group(2) + "\\end{minipage}", text, count=1, flags=re.S)
     # Shamir: explain why the funnel's 59 databases become 58 in the splits (outline only).
     text = text.replace("790 gave different or empty results.", "790 gave different or empty results; one database (craftbeer) yielded no verified pairs, so the splits cover 58.", 1)
     # Shamir: in the outline, Fig. 2 sits before the Proposed solution subsection.
