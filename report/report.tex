@@ -79,7 +79,7 @@ The baseline's errors on development data were dimensions placed under \texttt{m
 \textbf{Split} & \textbf{Purpose} & \textbf{Items} & \textbf{Databases}\\
 \midrule
 LoRA training & BIRD train questions turned into verified Cube transcripts & 3,273 & 55\\
-LoRA validation & Same, three whole databases held out; early-stopping check only & 258 & 3\\
+LoRA validation & Transcripts from three other BIRD train databases; only for picking the best checkpoint & 258 & 3\\
 Harness tuning & BIRD dev questions used to develop the prompt and tools & 363 & 3\\
 Final test & All BIRD dev questions on \texttt{formula\_1} (174) and \texttt{student\_club} (158); run once per arm & 332 & 2\\
 \bottomrule

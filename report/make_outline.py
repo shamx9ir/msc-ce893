@@ -47,7 +47,7 @@ NOTES = {
         "Chat transcript format, loss on assistant turns only; 769 transcripts include a search_values call.",
     ],
     "Data quality and limitations": [
-        "Translator coverage: no subqueries, CASE arithmetic, string slicing; 30% of test needs such SQL (ceiling 231/332).",
+        "Translator: no subqueries, CASE, string slicing; 30% of test needs such SQL (ceiling 231/332).",
     ],
     "Base model and baseline": [
         "Qwen2.5-Coder 7B/14B Instruct, Ollama Q4_K_M, temperature 0, 16k context.",
@@ -87,8 +87,8 @@ NOTES = {
         "Output speed unchanged, so the saving is fewer, shorter calls (partly from skipping search_values).",
     ],
     "Interpretation and error analysis": [
-        "Walk through Fig. 9 case A (extra grouping dimension) and case B (guessed value, empty result) and case C (invented member without schema).",
-        "Fig. 10: failed runs 45 to 4 (7B); wrong filters 64 to 50 (7B), 48 to 39 (14B); ~55 per arm need SQL Cube cannot express (ceiling, not a model error).",
+        "Walk through Fig. 9: A extra grouping, B guessed value, C invented member.",
+        "Fig. 10: failed runs 45 to 4 (7B); wrong filters 64 to 50; ~55 per arm need SQL Cube cannot express.",
     ],
     "Limitations and responsible use": [
         "Two dbs, one run per arm (about +/-5 points). Setting differs from BIRD's standard one: not comparable with its leaderboard.",

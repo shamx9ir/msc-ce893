@@ -89,7 +89,7 @@ On the tuning databases, most baseline failures were not missing knowledge but p
 \textbf{Split} & \textbf{Purpose} & \textbf{Items} & \textbf{Databases}\\
 \midrule
 LoRA training & BIRD train questions turned into verified Cube transcripts & 3,273 & 55\\
-LoRA validation & Same, three whole databases held out; early-stopping check only & 258 & 3\\
+LoRA validation & Transcripts from three other BIRD train databases; only for picking the best checkpoint & 258 & 3\\
 Harness tuning & BIRD dev questions used to develop the prompt and tools & 363 & 3\\
 Final test & All BIRD dev questions on \texttt{formula\_1} (174) and \texttt{student\_club} (158); run once per arm & 332 & 2\\
 \bottomrule
@@ -112,7 +112,7 @@ Final test & All BIRD dev questions on \texttt{formula\_1} (174) and \texttt{stu
 
 \subsection{Data quality and limitations}
 \resultplaceholder{\textbf{Write here:}\begin{itemize}[leftmargin=1.2em,itemsep=0.05em]
-  \item Translator coverage: no subqueries, CASE arithmetic, string slicing; 30\% of test needs such SQL (ceiling 231/332).
+  \item Translator: no subqueries, CASE, string slicing; 30\% of test needs such SQL (ceiling 231/332).
 \end{itemize}}
 
 \section{Method}\label{sec:method}
@@ -307,8 +307,8 @@ Significance & Exact McNemar test on paired per-question outcomes (strict)\\
 
 \subsection{Interpretation and error analysis}
 \resultplaceholder{\textbf{Write here:}\begin{itemize}[leftmargin=1.2em,itemsep=0.05em]
-  \item Walk through Fig. 9 case A (extra grouping dimension) and case B (guessed value, empty result) and case C (invented member without schema).
-  \item Fig. 10: failed runs 45 to 4 (7B); wrong filters 64 to 50 (7B), 48 to 39 (14B); \textasciitilde{}55 per arm need SQL Cube cannot express (ceiling, not a model error).
+  \item Walk through Fig. 9: A extra grouping, B guessed value, C invented member.
+  \item Fig. 10: failed runs 45 to 4 (7B); wrong filters 64 to 50; \textasciitilde{}55 per arm need SQL Cube cannot express.
 \end{itemize}}
 
 \begin{figure}[!htbp]
