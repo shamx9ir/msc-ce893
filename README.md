@@ -163,7 +163,7 @@ baseline only by the adapter. The 7B was trained on examples up to 8,192 tokens;
 `--max-len 4096` (2,621 train / 139 val examples), so it saw about 10% fewer examples. `--quantize` is optional:
 without it Ollama would quantise, but Ollama 0.40 cannot make Q4_K_M, so we used llama.cpp's `llama-quantize` (release b12376).
 
-### search_values retrain (7B, 2026-11-21)
+### search_values retrain (7B and 14B, 2026-11-21/22)
 
 The first adapters almost stopped calling `search_values` (7B: 1 of 332 test questions, 14B: 0; harness-only 92%),
 because only 769 of the 3,531 training examples (22%) had a lookup. Fixing that took three changes; the last
@@ -217,8 +217,23 @@ sv3-nt vs the original no-hint run: 32 vs 15, p = 0.019. The template alone does
 (data change only) did not improve accuracy: its calls mostly went through the text fallback, and once that was
 fixed by prefilling `<tool_call>` it looped (search, 0 rows, search again: 24 step-limit hits). With the hint most
 literal values are already given, so lookups add little. Runs: `results/runs/test_{nohint_,}lora_{sv2,sv2_pf,pf,sv3,sv3_nt,nt}_7b.jsonl.gz`
-(`sv3` = sv3 weights on Ollama's own tool rendering, kept as a record: 32.2% / 39.8%). The 14B retrain with the same
-fixes is in progress.
+(`sv3` = sv3 weights on Ollama's own tool rendering, kept as a record: 32.2% / 39.8%).
+
+14B, same fixes (`--max-len 4096`, 2,567 train examples; validation loss 0.011; Ollama `qwen14b-cube-sv3-nt`).
+The fair baseline is the original 14B LoRA run on its own template: on the literal template (`lora-nt`) the old
+14B adapter writes junk instead of `<tool_call>` and Ollama aborts on repeated tokens (24.4% / 29.2% strict), and
+even on its own template every one of its calls went through the text fallback.
+
+| 14B LoRA | Hint | Strict | Relaxed | Calls search_values | Text-fallback questions |
+|---|---|---|---|---|---|
+| original (`lora`) | no | 40.7% | 45.5% | 0% | 332 |
+| **sv3-nt** | no | **44.9%** (23 vs 9, p = 0.020) | **48.8%** | 69.0% | 0 |
+| original (`lora`) | yes | 49.7% | 56.9% | 0% | 332 |
+| sv3-nt | yes | 48.2% (10 vs 15, p = 0.42) | 55.1% | 69.6% | 0 |
+
+Across both sizes the fixes give a significant gain without the hint (7B +5.2 / +6.3 points against the original
+run / same-template run, 14B +4.2) and none with it, where the hint already spells out most values. sv3-nt 14B vs
+7B: no hint p = 0.13, hint p = 0.86. Runs: `results/runs/test_{nohint_,}lora_{sv3_nt,nt}_14b.jsonl.gz`.
 
 ## Schema-offloading arms (prompt profiles)
 
