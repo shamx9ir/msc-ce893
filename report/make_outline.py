@@ -180,7 +180,7 @@ def main():
     text = re.sub(r"\\textbf\{Summary\.\}.*?\n", "\\\\textbf{Summary (to write).} " + esc(NOTES["TITLE"][0]).replace("\\", "\\\\") + "\n", text, count=1)
     text = text.replace("{\\footnotesize\n\\bibliographystyle", "{\\footnotesize\n\\nocite{*}\n\\bibliographystyle")
     # The outline's notes run longer than the prose in places, so a few figures are smaller here to keep 10 pages.
-    for fig, (w_old, w_new) in {"fig01_glance": ("0.7", "0.62"), "fig03_data": ("0.7", "0.64"), "fig05_method": ("0.7", "0.6"), "fig04_harness_versions": ("0.7", "0.62"), "fig06_training": ("0.7", "0.62"), "fig07_main": ("0.62", "0.56"), "fig08_offload": ("0.68", "0.6"), "fig09_outputs": ("0.6", "0.7"), "fig10_errors": ("0.52", "0.44")}.items():
+    for fig, (w_old, w_new) in {"fig01_glance": ("0.7", "0.62"), "fig03_data": ("0.7", "0.56"), "fig05_method": ("0.7", "0.6"), "fig04_harness_versions": ("0.7", "0.55"), "fig06_training": ("0.7", "0.62"), "fig07_main": ("0.62", "0.56"), "fig08_offload": ("0.68", "0.6"), "fig09_outputs": ("0.6", "0.7"), "fig10_errors": ("0.52", "0.44")}.items():
         text = text.replace(f"width={w_old}\\linewidth]{{figures/{fig}", f"width={w_new}\\linewidth]{{figures/{fig}")
     # Shamir: Fig. 9 in the outline uses the wider two-column layout (shorter traces, larger text).
     text = text.replace("{figures/fig09_outputs.pdf}", "{figures/fig09_outputs_wide.pdf}", 1)
@@ -194,6 +194,8 @@ def main():
     m5 = re.search(r"\\begin\{figure\}\[!htbp\]\n(?:(?!\\end\{figure\}).)*fig07_main.*?\\end\{figure\}\n\n?", text, flags=re.S)
     if m5:
         text = text.replace(m5.group(0), "", 1).replace("\\subsection{Experimental procedure}", m5.group(0) + "\\subsection{Experimental procedure}", 1)
+    # Shamir: Fig. 4 must appear before 4.2 in the outline.
+    text = text.replace("\\subsection{Chosen method}", "\\FloatBarrier\n\\subsection{Chosen method}", 1)
     # Shamir: in the outline, Fig. 2 sits before the Proposed solution subsection.
     m = re.search(r"\\begin\{figure\}\[!htbp\]\n(?:(?!\\end\{figure\}).)*fig02_pipeline.*?\\end\{figure\}\n\n?", text, flags=re.S)
     if m:
