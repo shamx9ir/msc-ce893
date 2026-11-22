@@ -269,10 +269,10 @@ Addressing the second component of the Research Question, Fig.~\ref{fig:offload}
 \end{tabularx}
 \end{table}
 
-\resultplaceholder{\textbf{Write here:}\begin{itemize}[leftmargin=1.2em,itemsep=0.05em]
-  \item Table 6: baseline \textasciitilde{}2 lookups, \textasciitilde{}1 rejected call per q; adapters draft once, never look values up (13\% empty answers).
-  \item Extra arm (retrained for lookups; untrained \textless{}tool\_call\textgreater{} tokens fixed): 7B 41.9\% (+5.1, p=0.019), 14B 44.9\% (+4.2, p=0.020); lookups \textasciitilde{}70\%, empty answers 4-5\%.
-\end{itemize}}
+The operational behaviour of the adapters diverges significantly from that of the baselines (Table~\ref{tab:tools}). While the 7B baseline averages approximately two value lookups per question and experiences one request rejection per question during name and type validation, the adapters typically draft a query once and submit it successfully without rejection. However, because these adapters omit value lookups entirely, 13\% of their final answers stem from queries that return zero rows (case B, Fig.~\ref{fig:outputs}), compared to a 2--10\% empty-result rate for the baselines. Meanwhile, the 14B models generate the majority of their tool calls in raw text for the harness to parse.
+
+\textbf{Retraining for lookups (extra arm).} Because only 22\% of the initial training transcripts incorporated value lookups and the Qwen2.5-Coder-Instruct model's \texttt{<tool\_call>} tokens remained untrained, the adapters frequently produced extraneous tokens before reverting to text-based calls. To address this, an additional experimental arm was introduced to retrain the models. This retraining regimen enforced a lookup step prior to every text filter, incorporated failure-recovery examples, trained the corresponding token embeddings alongside output layers, and restored the tool schemas to the Ollama template as structured during training. Following retraining, the models perform value lookups on roughly 70\% of questions, eliminate text-formatted calls entirely, and reduce empty-answer rates to 4--5\%. Consequently, performance improved by 5.1 percentage points at 7B ($p{=}0.019$ relative to the base LoRA) and 4.2 points at 14B ($p{=}0.020$). These gains require additional reasoning steps and higher prompt token consumption due to re-including tool schemas in the template; as both the dataset and template were modified alongside the adapter, this configuration represents a distinct experimental arm.
+
 
 
 \subsection{Resource use}
