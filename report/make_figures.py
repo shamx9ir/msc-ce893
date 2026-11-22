@@ -85,7 +85,7 @@ def ygrid(ax):
 def fig_glance():
     fig, ax = canvas(W, 1.75)
     box(ax, 0.02, 0.15, 1.45, 1.5, "Question",
-        "\"How many Formula 1\nraces took place on\nthe circuits in Italy?\"\n\n(no BIRD hint)", fs=6.8)
+        "\"How many Formula 1\nraces took place on\nthe circuits in Italy?\"", fs=6.8)
     box(ax, 1.75, 0.15, 1.75, 1.5, "Agent (ADK)",
         "Qwen2.5-Coder 7B/14B\nprompt + 3 Cube tools\n\nA: base model\nB: base + LoRA adapter",
         color=C_L, fill="#fdf0ea", fs=6.8)
@@ -104,7 +104,7 @@ def fig_glance():
 # ------------------------------------------------------------------ Fig 2: pipeline
 def fig_pipeline():
     fig, ax = canvas(W, 3.05)
-    box(ax, 0.02, 1.45, 1.3, 1.25, "1 Input", "question\n+ database id\n\n(BIRD hint only\nin training)", fs=6.8)
+    box(ax, 0.02, 1.45, 1.3, 1.25, "1 Input", "question\n+ database id", fs=6.8)
     box(ax, 1.6, 1.15, 1.95, 1.85, "2 ADK agent loop",
         "system prompt: query guide,\nCube schema, tool list\nuser msg: question,\nlinked fields\n\n"
         "LiteLLM -> Ollama\nQwen2.5-Coder Q4_K_M\n(base, or + LoRA)", color=C_L, fill="#fdf0ea", fs=6.6)
@@ -379,14 +379,14 @@ def _trace_lines(row, width=60, max_rows=7):
     return lines
 
 
-def fig_outputs():
+def fig_outputs(wide=False):
     cases = [
         (923, "harness_7b", "lora_7b", "A. Fixed by the LoRA (7B)"),
         (1314, "harness_7b", "lora_7b", "B. Broken by the LoRA (7B): no value lookup"),
         (1316, "lean_14b", "noschema_14b", "C. No schema in the prompt (14B)"),
     ]
-    fig = plt.figure(figsize=(W, 6.6))
-    gs = fig.add_gridspec(len(cases), 2, hspace=0.36, wspace=0.03, left=0.005, right=0.995, top=0.96, bottom=0.01)
+    fig = plt.figure(figsize=(W, 5.2 if wide else 6.6))
+    gs = fig.add_gridspec(len(cases), 2, hspace=0.42 if wide else 0.36, wspace=0.03, left=0.005, right=0.995, top=0.96, bottom=0.01)
     for i, (qid, a, b, title) in enumerate(cases):
         for j, run in enumerate([a, b]):
             ax = fig.add_subplot(gs[i, j])
@@ -401,10 +401,11 @@ def fig_outputs():
             ax.text(0.02, 0.82, f"{A.TEST_RUNS[run][1]}:  " + ("correct" if ok else "wrong"),
                     fontsize=7, fontweight="bold", color=ec, va="top")
             y = 0.74
-            for kind, t in _trace_lines(row, width=55):
+            step = 0.092 if wide else 0.071
+            for kind, t in _trace_lines(row, width=55, max_rows=5 if wide else 7):
                 ax.text(0.02, y, t, fontsize=6.0, family="DejaVu Sans Mono", va="top",
                         color=INK if kind == "call" else "#5f5e5a")
-                y -= 0.071
+                y -= step
                 if y < 0.06:
                     ax.text(0.02, y, "  ...", fontsize=5.5, family="DejaVu Sans Mono", va="top", color=MUTED)
                     break
@@ -414,7 +415,7 @@ def fig_outputs():
                         color=INK, transform=ax.transAxes, clip_on=False)
                 ax.text(0.0, 0.98, f"Q{qid}: \"{q}\"", fontsize=6.8, va="top",
                         color=INK, transform=ax.transAxes, clip_on=False)
-    save(fig, "fig09_outputs")
+    save(fig, "fig09_outputs_wide" if wide else "fig09_outputs")
 
 
 # ------------------------------------------------------------------ Fig 10: errors
