@@ -298,10 +298,8 @@ As shown in Fig.~\ref{fig:outputs}A, the baseline follows its rules by looking u
 \end{figure}
 
 \subsection{Limitations and responsible use}
-\resultplaceholder{\textbf{Write here:}\begin{itemize}[leftmargin=1.2em,itemsep=0.05em]
-  \item Two dbs, one run per arm (about $\pm$5 points). Setting differs from BIRD's standard one: not comparable with its leaderboard.
-  \item Stray token instead of \textless{}tool\_call\textgreater{} (untrained); retrain fixes it. Public data; app shows the query.
-\end{itemize}}
+Results come from two test databases and one run per arm, so each accuracy has a 95\% margin of about $\pm$5 points. Questions are answered as Cube queries from the question text alone, so the numbers are not comparable with the BIRD leaderboard. The translation pipeline keeps only queries Cube can express, and the no-schema adapter is tied to the databases it was trained on. The original 14B adapter wrote a stray token instead of \texttt{<tool\_call>} on every call, because the base model never learned that token; our harness parsed these text calls, but other clients would fail, and retraining fixed it. BIRD is public and contains no sensitive personal data. Because a chart built on a wrong filter (case B, Fig.~\ref{fig:outputs}) looks as convincing as a correct one, the demo app shows the Cube query and trace next to every chart.
+
 
 \section{Conclusion}
 \resultplaceholder{\textbf{Write here:}\begin{itemize}[leftmargin=1.2em,itemsep=0.05em]
