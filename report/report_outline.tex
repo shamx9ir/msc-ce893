@@ -114,10 +114,8 @@ The translator is restricted to SQL constructs supported by Cube, meaning the tr
 \section{Method}\label{sec:method}
 
 \subsection{Base model and baseline}
-\resultplaceholder{\textbf{Write here:}\begin{itemize}[leftmargin=1.2em,itemsep=0.05em]
-  \item Qwen2.5-Coder 7B/14B Instruct, Ollama Q4\_K\_M, temperature 0, 16k context.
-  \item Harness versions v1 to v4.2 developed on tuning dbs only (Fig. 4); list what each version added; v4.2 frozen before any LoRA run.
-\end{itemize}}
+Both experimental setups employ the Qwen2.5-Coder-7B-Instruct and -14B-Instruct architectures, served as Q4\_K\_M GGUF format through Ollama with zero temperature and a context window of 16,384 tokens. Serving as the baseline, the agent harness was refined across five iterations using strictly the tuning databases (Fig.~\ref{fig:versions}). Version 2 introduced four worked examples alongside rules targeted at common error patterns; versions 3 through 4.2 integrated numerical and date field value lookups, schema linking (wherein matching field names are provided in the user prompt), repeated-call prevention, and pre-submission column verification. Version 4.2 was finalised and frozen prior to initiating any LoRA fine-tuning runs.
+
 
 \begin{figure}[!htbp]
 \centering
