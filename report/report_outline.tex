@@ -165,17 +165,17 @@ Hardware & one RTX 5070 Ti (16\,GB), 32\,GB RAM, Windows; training 5.3\,h (7B) a
 \section{Experiments}
 
 \subsection{Compared systems}
-\resultplaceholder{\textbf{Write here:}\begin{itemize}[leftmargin=1.2em,itemsep=0.05em]
-  \item Baseline: base model + harness v4.2 (full prompt).
-  \item Proposed: same model file + LoRA, same harness and prompt.
-  \item Prompt-offloading arms: lean LoRA; noschema LoRA with no schema / with lean prompt; control = full LoRA given the lean prompt without retraining.
-  \item Extra arm: LoRA retrained to look up filter values (Section 6.2).
-\end{itemize}}
+\begin{enumerate}
+  \item \textbf{Baseline:} base Qwen2.5-Coder 7B or 14B with harness v4.2 (full prompt, tools sent as JSON schemas).
+  \item \textbf{Proposed system:} the same model file plus the LoRA adapter, same harness and prompt.
+  \item \textbf{Prompt-offloading arms:} LoRA trained and run with the \emph{lean} prompt; the \emph{noschema} LoRA run with no schema and with the lean prompt. As a control, the full-prompt LoRA was also given the lean prompt without retraining.
+  \item \textbf{Extra arm:} the LoRA retrained to look up filter values (Section~\ref{sec:tooluse}).
+\end{enumerate}
+
 
 \subsection{Evaluation data and measures}
-\resultplaceholder{\textbf{Write here:}\begin{itemize}[leftmargin=1.2em,itemsep=0.05em]
-  \item 332 test questions, 2 unseen dbs, difficulty mix 218/91/23, 77\% need a join. Introduce Table 4.
-\end{itemize}}
+The 332 test questions come from two databases unseen in training and tuning (218 simple, 91 moderate, 23 challenging; 77\% need a join). The model sees only the question, as a real user would type it.
+
 
 \begin{table}[!htbp]
 \centering
@@ -203,9 +203,8 @@ Significance & Exact McNemar test on paired per-question outcomes (strict)\\
 \end{figure}
 
 \subsection{Experimental procedure}
-\resultplaceholder{\textbf{Write here:}\begin{itemize}[leftmargin=1.2em,itemsep=0.05em]
-  \item Order: freeze test split, tune harness, freeze v4.2, train each adapter once, run each arm once.
-\end{itemize}}
+The test split and scoring rule were frozen first; the harness was developed on tuning databases only and frozen at v4.2. Each adapter was trained once (fixed seed) and each arm run once on all 332 questions. Within a size, all arms share the model file, quantisation, context, temperature, step limit and Cube models.
+
 
 \section{Results}
 
