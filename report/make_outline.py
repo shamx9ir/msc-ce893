@@ -207,6 +207,7 @@ def main():
                   lambda m: "\\begin{minipage}[c]{0.68\\linewidth}\\includegraphics[width=\\linewidth]{figures/fig09_outputs_wide.pdf}\\end{minipage}\\hfill\n"
                             "\\begin{minipage}[c]{0.3\\linewidth}\\small\\raggedright " + m.group(1) + m.group(2) + "\\end{minipage}", text, count=1, flags=re.S)
     # Shamir: explain why the funnel's 59 databases become 58 in the splits (outline only).
+    text = text.replace(r"\texttt{<} tool reply; long lines cut)", r"\texttt{<} tool reply; shortened to fit, full traces in the saved runs)", 1)
     text = text.replace("790 gave different or empty results.", "790 gave different or empty results; one database (craftbeer) yielded no verified pairs, so the splits cover 58.", 1)
     # Outline only: Fig. 7 placed before 5.3 so it can fill the end of page 7 (keeps 10 pages).
     m5 = re.search(r"\\begin\{figure\}\[!htbp\]\n(?:(?!\\end\{figure\}).)*fig07_main.*?\\end\{figure\}\n\n?", text, flags=re.S)

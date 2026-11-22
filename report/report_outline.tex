@@ -283,7 +283,7 @@ Training took 5.3\,h (7B) and 9.0\,h (14B) on one 16\,GB GPU (2--3\,h for the le
 
 \begin{figure}[!htbp]
 \begin{minipage}[c]{0.68\linewidth}\includegraphics[width=\linewidth]{figures/fig09_outputs_wide.pdf}\end{minipage}\hfill
-\begin{minipage}[c]{0.3\linewidth}\small\raggedright \caption{Real tool traces from the test runs (\texttt{>} model call, \texttt{<} tool reply; long lines cut). A: the baseline groups by circuit and returns three rows, the LoRA asks for the single count. B: the LoRA skips the value lookup, filters on a value that does not exist and submits an empty result. C: without a schema the model invents \texttt{student.phone} and repeats it; the lean adapter writes \texttt{member.phone} (here as text, which the harness parses).}\label{fig:outputs}\end{minipage}
+\begin{minipage}[c]{0.3\linewidth}\small\raggedright \caption{Real tool traces from the test runs (\texttt{>} model call, \texttt{<} tool reply; shortened to fit, full traces in the saved runs). A: the baseline groups by circuit and returns three rows, the LoRA asks for the single count. B: the LoRA skips the value lookup, filters on a value that does not exist and submits an empty result. C: without a schema the model invents \texttt{student.phone} and repeats it; the lean adapter writes \texttt{member.phone} (here as text, which the harness parses).}\label{fig:outputs}\end{minipage}
 \end{figure}
 
 \subsection{Interpretation and error analysis}
