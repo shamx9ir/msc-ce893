@@ -33,7 +33,7 @@ NOTES = {
         "One sentence introducing Table 1.",
     ],
     "Proposed solution": [
-        "Baseline = prompt-engineering harness: guide, rules, 4 examples, schema with question-linked fields, 3 tools, pre-checks with 'did you mean' suggestions (Fig. 2).",
+        "Baseline = prompt-engineering harness: guide, rules, 4 examples, schema with question-linked fields, 3 tools (Fig. 2).",
         "Proposed = same harness + LoRA trained on transcripts with exactly this prompt and these tools; also adapters with shorter prompts (lean, no schema) to test how much of the prompt the adapter absorbs.",
         "Why fine-tuning fits: output is strict JSON with exact names; baseline errors were format/protocol errors.",
     ],
