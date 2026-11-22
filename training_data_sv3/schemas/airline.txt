@@ -1,0 +1,103 @@
+cube Air_Carriers
+  dim  Air_Carriers.Code (number) -- the code of the air carriers
+  dim  Air_Carriers.Description (string) -- the description of air carriers
+  meas Air_Carriers.count (count)
+cube Airports
+  dim  Airports.Code (string) -- IATA code of the air airports
+  dim  Airports.Description (string) -- the description of airports
+  meas Airports.count (count)
+cube Airlines
+  dim  Airlines.row_key (string)
+  dim  Airlines.FL_DATE (string) -- flight date
+  dim  Airlines.OP_CARRIER_AIRLINE_ID (number) -- operator carrier airline id
+  dim  Airlines.TAIL_NUM (string) -- plane's tail number plane's tail number
+  dim  Airlines.OP_CARRIER_FL_NUM (number) -- operator carrier flight number
+  dim  Airlines.ORIGIN_AIRPORT_ID (number) -- origin airport id
+  dim  Airlines.ORIGIN_AIRPORT_SEQ_ID (number) -- origin airport sequence id
+  dim  Airlines.ORIGIN_CITY_MARKET_ID (number) -- origin city market id
+  dim  Airlines.ORIGIN (string) -- airport of origin • the origin city could be inferred by this code: you can refer to https://www.iata.org/en/publications/directories/code-search/?airport.search=mia to quickly check
+  dim  Airlines.DEST_AIRPORT_ID (number) -- ID of the destination airport
+  dim  Airlines.DEST_AIRPORT_SEQ_ID (number)
+  dim  Airlines.DEST_CITY_MARKET_ID (number)
+  dim  Airlines.DEST (string) -- Destination airport • the dest city could be inferred by this code: you can refer to https://www.iata.org/en/publications/directories/code-search/?airport.search=mia to quickly check
+  dim  Airlines.CRS_DEP_TIME (number)
+  dim  Airlines.DEP_TIME (number) -- Flight departure time stored as the integer
+  dim  Airlines.DEP_DELAY (number) -- Departure delay indicator in minutes • if this value is positive: it means this flight delays; if the value is negative, it means this flight departs in advance (-4) • if this value <= 0, it means this flight departs on time
+  dim  Airlines.DEP_DELAY_NEW (number) -- departure delay new not useful
+  dim  Airlines.ARR_TIME (number) -- Flight arrival time.
+  dim  Airlines.ARR_DELAY (number) -- arrival delay time in minutes • if this value is positive: it means this flight will arrives late (delay); If the value is negative, this flight arrives earlier than scheduled. (-4) • if this value <= 0, it means this flight arrives on time
+  dim  Airlines.ARR_DELAY_NEW (number) -- arrival delay new not useful
+  dim  Airlines.CANCELLED (number) -- Flight cancellation indicator.
+  dim  Airlines.CANCELLATION_CODE (string) -- cancellation code C--> A: more serious reasons lead to this cancellation
+  dim  Airlines.CRS_ELAPSED_TIME (number) -- scheduled elapsed time
+  dim  Airlines.ACTUAL_ELAPSED_TIME (number) -- actual elapsed time if ACTUAL_ELAPSED_TIME < CRS_ELAPSED_TIME: this flight is faster than scheduled; if ACTUAL_ELAPSED_TIME > CRS_ELAPSED_TIME: this flight is slower than scheduled
+  dim  Airlines.CARRIER_DELAY (number) -- carrier delay minutes
+  dim  Airlines.WEATHER_DELAY (number) -- delay caused by the wheather problem minutes
+  dim  Airlines.NAS_DELAY (number) -- delay, in minutes, attributable to the National Aviation System minutes
+  dim  Airlines.SECURITY_DELAY (number) -- delay attribute to security minutes
+  dim  Airlines.LATE_AIRCRAFT_DELAY (number) -- delay attribute to late aircraft minutes
+  meas Airlines.count (count)
+  meas Airlines.sum_OP_CARRIER_FL_NUM (sum)
+  meas Airlines.avg_OP_CARRIER_FL_NUM (avg)
+  meas Airlines.min_OP_CARRIER_FL_NUM (min)
+  meas Airlines.max_OP_CARRIER_FL_NUM (max)
+  meas Airlines.sum_CRS_DEP_TIME (sum)
+  meas Airlines.avg_CRS_DEP_TIME (avg)
+  meas Airlines.min_CRS_DEP_TIME (min)
+  meas Airlines.max_CRS_DEP_TIME (max)
+  meas Airlines.sum_DEP_TIME (sum)
+  meas Airlines.avg_DEP_TIME (avg)
+  meas Airlines.min_DEP_TIME (min)
+  meas Airlines.max_DEP_TIME (max)
+  meas Airlines.sum_DEP_DELAY (sum)
+  meas Airlines.avg_DEP_DELAY (avg)
+  meas Airlines.min_DEP_DELAY (min)
+  meas Airlines.max_DEP_DELAY (max)
+  meas Airlines.sum_DEP_DELAY_NEW (sum)
+  meas Airlines.avg_DEP_DELAY_NEW (avg)
+  meas Airlines.min_DEP_DELAY_NEW (min)
+  meas Airlines.max_DEP_DELAY_NEW (max)
+  meas Airlines.sum_ARR_TIME (sum)
+  meas Airlines.avg_ARR_TIME (avg)
+  meas Airlines.min_ARR_TIME (min)
+  meas Airlines.max_ARR_TIME (max)
+  meas Airlines.sum_ARR_DELAY (sum)
+  meas Airlines.avg_ARR_DELAY (avg)
+  meas Airlines.min_ARR_DELAY (min)
+  meas Airlines.max_ARR_DELAY (max)
+  meas Airlines.sum_ARR_DELAY_NEW (sum)
+  meas Airlines.avg_ARR_DELAY_NEW (avg)
+  meas Airlines.min_ARR_DELAY_NEW (min)
+  meas Airlines.max_ARR_DELAY_NEW (max)
+  meas Airlines.sum_CANCELLED (sum)
+  meas Airlines.avg_CANCELLED (avg)
+  meas Airlines.min_CANCELLED (min)
+  meas Airlines.max_CANCELLED (max)
+  meas Airlines.sum_CRS_ELAPSED_TIME (sum)
+  meas Airlines.avg_CRS_ELAPSED_TIME (avg)
+  meas Airlines.min_CRS_ELAPSED_TIME (min)
+  meas Airlines.max_CRS_ELAPSED_TIME (max)
+  meas Airlines.sum_ACTUAL_ELAPSED_TIME (sum)
+  meas Airlines.avg_ACTUAL_ELAPSED_TIME (avg)
+  meas Airlines.min_ACTUAL_ELAPSED_TIME (min)
+  meas Airlines.max_ACTUAL_ELAPSED_TIME (max)
+  meas Airlines.sum_CARRIER_DELAY (sum)
+  meas Airlines.avg_CARRIER_DELAY (avg)
+  meas Airlines.min_CARRIER_DELAY (min)
+  meas Airlines.max_CARRIER_DELAY (max)
+  meas Airlines.sum_WEATHER_DELAY (sum)
+  meas Airlines.avg_WEATHER_DELAY (avg)
+  meas Airlines.min_WEATHER_DELAY (min)
+  meas Airlines.max_WEATHER_DELAY (max)
+  meas Airlines.sum_NAS_DELAY (sum)
+  meas Airlines.avg_NAS_DELAY (avg)
+  meas Airlines.min_NAS_DELAY (min)
+  meas Airlines.max_NAS_DELAY (max)
+  meas Airlines.sum_SECURITY_DELAY (sum)
+  meas Airlines.avg_SECURITY_DELAY (avg)
+  meas Airlines.min_SECURITY_DELAY (min)
+  meas Airlines.max_SECURITY_DELAY (max)
+  meas Airlines.sum_LATE_AIRCRAFT_DELAY (sum)
+  meas Airlines.avg_LATE_AIRCRAFT_DELAY (avg)
+  meas Airlines.min_LATE_AIRCRAFT_DELAY (min)
+  meas Airlines.max_LATE_AIRCRAFT_DELAY (max)

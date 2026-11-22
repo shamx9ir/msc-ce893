@@ -1,0 +1,96 @@
+cube Episode
+  dim  Episode.episode_id (string) -- the unique identifier of the episode
+  dim  Episode.series (string) -- the name of the series
+  dim  Episode.season (number) -- a number indicating the season of the episode
+  dim  Episode.episode (number) -- the sequential number of the episode within a specific season
+  dim  Episode.number_in_series (number) -- the overall sequence number of episode in the entire series
+  dim  Episode.title (string) -- the title of the episode
+  dim  Episode.summary (string) -- a brief description of what happens in the episode
+  dim  Episode.air_date (time) -- the date the episode was initially broadcast in the United States
+  dim  Episode.episode_image (string) -- a link to an image from the episode
+  dim  Episode.rating (number) -- the weighted average of the votes received for the episode The higher rating means the episode has more positive viewer comments.
+  dim  Episode.votes (number) -- the total number of rating votes for the episode
+  meas Episode.count (count)
+  meas Episode.sum_season (sum)
+  meas Episode.avg_season (avg)
+  meas Episode.min_season (min)
+  meas Episode.max_season (max)
+  meas Episode.sum_episode (sum)
+  meas Episode.avg_episode (avg)
+  meas Episode.min_episode (min)
+  meas Episode.max_episode (max)
+  meas Episode.sum_number_in_series (sum)
+  meas Episode.avg_number_in_series (avg)
+  meas Episode.min_number_in_series (min)
+  meas Episode.max_number_in_series (max)
+  meas Episode.sum_rating (sum)
+  meas Episode.avg_rating (avg)
+  meas Episode.min_rating (min)
+  meas Episode.max_rating (max)
+  meas Episode.sum_votes (sum)
+  meas Episode.avg_votes (avg)
+  meas Episode.min_votes (min)
+  meas Episode.max_votes (max)
+cube Keyword
+  dim  Keyword.row_key (string)
+  dim  Keyword.episode_id (string) -- the id of the episode
+  dim  Keyword.keyword (string) -- the keyword that is relevant for the episode
+  meas Keyword.count (count)
+cube Person
+  dim  Person.person_id (string) -- the unique identifier for the person
+  dim  Person.name (string) -- the name of the person
+  dim  Person.birthdate (time) -- the date the person was born if null, it means this birthdate of the person is not available
+  dim  Person.birth_name (string) -- the name parents gave to the person shortly after birth
+  dim  Person.birth_place (string) -- the place where a person was born. the birth place info is integrate if birth_name, birth_place, birth_region don't contain null value the full birth place = birth_country +birth_region +birth_place
+  dim  Person.birth_region (string) -- the geographical area describing where a person was born that is larger than the birth place
+  dim  Person.birth_country (string) -- the name of the country where the person was born can ask questions about its corresponding continent: e.g.: USA --> North America
+  dim  Person.height_meters (number) -- how tall the person is in meters
+  dim  Person.nickname (string) -- the nickname the person goes by
+  meas Person.count (count)
+  meas Person.sum_height_meters (sum)
+  meas Person.avg_height_meters (avg)
+  meas Person.min_height_meters (min)
+  meas Person.max_height_meters (max)
+cube Award
+  dim  Award.award_id (number) -- the unique identifier for the award nomination
+  dim  Award.organization (string) -- the name of the organization that grants the award
+  dim  Award.year (number) -- the year of the nomination for the award
+  dim  Award.award_category (string) -- the class of the award
+  dim  Award.award (string) -- the specific award
+  dim  Award.series (string) -- the name of the Law & Order series that has been nominated
+  dim  Award.episode_id (string) -- the id of the episode that has been nominated
+  dim  Award.person_id (string) -- the id of the person that has been nominated
+  dim  Award.role (string) -- the role that has been nominated
+  dim  Award.result (string) -- the nomination result Nominee / Winner 'Winner' means that the award was actually received.
+  meas Award.count (count)
+  meas Award.sum_year (sum)
+  meas Award.avg_year (avg)
+  meas Award.min_year (min)
+  meas Award.max_year (max)
+cube Credit
+  dim  Credit.row_key (string)
+  dim  Credit.episode_id (string) -- the id of the episode to which the credit information pertains
+  dim  Credit.person_id (string) -- the id of the person to which the credit information pertains
+  dim  Credit.category (string) -- the kind of credit being recognized
+  dim  Credit.role (string) -- the role for which the person is being recognized If the credit is for an actor, this is the name of the character he or she portrayed (Dan Florek plays Donald Craven). Otherwise, this is the production role (producer, sound editor).
+  dim  Credit.credited (string) -- whether the credit was displayed in the credits at the end of the episode A person may fill a role in an episode, but not show up in the on-screen credits. In this case, the work is said to be "uncredited."
+  meas Credit.count (count)
+cube Vote
+  dim  Vote.row_key (string)
+  dim  Vote.episode_id (string) -- the id of the episode
+  dim  Vote.stars (number) -- a number between 1 and 10 indicating how much the viewer enjoyed the episode The higher the number, the more the episode was enjoyed
+  dim  Vote.votes (number) -- The total number of viewers that gave the specific episode the number of stars indicated in the "stars" column
+  dim  Vote.percent (number) -- The percent of viewers that gave the specific episode the number of stars indicated in the "stars" column
+  meas Vote.count (count)
+  meas Vote.sum_stars (sum)
+  meas Vote.avg_stars (avg)
+  meas Vote.min_stars (min)
+  meas Vote.max_stars (max)
+  meas Vote.sum_votes (sum)
+  meas Vote.avg_votes (avg)
+  meas Vote.min_votes (min)
+  meas Vote.max_votes (max)
+  meas Vote.sum_percent (sum)
+  meas Vote.avg_percent (avg)
+  meas Vote.min_percent (min)
+  meas Vote.max_percent (max)

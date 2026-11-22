@@ -1,0 +1,66 @@
+cube Categories
+  dim  Categories.CategoryID (number) -- the unique id for the category
+  dim  Categories.CategoryName (string) -- the category name
+  dim  Categories.Description (string) -- the detailed description of the category
+  meas Categories.count (count)
+cube Customers
+  dim  Customers.CustomerID (number) -- the unique id for customers
+  dim  Customers.CustomerName (string) -- the customer name
+  dim  Customers.ContactName (string) -- the contact person's name representing the company
+  dim  Customers.Address (string) -- the address of the customer
+  dim  Customers.City (string) -- the city where the customer is located
+  dim  Customers.PostalCode (string) -- the postal code
+  dim  Customers.Country (string) -- the country
+  meas Customers.count (count)
+cube Employees
+  dim  Employees.EmployeeID (number) -- the unique id for employees
+  dim  Employees.LastName (string) -- the employee's last name
+  dim  Employees.FirstName (string) -- the employee's first name the employee's full name is 'first_name last_name'.
+  dim  Employees.BirthDate (time) -- the birth date of the employee
+  dim  Employees.Photo (string) -- the photo of the employee
+  dim  Employees.Notes (string) -- some additional information of the employee
+  meas Employees.count (count)
+cube Shippers
+  dim  Shippers.ShipperID (number) -- the unique id for shippers
+  dim  Shippers.ShipperName (string) -- the shipped company name
+  dim  Shippers.Phone (string) -- the phone of the company
+  meas Shippers.count (count)
+cube Suppliers
+  dim  Suppliers.SupplierID (number) -- the unique id for suppliers
+  dim  Suppliers.SupplierName (string) -- the supplier name
+  dim  Suppliers.ContactName (string) -- the contact person's name representing the company
+  dim  Suppliers.Address (string) -- the address of the supplier
+  dim  Suppliers.City (string) -- the city where the supplier is located
+  dim  Suppliers.PostalCode (string) -- the postal code
+  dim  Suppliers.Country (string) -- the country
+  dim  Suppliers.Phone (string) -- the phone number
+  meas Suppliers.count (count)
+cube Products
+  dim  Products.ProductID (number) -- the unique id for products
+  dim  Products.ProductName (string) -- the name of the product
+  dim  Products.SupplierID (number) -- the unique id for supplier
+  dim  Products.CategoryID (number) -- the unique id for the product category
+  dim  Products.Unit (string) -- the unit of the product
+  dim  Products.Price (number) -- the price
+  meas Products.count (count)
+  meas Products.sum_Price (sum)
+  meas Products.avg_Price (avg)
+  meas Products.min_Price (min)
+  meas Products.max_Price (max)
+cube Orders
+  dim  Orders.OrderID (number) -- the unique id for orders
+  dim  Orders.CustomerID (number) -- the unique id for customers
+  dim  Orders.EmployeeID (number) -- the unique id for employees
+  dim  Orders.OrderDate (time) -- the order date
+  dim  Orders.ShipperID (number) -- the id of the shipper
+  meas Orders.count (count)
+cube OrderDetails
+  dim  OrderDetails.OrderDetailID (number) -- id of the order detail
+  dim  OrderDetails.OrderID (number) -- the unique id for orders
+  dim  OrderDetails.ProductID (number) -- the unique id for products
+  dim  OrderDetails.Quantity (number) -- the quantity of the ordered products
+  meas OrderDetails.count (count)
+  meas OrderDetails.sum_Quantity (sum)
+  meas OrderDetails.avg_Quantity (avg)
+  meas OrderDetails.min_Quantity (min)
+  meas OrderDetails.max_Quantity (max)

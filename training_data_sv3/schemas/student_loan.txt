@@ -1,0 +1,45 @@
+cube bool
+  dim  bool.name (string)
+  meas bool.count (count)
+cube person
+  dim  person.name (string) -- student's name
+  meas person.count (count)
+cube disabled
+  dim  disabled.name (string) -- the name of the disabled students
+  meas disabled.count (count)
+cube enlist
+  dim  enlist.row_key (string)
+  dim  enlist.name (string) -- the name of the enlisted students
+  dim  enlist.organ (string) -- the organization that the student enlisted in
+  meas enlist.count (count)
+cube filed_for_bankrupcy
+  dim  filed_for_bankrupcy.name (string)
+  meas filed_for_bankrupcy.count (count)
+cube longest_absense_from_school
+  dim  longest_absense_from_school.name (string) -- student's name
+  dim  longest_absense_from_school.month (number) -- the duration of absence 0 means that the student has never been absent.
+  meas longest_absense_from_school.count (count)
+  meas longest_absense_from_school.sum_month (sum)
+  meas longest_absense_from_school.avg_month (avg)
+  meas longest_absense_from_school.min_month (min)
+  meas longest_absense_from_school.max_month (max)
+cube male
+  dim  male.name (string) -- student's name who are male the students who are not in this list are female.
+  meas male.count (count)
+cube no_payment_due
+  dim  no_payment_due.name (string) -- student's name
+  dim  no_payment_due.bool (string) -- whether the student has payment dues  neg: the student doesn't have payment due  pos: the student has payment due
+  meas no_payment_due.count (count)
+cube unemployed
+  dim  unemployed.name (string) -- student who is unemployed
+  meas unemployed.count (count)
+cube enrolled
+  dim  enrolled.row_key (string)
+  dim  enrolled.name (string)
+  dim  enrolled.school (string)
+  dim  enrolled.month (number)
+  meas enrolled.count (count)
+  meas enrolled.sum_month (sum)
+  meas enrolled.avg_month (avg)
+  meas enrolled.min_month (min)
+  meas enrolled.max_month (max)

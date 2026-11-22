@@ -1,0 +1,143 @@
+cube people
+  dim  people.row_key (string)
+  dim  people.Customer_ID (string) -- the id of the customers
+  dim  people.Customer_Name (string) -- the name of the customers
+  dim  people.Segment (string) -- the segment that the customers belong to  consumer  home office: synonym: headquarter.  corporate
+  dim  people.Country (string) -- the country of people
+  dim  people.City (string) -- the city of people
+  dim  people.State (string) -- the state of people please mention its full name in the question, by referring to https://www23.statcan.gc.ca/imdb/p3VD.pl?Function=getVD&TVD=53971 e.g., New York --> NY
+  dim  people.Postal_Code (number) -- the postal code
+  dim  people.Region (string) -- the region of people  Central:  East:  West:  South:
+  meas people.count (count)
+  meas people.sum_Postal_Code (sum)
+  meas people.avg_Postal_Code (avg)
+  meas people.min_Postal_Code (min)
+  meas people.max_Postal_Code (max)
+cube product
+  dim  product.row_key (string)
+  dim  product.Product_ID (string) -- the id of products
+  dim  product.Product_Name (string) -- the name of products
+  dim  product.Category (string) -- the categories of products  Furniture  Office Supplies  Technology
+  dim  product.Sub_Category (string) -- the sub-categories of products  Bookcases  Chairs  Furnishings  Tables  Appliances  Art  Binders  Envelopes  Fasteners  Labels  Paper  Storage  Supplies  Accessories  Copiers  Machines  Phones
+  dim  product.Region (string) -- the region of products  Central:  East:  West:  South:
+  meas product.count (count)
+cube central_superstore
+  dim  central_superstore.Row_ID (number) -- the unique id for rows
+  dim  central_superstore.Order_ID (string) -- the unique identifier for the order
+  dim  central_superstore.Order_Date (time) -- the date of the order yyyy-mm-dd
+  dim  central_superstore.Ship_Date (time) -- the date of the shipment yyyy-mm-dd 'shipment time' refers to the time interval between order_date and ship_date.
+  dim  central_superstore.Ship_Mode (string) -- the ship mode of the order First Class / Second Class / Standard Class Among three ship modes, First Class has the fastest delivery speed, followed by Second Class and the speed of the Standard Class is the slowest.
+  dim  central_superstore.Customer_ID (string) -- the id of the customer
+  dim  central_superstore.Region (string) -- region of the customer's address
+  dim  central_superstore.Product_ID (string) -- the id of the product
+  dim  central_superstore.Sales (number) -- the sales of the product
+  dim  central_superstore.Quantity (number) -- the quantity of the product
+  dim  central_superstore.Discount (number) -- the discount of the product original price = sales / (1- discount)
+  dim  central_superstore.Profit (number) -- the profit that the company got by selling the product total cost of products = sales / (1- discount) * quantity - profit deficiency: if the value is negative
+  meas central_superstore.count (count)
+  meas central_superstore.sum_Sales (sum)
+  meas central_superstore.avg_Sales (avg)
+  meas central_superstore.min_Sales (min)
+  meas central_superstore.max_Sales (max)
+  meas central_superstore.sum_Quantity (sum)
+  meas central_superstore.avg_Quantity (avg)
+  meas central_superstore.min_Quantity (min)
+  meas central_superstore.max_Quantity (max)
+  meas central_superstore.sum_Discount (sum)
+  meas central_superstore.avg_Discount (avg)
+  meas central_superstore.min_Discount (min)
+  meas central_superstore.max_Discount (max)
+  meas central_superstore.sum_Profit (sum)
+  meas central_superstore.avg_Profit (avg)
+  meas central_superstore.min_Profit (min)
+  meas central_superstore.max_Profit (max)
+cube east_superstore
+  dim  east_superstore.Row_ID (number) -- the unique id for rows
+  dim  east_superstore.Order_ID (string) -- the unique identifier for the order
+  dim  east_superstore.Order_Date (time) -- the date of the order yyyy-mm-dd
+  dim  east_superstore.Ship_Date (time) -- the date of the shipment yyyy-mm-dd 'shipment time' refers to the time interval between order_date and ship_date.
+  dim  east_superstore.Ship_Mode (string) -- the ship mode of the order First Class / Second Class / Standard Class Among three ship modes, First Class has the fastest delivery speed, followed by Second Class and the speed of the Standard Class is the slowest.
+  dim  east_superstore.Customer_ID (string) -- the id of the customer
+  dim  east_superstore.Region (string) -- region of the customer's address
+  dim  east_superstore.Product_ID (string) -- the id of the product
+  dim  east_superstore.Sales (number) -- the sales of the product
+  dim  east_superstore.Quantity (number) -- the quantity of the product
+  dim  east_superstore.Discount (number) -- the discount of the product original price = sales / (1- discount)
+  dim  east_superstore.Profit (number) -- the profit that the company got by selling the product total cost of products = sales / (1- discount) * quantity - profit deficiency: if the value is negative
+  meas east_superstore.count (count)
+  meas east_superstore.sum_Sales (sum)
+  meas east_superstore.avg_Sales (avg)
+  meas east_superstore.min_Sales (min)
+  meas east_superstore.max_Sales (max)
+  meas east_superstore.sum_Quantity (sum)
+  meas east_superstore.avg_Quantity (avg)
+  meas east_superstore.min_Quantity (min)
+  meas east_superstore.max_Quantity (max)
+  meas east_superstore.sum_Discount (sum)
+  meas east_superstore.avg_Discount (avg)
+  meas east_superstore.min_Discount (min)
+  meas east_superstore.max_Discount (max)
+  meas east_superstore.sum_Profit (sum)
+  meas east_superstore.avg_Profit (avg)
+  meas east_superstore.min_Profit (min)
+  meas east_superstore.max_Profit (max)
+cube south_superstore
+  dim  south_superstore.Row_ID (number) -- the unique id for rows
+  dim  south_superstore.Order_ID (string) -- the unique identifier for the order
+  dim  south_superstore.Order_Date (time) -- the date of the order yyyy-mm-dd
+  dim  south_superstore.Ship_Date (time) -- the date of the shipment yyyy-mm-dd 'shipment time' refers to the time interval between order_date and ship_date.
+  dim  south_superstore.Ship_Mode (string) -- the ship mode of the order First Class / Second Class / Standard Class Among three ship modes, First Class has the fastest delivery speed, followed by Second Class and the speed of the Standard Class is the slowest.
+  dim  south_superstore.Customer_ID (string) -- the id of the customer
+  dim  south_superstore.Region (string) -- region of the customer's address
+  dim  south_superstore.Product_ID (string) -- the id of the product
+  dim  south_superstore.Sales (number) -- the sales of the product
+  dim  south_superstore.Quantity (number) -- the quantity of the product
+  dim  south_superstore.Discount (number) -- the discount of the product original price = sales / (1- discount)
+  dim  south_superstore.Profit (number) -- the profit that the company got by selling the product total cost of products = sales / (1- discount) * quantity - profit deficiency: if the value is negative
+  meas south_superstore.count (count)
+  meas south_superstore.sum_Sales (sum)
+  meas south_superstore.avg_Sales (avg)
+  meas south_superstore.min_Sales (min)
+  meas south_superstore.max_Sales (max)
+  meas south_superstore.sum_Quantity (sum)
+  meas south_superstore.avg_Quantity (avg)
+  meas south_superstore.min_Quantity (min)
+  meas south_superstore.max_Quantity (max)
+  meas south_superstore.sum_Discount (sum)
+  meas south_superstore.avg_Discount (avg)
+  meas south_superstore.min_Discount (min)
+  meas south_superstore.max_Discount (max)
+  meas south_superstore.sum_Profit (sum)
+  meas south_superstore.avg_Profit (avg)
+  meas south_superstore.min_Profit (min)
+  meas south_superstore.max_Profit (max)
+cube west_superstore
+  dim  west_superstore.Row_ID (number) -- the unique id for rows
+  dim  west_superstore.Order_ID (string) -- the unique identifier for the order
+  dim  west_superstore.Order_Date (time) -- the date of the order yyyy-mm-dd
+  dim  west_superstore.Ship_Date (time) -- the date of the shipment yyyy-mm-dd 'shipment time' refers to the time interval between order_date and ship_date.
+  dim  west_superstore.Ship_Mode (string) -- the ship mode of the order First Class / Second Class / Standard Class Among three ship modes, First Class has the fastest delivery speed, followed by Second Class and the speed of the Standard Class is the slowest.
+  dim  west_superstore.Customer_ID (string) -- the id of the customer
+  dim  west_superstore.Region (string) -- region of the customer's address
+  dim  west_superstore.Product_ID (string) -- the id of the product
+  dim  west_superstore.Sales (number) -- the sales of the product
+  dim  west_superstore.Quantity (number) -- the quantity of the product
+  dim  west_superstore.Discount (number) -- the discount of the product original price = sales / (1- discount)
+  dim  west_superstore.Profit (number) -- the profit that the company got by selling the product total cost of products = sales / (1- discount) * quantity - profit deficiency: if the value is negative
+  meas west_superstore.count (count)
+  meas west_superstore.sum_Sales (sum)
+  meas west_superstore.avg_Sales (avg)
+  meas west_superstore.min_Sales (min)
+  meas west_superstore.max_Sales (max)
+  meas west_superstore.sum_Quantity (sum)
+  meas west_superstore.avg_Quantity (avg)
+  meas west_superstore.min_Quantity (min)
+  meas west_superstore.max_Quantity (max)
+  meas west_superstore.sum_Discount (sum)
+  meas west_superstore.avg_Discount (avg)
+  meas west_superstore.min_Discount (min)
+  meas west_superstore.max_Discount (max)
+  meas west_superstore.sum_Profit (sum)
+  meas west_superstore.avg_Profit (avg)
+  meas west_superstore.min_Profit (min)
+  meas west_superstore.max_Profit (max)

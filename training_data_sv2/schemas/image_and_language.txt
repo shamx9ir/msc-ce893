@@ -1,0 +1,51 @@
+cube ATT_CLASSES
+  dim  ATT_CLASSES.ATT_CLASS_ID (number) -- the unique attribute class ids
+  dim  ATT_CLASSES.ATT_CLASS (string) -- the corresponding classes for attributes
+  meas ATT_CLASSES.count (count)
+cube OBJ_CLASSES
+  dim  OBJ_CLASSES.OBJ_CLASS_ID (number) -- unique id number identifying object classes
+  dim  OBJ_CLASSES.OBJ_CLASS (string) -- the explanation about object classes
+  meas OBJ_CLASSES.count (count)
+cube IMG_OBJ
+  dim  IMG_OBJ.row_key (string)
+  dim  IMG_OBJ.IMG_ID (number) -- the id representing images
+  dim  IMG_OBJ.OBJ_SAMPLE_ID (number) -- the id of the object sample
+  dim  IMG_OBJ.OBJ_CLASS_ID (number) -- the id indicating class of the objects
+  dim  IMG_OBJ.X (number) -- x coordinate
+  dim  IMG_OBJ.Y (number) -- y coordinate
+  dim  IMG_OBJ.W (number) -- width of the bounding box of the object
+  dim  IMG_OBJ.H (number) -- height of the bounding box of the object bounding box of the object: (x, y, W, H)
+  meas IMG_OBJ.count (count)
+  meas IMG_OBJ.sum_X (sum)
+  meas IMG_OBJ.avg_X (avg)
+  meas IMG_OBJ.min_X (min)
+  meas IMG_OBJ.max_X (max)
+  meas IMG_OBJ.sum_Y (sum)
+  meas IMG_OBJ.avg_Y (avg)
+  meas IMG_OBJ.min_Y (min)
+  meas IMG_OBJ.max_Y (max)
+  meas IMG_OBJ.sum_W (sum)
+  meas IMG_OBJ.avg_W (avg)
+  meas IMG_OBJ.min_W (min)
+  meas IMG_OBJ.max_W (max)
+  meas IMG_OBJ.sum_H (sum)
+  meas IMG_OBJ.avg_H (avg)
+  meas IMG_OBJ.min_H (min)
+  meas IMG_OBJ.max_H (max)
+cube IMG_OBJ_ATT
+  dim  IMG_OBJ_ATT.row_key (string)
+  dim  IMG_OBJ_ATT.IMG_ID (number) -- id number of each image
+  dim  IMG_OBJ_ATT.ATT_CLASS_ID (number) -- attribute class number for image if one IMG_ID has many ATT_CLASS_ID, it refers to that this image has multiple attributes
+  dim  IMG_OBJ_ATT.OBJ_SAMPLE_ID (number) -- object sample id â¢ if one IMG_ID has many OBJ_SAMPLE_ID, it refers to that this image has multiple objects â¢ if one ATT_CLASS_ID has many OBJ_SAMPLE_ID, it refers to that this attribute is composed of multiple objects.
+  meas IMG_OBJ_ATT.count (count)
+cube PRED_CLASSES
+  dim  PRED_CLASSES.PRED_CLASS_ID (number) -- the unique prediction id for the class
+  dim  PRED_CLASSES.PRED_CLASS (string) -- the caption for the prediction class id
+  meas PRED_CLASSES.count (count)
+cube IMG_REL
+  dim  IMG_REL.row_key (string)
+  dim  IMG_REL.IMG_ID (number) -- the image id
+  dim  IMG_REL.PRED_CLASS_ID (number) -- the prediction relationship class between objects if OBJ1_SAMPLE_ID = OBJ2_SAMPLE_ID, this relationship is the self-relation.
+  dim  IMG_REL.OBJ1_SAMPLE_ID (number) -- the sample id of the first object
+  dim  IMG_REL.OBJ2_SAMPLE_ID (number) -- the sample id of the second object if (OBJ1_SAMPLE_ID, OBJ2_SAMPLE_ID) has multiple PRED_CLASS_ID, it means these two objects have multiple relations.
+  meas IMG_REL.count (count)

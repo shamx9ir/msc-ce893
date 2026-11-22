@@ -1,0 +1,170 @@
+cube all_prevalences
+  dim  all_prevalences.ITEM (string) -- the prevalent disease
+  dim  all_prevalences.POPULATION_TYPE (string) -- the population type - LIVING
+  dim  all_prevalences.OCCURRENCES (number) -- the number of occurrences
+  dim  all_prevalences.POPULATION_COUNT (number) -- the number of the counted populations
+  dim  all_prevalences.PREVALENCE_RATE (number) -- the prevalence rate prevalence rate = occurrences / population_count
+  dim  all_prevalences.PREVALENCE_PERCENTAGE (number) -- the prevalence percentage prevalence rate = occurrences / population_count * 100
+  meas all_prevalences.count (count)
+  meas all_prevalences.sum_OCCURRENCES (sum)
+  meas all_prevalences.avg_OCCURRENCES (avg)
+  meas all_prevalences.min_OCCURRENCES (min)
+  meas all_prevalences.max_OCCURRENCES (max)
+  meas all_prevalences.sum_POPULATION_COUNT (sum)
+  meas all_prevalences.avg_POPULATION_COUNT (avg)
+  meas all_prevalences.min_POPULATION_COUNT (min)
+  meas all_prevalences.max_POPULATION_COUNT (max)
+  meas all_prevalences.sum_PREVALENCE_RATE (sum)
+  meas all_prevalences.avg_PREVALENCE_RATE (avg)
+  meas all_prevalences.min_PREVALENCE_RATE (min)
+  meas all_prevalences.max_PREVALENCE_RATE (max)
+  meas all_prevalences.sum_PREVALENCE_PERCENTAGE (sum)
+  meas all_prevalences.avg_PREVALENCE_PERCENTAGE (avg)
+  meas all_prevalences.min_PREVALENCE_PERCENTAGE (min)
+  meas all_prevalences.max_PREVALENCE_PERCENTAGE (max)
+cube patients
+  dim  patients.patient (string) -- the unique id for the patient
+  dim  patients.birthdate (time) -- the birth date of the patient
+  dim  patients.deathdate (time) -- the death date of the patient  the age of the patient = death year - birth year  if null, it means this patient is still alive
+  dim  patients.ssn (string) -- the social security number of the patient
+  dim  patients.drivers (string) -- the driver number of the patient if not, this patient doesn't have driving license
+  dim  patients.passport (string) -- the passport number if not, this patient cannot go abroad, vice versa
+  dim  patients.prefix (string) -- the prefix
+  dim  patients.first (string) -- the first name
+  dim  patients.last (string) -- the last name full name = first + last
+  dim  patients.suffix (string) -- the suffix of the patient if suffix = PhD, JD, MD, it means this patient has doctoral degree. Otherwise, this patient is not.
+  dim  patients.maiden (string) -- the maiden name of the patient Only married women have the maiden name
+  dim  patients.marital (string) -- the marital status of the patient  M: married  S: single
+  dim  patients.race (string) -- the race of the patient
+  dim  patients.ethnicity (string) -- the ethnicity of the patient
+  dim  patients.gender (string) -- the gender of the patient
+  dim  patients.birthplace (string) -- the birth place
+  dim  patients.address (string) -- the specific address
+  meas patients.count (count)
+cube encounters
+  dim  encounters.ID (string) -- the unique id of the encounter
+  dim  encounters.DATE (time) -- the date of the encounter yyyy-mm-dd
+  dim  encounters.PATIENT (string) -- the patient id
+  dim  encounters.CODE (number) -- the code of the care plan
+  dim  encounters.DESCRIPTION (string) -- the description of the care plan
+  dim  encounters.REASONCODE (number) -- the reason code
+  dim  encounters.REASONDESCRIPTION (string) -- the description of the reason why the patient needs the care plan
+  meas encounters.count (count)
+  meas encounters.sum_CODE (sum)
+  meas encounters.avg_CODE (avg)
+  meas encounters.min_CODE (min)
+  meas encounters.max_CODE (max)
+  meas encounters.sum_REASONCODE (sum)
+  meas encounters.avg_REASONCODE (avg)
+  meas encounters.min_REASONCODE (min)
+  meas encounters.max_REASONCODE (max)
+cube allergies
+  dim  allergies.row_key (string)
+  dim  allergies.START (string) -- the start date of the allergy mm/dd/yy
+  dim  allergies.STOP (string) -- the stop date of the allergy mm/dd/yy allergy period = stop - start
+  dim  allergies.PATIENT (string) -- the patient id
+  dim  allergies.ENCOUNTER (string) -- the medical encounter id
+  dim  allergies.CODE (number) -- the code of the allergy
+  dim  allergies.DESCRIPTION (string) -- the description of the allergy
+  meas allergies.count (count)
+cube careplans
+  dim  careplans.row_key (string)
+  dim  careplans.ID (string) -- the unique id of the care plan
+  dim  careplans.START (time) -- the start date of the care plan yyyy-mm-dd
+  dim  careplans.STOP (time) -- the stop date of the care plan yyyy-mm-dd care plan period: stop - start
+  dim  careplans.PATIENT (string) -- the patient id
+  dim  careplans.ENCOUNTER (string) -- the medical encounter id
+  dim  careplans.CODE (number) -- the code of the care plan
+  dim  careplans.DESCRIPTION (string) -- the description of the care plan
+  dim  careplans.REASONCODE (number) -- the reason code
+  dim  careplans.REASONDESCRIPTION (string) -- the description of the reason why the patient needs the care plan
+  meas careplans.count (count)
+  meas careplans.sum_CODE (sum)
+  meas careplans.avg_CODE (avg)
+  meas careplans.min_CODE (min)
+  meas careplans.max_CODE (max)
+  meas careplans.sum_REASONCODE (sum)
+  meas careplans.avg_REASONCODE (avg)
+  meas careplans.min_REASONCODE (min)
+  meas careplans.max_REASONCODE (max)
+cube conditions
+  dim  conditions.row_key (string)
+  dim  conditions.START (time) -- the start date of the allergy mm/dd/yy
+  dim  conditions.STOP (time) -- the stop date of the allergy mm/dd/yy
+  dim  conditions.PATIENT (string) -- the patient id
+  dim  conditions.ENCOUNTER (string) -- the medical encounter id
+  dim  conditions.CODE (number) -- the code of the condition
+  dim  conditions.DESCRIPTION (string) -- the description of the patient condition
+  meas conditions.count (count)
+  meas conditions.sum_CODE (sum)
+  meas conditions.avg_CODE (avg)
+  meas conditions.min_CODE (min)
+  meas conditions.max_CODE (max)
+cube immunizations
+  dim  immunizations.row_key (string)
+  dim  immunizations.DATE (time) -- the date of the immunization yyyy-mm-dd
+  dim  immunizations.PATIENT (string) -- the patient id
+  dim  immunizations.ENCOUNTER (string) -- the medical encounter id
+  dim  immunizations.CODE (number) -- the code of the immunization
+  dim  immunizations.DESCRIPTION (string) -- the description of the immunization
+  meas immunizations.count (count)
+cube medications
+  dim  medications.row_key (string)
+  dim  medications.START (time) -- the start date of the care plan yyyy-mm-dd
+  dim  medications.STOP (time) -- the stop date of the care plan yyyy-mm-dd Time of taking medicine
+  dim  medications.PATIENT (string) -- the patient id
+  dim  medications.ENCOUNTER (string) -- the medical encounter id
+  dim  medications.CODE (number) -- the code of the medication
+  dim  medications.DESCRIPTION (string) -- the description of the medication
+  dim  medications.REASONCODE (number) -- the reason code
+  dim  medications.REASONDESCRIPTION (string) -- the description of the reason why the patient take the medication
+  meas medications.count (count)
+  meas medications.sum_REASONCODE (sum)
+  meas medications.avg_REASONCODE (avg)
+  meas medications.min_REASONCODE (min)
+  meas medications.max_REASONCODE (max)
+cube observations
+  dim  observations.row_key (string)
+  dim  observations.DATE (time) -- the date of the observation yyyy-mm-dd
+  dim  observations.PATIENT (string) -- the patient id
+  dim  observations.ENCOUNTER (string) -- the medical encounter id
+  dim  observations.CODE (string) -- the code of the observation type
+  dim  observations.DESCRIPTION (string) -- the description of the observation
+  dim  observations.VALUE (number) -- the observation value
+  dim  observations.UNITS (string) -- the units of the observation value DESCRIPTION + VALUE + UNITS could be a fact: e.g.: body height of patient xxx is 166.03 cm: body height is in DESCRIPTION 166.03 is in VALUE cm is in UNITS
+  meas observations.count (count)
+  meas observations.sum_VALUE (sum)
+  meas observations.avg_VALUE (avg)
+  meas observations.min_VALUE (min)
+  meas observations.max_VALUE (max)
+cube procedures
+  dim  procedures.row_key (string)
+  dim  procedures.DATE (time) -- the date of the procedure yyyy-mm-dd
+  dim  procedures.PATIENT (string) -- the patient id
+  dim  procedures.ENCOUNTER (string) -- the medical encounter id
+  dim  procedures.CODE (number) -- the code of the procedure
+  dim  procedures.DESCRIPTION (string) -- the description of the procedure
+  dim  procedures.REASONCODE (number) -- the code of the reason
+  dim  procedures.REASONDESCRIPTION (string) -- the description of the reason why the patient take the procedure
+  meas procedures.count (count)
+  meas procedures.sum_CODE (sum)
+  meas procedures.avg_CODE (avg)
+  meas procedures.min_CODE (min)
+  meas procedures.max_CODE (max)
+  meas procedures.sum_REASONCODE (sum)
+  meas procedures.avg_REASONCODE (avg)
+  meas procedures.min_REASONCODE (min)
+  meas procedures.max_REASONCODE (max)
+cube claims
+  dim  claims.ID (string) -- the unique id of the claim
+  dim  claims.PATIENT (string) -- the patient id
+  dim  claims.BILLABLEPERIOD (time) -- the start date of the billable yyyy-mm-dd
+  dim  claims.ORGANIZATION (string) -- the claim organization
+  dim  claims.ENCOUNTER (string) -- the medical encounter id
+  dim  claims.DIAGNOSIS (string) -- the diagnosis
+  dim  claims.TOTAL (number) -- the length of the billable period
+  meas claims.count (count)
+  meas claims.sum_TOTAL (sum)
+  meas claims.avg_TOTAL (avg)
+  meas claims.min_TOTAL (min)
+  meas claims.max_TOTAL (max)

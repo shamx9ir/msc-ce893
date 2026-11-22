@@ -1,0 +1,15 @@
+cube Question
+  dim  Question.questiontext (string) -- The detailed text of the question.
+  dim  Question.questionid (number) -- The unique id of the question. Each questiontext can only have one unique questionid
+  meas Question.count (count)
+cube Survey
+  dim  Survey.SurveyID (number) -- The unique id of each survey Each SurveyID is unique. And SurveyID is simply survey year ie 2014, 2016, 2017, 2018, 2019.
+  dim  Survey.Description (string) -- The Description of the specific survey.
+  meas Survey.count (count)
+cube Answer
+  dim  Answer.row_key (string)
+  dim  Answer.AnswerText (string) -- The specific and detailed answer text of each question. The content is highly depend on the question.
+  dim  Answer.SurveyID (number) -- The id of each survey. The SurveyID is simply survey year i.e., 2014, 2016, 2017, 2018, 2019.
+  dim  Answer.UserID (number) -- The id of different user. Some questions can contain multiple answers, thus the same user can appear more than once for that QuestionID.
+  dim  Answer.QuestionID (number) -- The id of different questions. Some questions can contain multiple answers, thus the same user can appear more than once for that QuestionID.
+  meas Answer.count (count)

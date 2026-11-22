@@ -1,0 +1,114 @@
+cube height_info
+  dim  height_info.height_id (number) -- the unique height id
+  dim  height_info.height_in_cm (number) -- height in cm e.g. 180 --> the height is 180 cm
+  dim  height_info.height_in_inch (string) -- height in inch
+  meas height_info.count (count)
+  meas height_info.sum_height_in_cm (sum)
+  meas height_info.avg_height_in_cm (avg)
+  meas height_info.min_height_in_cm (min)
+  meas height_info.max_height_in_cm (max)
+cube weight_info
+  dim  weight_info.weight_id (number) -- the unique weight id
+  dim  weight_info.weight_in_kg (number) -- weight in kg e.g. 70: -->70 kg
+  dim  weight_info.weight_in_lbs (number) -- weight in lbs
+  meas weight_info.count (count)
+  meas weight_info.sum_weight_in_kg (sum)
+  meas weight_info.avg_weight_in_kg (avg)
+  meas weight_info.min_weight_in_kg (min)
+  meas weight_info.max_weight_in_kg (max)
+  meas weight_info.sum_weight_in_lbs (sum)
+  meas weight_info.avg_weight_in_lbs (avg)
+  meas weight_info.min_weight_in_lbs (min)
+  meas weight_info.max_weight_in_lbs (max)
+cube PlayerInfo
+  dim  PlayerInfo.ELITEID (number) -- the unique number identifying the players who attended the draft
+  dim  PlayerInfo.PlayerName (string) -- the name of the player
+  dim  PlayerInfo.birthdate (time) -- the birthdate of the player
+  dim  PlayerInfo.birthyear (time) -- the birth year of the player
+  dim  PlayerInfo.birthmonth (number) -- the birth month of the player
+  dim  PlayerInfo.birthday (number) -- the birthday of the player
+  dim  PlayerInfo.birthplace (string) -- the player of the birthplace
+  dim  PlayerInfo.nation (string) -- the nation of the player can ask questions about their corresponding continents. or group nations with their continents. You can refer to https://worldpopulationreview.com/country-rankings/list-of-countries-by-continent e.g.: Slovakia --> Europe
+  dim  PlayerInfo.height (number) -- the id number identifying heights
+  dim  PlayerInfo.weight (number) -- the id number identifying weights
+  dim  PlayerInfo.position_info (string) -- position information of the player There are six different positions in hockey: left wing, right wing, center, left defenseman, right defenseman goalie. Left wings, right wings, and centers are all considered forwards, while left and right defensemen are considered the defense.
+  dim  PlayerInfo.shoots (string) --  L: Left-shooted  R: Right-shooted  '-': no preference
+  dim  PlayerInfo.draftyear (number) -- draft year
+  dim  PlayerInfo.draftround (number) -- draft round
+  dim  PlayerInfo.overall (number) -- overall orders of draft picks
+  dim  PlayerInfo.overallby (string) -- drafted by which team
+  dim  PlayerInfo.CSS_rank (number) -- Central Scouting Service ranking higher rank refers to higher prospects for the draft
+  dim  PlayerInfo.sum_7yr_GP (number) -- Total NHL games played in players first 7 years of NHL career higher --> more attendance in the first 7 years
+  dim  PlayerInfo.sum_7yr_TOI (number) -- Total NHL Time on Ice in players first 7 years of NHL career higher --> more playing time in the first 7 years of career
+  dim  PlayerInfo.GP_greater_than_0 (string) -- Played a game or not in players first 7 years of NHL career  yes  no
+  meas PlayerInfo.count (count)
+  meas PlayerInfo.sum_birthmonth (sum)
+  meas PlayerInfo.avg_birthmonth (avg)
+  meas PlayerInfo.min_birthmonth (min)
+  meas PlayerInfo.max_birthmonth (max)
+  meas PlayerInfo.sum_birthday (sum)
+  meas PlayerInfo.avg_birthday (avg)
+  meas PlayerInfo.min_birthday (min)
+  meas PlayerInfo.max_birthday (max)
+  meas PlayerInfo.sum_draftyear (sum)
+  meas PlayerInfo.avg_draftyear (avg)
+  meas PlayerInfo.min_draftyear (min)
+  meas PlayerInfo.max_draftyear (max)
+  meas PlayerInfo.sum_draftround (sum)
+  meas PlayerInfo.avg_draftround (avg)
+  meas PlayerInfo.min_draftround (min)
+  meas PlayerInfo.max_draftround (max)
+  meas PlayerInfo.sum_overall (sum)
+  meas PlayerInfo.avg_overall (avg)
+  meas PlayerInfo.min_overall (min)
+  meas PlayerInfo.max_overall (max)
+  meas PlayerInfo.sum_CSS_rank (sum)
+  meas PlayerInfo.avg_CSS_rank (avg)
+  meas PlayerInfo.min_CSS_rank (min)
+  meas PlayerInfo.max_CSS_rank (max)
+  meas PlayerInfo.sum_sum_7yr_GP (sum)
+  meas PlayerInfo.avg_sum_7yr_GP (avg)
+  meas PlayerInfo.min_sum_7yr_GP (min)
+  meas PlayerInfo.max_sum_7yr_GP (max)
+  meas PlayerInfo.sum_sum_7yr_TOI (sum)
+  meas PlayerInfo.avg_sum_7yr_TOI (avg)
+  meas PlayerInfo.min_sum_7yr_TOI (min)
+  meas PlayerInfo.max_sum_7yr_TOI (max)
+cube SeasonStatus
+  dim  SeasonStatus.row_key (string)
+  dim  SeasonStatus.ELITEID (number) -- the id number of the players
+  dim  SeasonStatus.SEASON (string) -- season when players are playing
+  dim  SeasonStatus.TEAM (string) -- which team the player belong to
+  dim  SeasonStatus.LEAGUE (string) -- league
+  dim  SeasonStatus.GAMETYPE (string) -- type of games  Regular season  playoffs (post season)
+  dim  SeasonStatus.GP (number) -- number of games
+  dim  SeasonStatus.G (number) -- Goals in Draft Year
+  dim  SeasonStatus.A (number) -- Assists in Draft Year
+  dim  SeasonStatus.P (number) -- Points in Draft Year higher --> more valuable
+  dim  SeasonStatus.PIM (number) -- Penalty Minutes in Draft Year higher --> This player has committed more rule violations.
+  dim  SeasonStatus.PLUSMINUS (number) -- Goal Differential in Draft Year Goal Differential
+  meas SeasonStatus.count (count)
+  meas SeasonStatus.sum_GP (sum)
+  meas SeasonStatus.avg_GP (avg)
+  meas SeasonStatus.min_GP (min)
+  meas SeasonStatus.max_GP (max)
+  meas SeasonStatus.sum_G (sum)
+  meas SeasonStatus.avg_G (avg)
+  meas SeasonStatus.min_G (min)
+  meas SeasonStatus.max_G (max)
+  meas SeasonStatus.sum_A (sum)
+  meas SeasonStatus.avg_A (avg)
+  meas SeasonStatus.min_A (min)
+  meas SeasonStatus.max_A (max)
+  meas SeasonStatus.sum_P (sum)
+  meas SeasonStatus.avg_P (avg)
+  meas SeasonStatus.min_P (min)
+  meas SeasonStatus.max_P (max)
+  meas SeasonStatus.sum_PIM (sum)
+  meas SeasonStatus.avg_PIM (avg)
+  meas SeasonStatus.min_PIM (min)
+  meas SeasonStatus.max_PIM (max)
+  meas SeasonStatus.sum_PLUSMINUS (sum)
+  meas SeasonStatus.avg_PLUSMINUS (avg)
+  meas SeasonStatus.min_PLUSMINUS (min)
+  meas SeasonStatus.max_PLUSMINUS (max)

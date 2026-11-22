@@ -55,6 +55,12 @@ MODELS = [
     {"id": "ollama_chat/qwen14b-cube-noschema", "label": "Qwen 14B + noschema LoRA, lean prompt",
      "short": "14B noschema", "lora": True, "strict": 47.9, "profile": "lean",
      "group": "Schema in LoRA (short prompt)", "core": False},
+    # search_values retrain (README "search_values retrain"): learned <tool_call> tokens, served with the
+    # literal tool-schema template (scripts/make_literal_tools_modelfile.py).
+    {"id": "ollama_chat/qwen7b-cube-sv3-nt", "label": "Qwen 7B + LoRA v3 (looks up values)", "short": "7B LoRA v3",
+     "lora": True, "strict": 47.6, "profile": "full", "group": "LoRA v3 (value lookups)", "core": False},
+    {"id": "ollama_chat/qwen14b-cube-sv3-nt", "label": "Qwen 14B + LoRA v3 (looks up values)", "short": "14B LoRA v3",
+     "lora": True, "strict": 48.2, "profile": "full", "group": "LoRA v3 (value lookups)", "core": False},
 ]
 DATABASES = ["formula_1", "student_club"]
 
