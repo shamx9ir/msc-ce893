@@ -61,7 +61,7 @@ The baseline is a \textbf{prompt-engineering harness}: a system prompt with a Cu
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=0.76\linewidth]{figures/fig02_pipeline.pdf}
+\includegraphics[width=0.7\linewidth]{figures/fig02_pipeline.pdf}
 \caption{Steps from input to output. The agent loops between the model and the tools until it submits a query (max.\ 8 calls). The submitted query is scored against the gold SQL (5a) and shown as a chart in the demo app (5b). Every arm uses this same pipeline.}
 \label{fig:pipeline}
 \end{figure}
@@ -91,13 +91,13 @@ BIRD gives, for each question, an English question, an evidence hint, a gold SQL
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=0.78\linewidth]{figures/fig03_data.pdf}
+\includegraphics[width=0.7\linewidth]{figures/fig03_data.pdf}
 \caption{(a) From 8,003 BIRD training questions to 3,531 verified examples: 2,782 used SQL a semantic layer cannot express, 900 failed in Cube and 790 gave different or empty results. (b) One record, its verified Cube query and the transcript the model is trained on.}
 \label{fig:data}
 \end{figure}
 
 \subsection{Data quality and limitations}
-The translator only handles SQL that Cube can express, so the training set has no subqueries, \texttt{CASE} arithmetic or string slicing; 30\% of the test questions need such SQL and are out of reach for any Cube query (the translator's own ceiling on the test set is 231/332). BIRD gold SQL has some errors and ties in \texttt{ORDER BY \dots LIMIT 1}. The test set is scored against the gold SQL's rows, not a reference Cube query, so any correct query counts. The ten largest training databases (over 600\,MB each) were skipped for disk and time.
+The translator only handles SQL that Cube can express, so the training set has no subqueries, \texttt{CASE} arithmetic or string slicing; 30\% of the test questions need such SQL and are out of reach for any Cube query (the translator's own ceiling on the test set is 231/332). BIRD gold SQL has some errors and ties. Scoring uses the gold rows, so any correct Cube query counts. The ten largest training databases (over 600\,MB) were skipped.
 
 \section{Method}\label{sec:method}
 
@@ -106,7 +106,7 @@ Both arms use \texttt{Qwen2.5-Coder-7B-Instruct} and \texttt{-14B-Instruct}~\cit
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=0.8\linewidth]{figures/fig04_harness_versions.pdf}
+\includegraphics[width=0.7\linewidth]{figures/fig04_harness_versions.pdf}
 \caption{Prompt-engineering progress for the 7B baseline (development runs, with BIRD's hint). (a) The three versions that were also run on the test set: strict accuracy doubled from v1 to v4.2. (b) The development loop used only tuning databases; on all 363 tuning questions v4.2 beat v3 (32.0\% vs 26.2\%, McNemar $p{=}0.011$), and the 14B model reached 38.8\%.}
 \label{fig:versions}
 \end{figure}
@@ -116,7 +116,7 @@ We fine-tune with QLoRA~\cite{dettmers2023qlora} using PEFT~\cite{peft}: the bas
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=0.75\linewidth]{figures/fig05_method.pdf}
+\includegraphics[width=0.7\linewidth]{figures/fig05_method.pdf}
 \caption{Fine-tuning pipeline (top) and the three prompt profiles (bottom). Only the adapter and the prompt profile change between arms.}
 \label{fig:method}
 \end{figure}
@@ -142,7 +142,7 @@ Hardware & one RTX 5070 Ti (16\,GB), 32\,GB RAM, Windows; training 5.3\,h (7B) a
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=0.78\linewidth]{figures/fig06_training.pdf}
+\includegraphics[width=0.7\linewidth]{figures/fig06_training.pdf}
 \caption{Training progress for all six adapters. The loss drops within the first quarter epoch and then stays flat; validation loss on the three held-out databases follows it, so the adapters did not overfit. Lean and noschema adapters start higher because the model has never seen those short prompts.}
 \label{fig:training}
 \end{figure}
@@ -154,6 +154,7 @@ Hardware & one RTX 5070 Ti (16\,GB), 32\,GB RAM, Windows; training 5.3\,h (7B) a
   \item \textbf{Baseline:} base Qwen2.5-Coder 7B or 14B with harness v4.2 (full prompt, tools sent as JSON schemas).
   \item \textbf{Proposed system:} the same model file plus the LoRA adapter, same harness and prompt.
   \item \textbf{Prompt-offloading arms:} LoRA trained and run with the \emph{lean} prompt; the \emph{noschema} LoRA run with no schema and with the lean prompt. As a control, the full-prompt LoRA was also given the lean prompt without retraining.
+  \item \textbf{Extra arm:} the LoRA retrained to look up filter values (Section~\ref{sec:tooluse}).
 \end{enumerate}
 
 \subsection{Evaluation data and measures}
@@ -178,7 +179,7 @@ Significance & Exact McNemar test on paired per-question outcomes (strict)\\
 \end{table}
 
 \subsection{Experimental procedure}
-The test split and scoring rule were frozen first; the harness was developed on tuning databases only and frozen at v4.2. Each adapter was trained once (fixed seed) and each arm run once on all 332 questions. Within a size, all arms share the base model file, quantisation, context, temperature, step limit, tools and Cube models.
+The test split and scoring rule were frozen first; the harness was developed on tuning databases only and frozen at v4.2. Each adapter was trained once (fixed seed) and each arm run once on all 332 questions. Within a size, all arms share the model file, quantisation, context, temperature, step limit and Cube models.
 
 \section{Results}
 
@@ -194,37 +195,40 @@ The test split and scoring rule were frozen first; the harness was developed on 
  & & & & & {\scriptsize mean\,/\,med.\,/\,p90} & {\scriptsize output} & \\
 \midrule
 7B harness only (baseline) & 21.4 & 27.7 & 15,929 & 4.1 & 3.5\,/\,2.3\,/\,6.8 & 121 & --\\
-7B LoRA + harness & \textbf{36.7} & \textbf{40.7} & 7,672 & 2.1 & 1.3\,/\,1.2\,/\,1.7 & 104 & $5{\times}10^{-8}$\\
+7B LoRA + harness & 36.7 & 40.7 & 7,672 & 2.1 & 1.3\,/\,1.2\,/\,1.7 & 104 & $5{\times}10^{-8}$\\
 7B lean LoRA & 34.6 & 36.7 & 3,242 & 2.2 & 1.4\,/\,1.2\,/\,1.5 & 110 & $3{\times}10^{-6}$\\
 \midrule
 14B harness only (baseline) & 27.4 & 35.8 & 11,952 & 3.2 & 4.6\,/\,3.8\,/\,7.0 & 67 & --\\
-14B LoRA + harness & \textbf{40.7} & 45.5 & 7,344 & 2.0 & 2.4\,/\,2.3\,/\,3.2 & 61 & $2{\times}10^{-7}$\\
-14B lean LoRA & 40.1 & \textbf{46.1} & 2,988 & 2.0 & 2.3\,/\,2.2\,/\,3.3 & 65 & $1{\times}10^{-6}$\\
+14B LoRA + harness & 40.7 & 45.5 & 7,344 & 2.0 & 2.4\,/\,2.3\,/\,3.2 & 61 & $2{\times}10^{-7}$\\
+14B lean LoRA & 40.1 & 46.1 & 2,988 & 2.0 & 2.3\,/\,2.2\,/\,3.3 & 65 & $1{\times}10^{-6}$\\
+\midrule
+7B LoRA retrained for lookups & \textbf{41.9} & \textbf{47.6} & 12,204 & 3.3 & 1.7\,/\,1.5\,/\,2.3 & 102 & $2{\times}10^{-13}$\\
+14B LoRA retrained for lookups & \textbf{44.9} & \textbf{48.8} & 11,638 & 3.1 & 2.7\,/\,2.4\,/\,3.8 & 60 & $4{\times}10^{-11}$\\
 \bottomrule
 \end{tabularx}
 \end{table}
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=0.68\linewidth]{figures/fig07_main.pdf}
+\includegraphics[width=0.62\linewidth]{figures/fig07_main.pdf}
 \caption{Before and after fine-tuning (higher is better). (a) The LoRA adds 13--15 points of strict accuracy at both sizes, more than doubling the model size does. (b) The gain holds on both databases and is largest on questions that need a join (7B: 20\% to 35\%, 14B: 23\% to 41\%).}
 \label{fig:main}
 \end{figure}
 
 \subsection{Main findings}
-The adapter is the main effect (Table~\ref{tab:main}, Fig.~\ref{fig:main}). At 7B it raised strict accuracy by 15.4 points: 70 questions became correct and 19 became wrong. At 14B the gain was 13.3 points (58 vs 14). The 7B LoRA beats the 14B baseline by 9.3 points ($p{=}0.0009$), while the 14B LoRA is only 3.9 points above the 7B LoRA ($p{=}0.09$, not significant). The baseline 14B model has a much higher relaxed than strict score (35.8 vs 27.4): it often returns the right rows with extra columns, a habit the adapter mostly removed.
+The adapter is the main effect (Table~\ref{tab:main}, Fig.~\ref{fig:main}). At 7B it raised strict accuracy by 15.4 points: 70 questions became correct and 19 became wrong. At 14B the gain was 13.3 points (58 vs 14). The 7B LoRA beats the 14B baseline by 9.3 points ($p{=}0.0009$), while the 14B LoRA is only 3.9 points above the 7B LoRA ($p{=}0.09$, not significant). The 14B baseline often returns the right rows with extra columns (relaxed 35.8 vs strict 27.4); the adapter mostly removed this.
 
 
 Fig.~\ref{fig:offload} answers the second part of the RQ. The lean LoRA sends 1.5k prompt tokens per call instead of 3.6k and loses only 2.1 points at 7B ($p{=}0.30$) and 0.6 at 14B ($p{=}0.83$), neither significant. Removing the schema entirely costs much more (7B: 18.1\%, 14B: 24.7\%), because the model then invents members (an ``unknown member'' error in 114 of 332 14B runs); with the short schema back, the noschema adapter matches the full LoRA (37.0\% and 41.0\%). A full-prompt LoRA given the lean prompt without retraining scored 0\%: the adapter learned its prompt, not the task in general.
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=0.74\linewidth]{figures/fig08_offload.pdf}
+\includegraphics[width=0.68\linewidth]{figures/fig08_offload.pdf}
 \caption{Accuracy against prompt cost (up and left is better). The lean adapters (green) match the full LoRA's accuracy at 40\% of its prompt tokens; dropping the schema altogether (triangles) saves more tokens but loses 16--19 points.}
 \label{fig:offload}
 \end{figure}
 
-\subsection{Tool use}
+\subsection{Tool use}\label{sec:tooluse}
 \begin{table}[!htbp]
 \centering
 \footnotesize
@@ -238,39 +242,44 @@ Fig.~\ref{fig:offload} answers the second part of the RQ. The lean LoRA sends 1.
 7B LoRA + harness & 0.01 & 1.09 & 0.11 & 0 & 0.0 & 13.0\\
 14B harness only & 0.95 & 0.95 & 0.14 & 54 & 0.9 & 10.2\\
 14B LoRA + harness & 0.00 & 0.97 & 0.00 & 100 & 0.0 & 13.3\\
+\midrule
+7B LoRA retrained for lookups & 1.05 & 1.18 & 0.27 & 0 & 0.9 & 4.5\\
+14B LoRA retrained for lookups & 1.04 & 1.09 & 0.12 & 0 & 2.4 & 3.9\\
 \bottomrule
 \end{tabularx}
 \end{table}
 
 The adapters work differently from the baselines (Table~\ref{tab:tools}). The 7B baseline looks up about two values per question and has one call per question turned back by the name and type checks; the adapters draft once, submit and are almost never rejected. But they never look values up, so 13\% of their answers come from a draft that returned no rows (case B in Fig.~\ref{fig:outputs}), against 2--10\% for the baselines. The 14B models write most calls as text, which the harness parses.
 
+\textbf{Retraining for lookups (extra arm).} Only 22\% of training transcripts looked a value up, and Qwen2.5-Coder-Instruct's \texttt{<tool\_call>} tokens are untrained, so the adapters wrote a stray token and fell back to text. The retrain adds a lookup before every text filter (plus recovery examples), trains those tokens' embedding and output rows, and lists the tool schemas in the Ollama template as in training. It looks values up on about 70\% of questions, makes no text calls and cuts empty answers to 4--5\%, gaining 5.1 points at 7B ($p{=}0.019$ against the original LoRA) and 4.2 at 14B ($p{=}0.020$). With the hint, which usually spells out the value, the gain vanishes (n.s.). The cost is more steps and prompt tokens, as the template re-adds the tool schemas; it is an extra arm because data and template changed, not only the adapter.
+
 \subsection{Resource use}
-Training took 5.3\,h (7B) and 9.0\,h (14B) on one 16\,GB GPU (lean: 2--3\,h) and converged within half an epoch (Fig.~\ref{fig:training}). The merged adapter adds no inference cost and halves the steps (4.1 to 2.1 at 7B), so prompt tokens halve and model time per question falls from 3.5 to 1.3\,s (p90: 6.8 to 1.7\,s). Output speed is unchanged (about 105--120 tokens/s at 7B, 60--67 at 14B), so the gain comes from fewer, shorter calls. Time to first token was not recorded, so prompt processing and decoding cannot be separated. Part of the saving comes from the adapter almost never calling \texttt{search\_values} (1\% of questions vs 92\%), which also causes errors (Section~\ref{sec:discussion}).
+Training took 5.3\,h (7B) and 9.0\,h (14B) on one 16\,GB GPU (lean: 2--3\,h) and converged within half an epoch (Fig.~\ref{fig:training}). The merged adapter adds no inference cost and halves the steps (4.1 to 2.1 at 7B), so prompt tokens halve and model time per question falls from 3.5 to 1.3\,s (p90: 6.8 to 1.7\,s). Output speed is unchanged (about 105--120 tokens/s at 7B, 60--67 at 14B), so the gain comes from fewer, shorter calls. Part of the saving comes from the adapter almost never calling \texttt{search\_values} (1\% of questions vs 92\%).
 
 \section{Discussion}\label{sec:discussion}
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=0.7\linewidth]{figures/fig09_outputs.pdf}
+\includegraphics[width=0.6\linewidth]{figures/fig09_outputs.pdf}
 \caption{Real tool traces from the test runs (\texttt{>} model call, \texttt{<} tool reply; long lines cut). A: the baseline groups by circuit and returns three rows, the LoRA asks for the single count. B: the LoRA skips the value lookup, filters on a value that does not exist and submits an empty result. C: without a schema the model invents \texttt{student.phone} and repeats it; the lean adapter writes \texttt{member.phone} (here as text, which the harness parses).}
 \label{fig:outputs}
 \end{figure}
 
 \subsection{Interpretation and error analysis}
-Fig.~\ref{fig:outputs} shows the typical change. The baseline follows its rules (it looks up ``Italy'' first) but then adds a grouping dimension that the question did not ask for, so the answer has three rows instead of one. Fig.~\ref{fig:errors} sorts every wrong answer into one category by fixed rules. The adapter almost removed failed runs (no valid query: 45 to 4 at 7B) and cut wrong filter values (7B: 64 to 50, 14B: 48 to 39), while the questions that need SQL Cube cannot express stayed at about 55: these are the ceiling of the approach, not a model error. The weak point is value lookup: only 22\% of training transcripts call \texttt{search\_values}, so the adapter learned to guess spellings (case B).
+In Fig.~\ref{fig:outputs}A the baseline looks up ``Italy'' as its rules say, then adds a grouping the question did not ask for, returning three rows instead of one. Fig.~\ref{fig:errors} sorts every wrong answer into one category by fixed rules. The adapter almost removed failed runs (no valid query: 45 to 4 at 7B) and cut wrong filter values (7B: 64 to 50, 14B: 48 to 39); about 55 per arm need SQL Cube cannot express, the ceiling of the approach. The weak point is value lookup: only 22\% of training transcripts call \texttt{search\_values}, so the adapter learned to guess spellings (case B); the retrained arm (Section~\ref{sec:tooluse}) fixes most of this.
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=0.62\linewidth]{figures/fig10_errors.pdf}
+\includegraphics[width=0.52\linewidth]{figures/fig10_errors.pdf}
 \caption{Wrong answers by category (rules applied in order). The LoRA mainly removes failed runs, wrong filters and extra columns; about 55 per arm need SQL Cube cannot express.}
 \label{fig:errors}
 \end{figure}
 
 \subsection{Limitations and responsible use}
-Two test databases and one run per arm give about $\pm$5 points of uncertainty (95\%). BIRD's standard setting gives the model the hint; with it every arm scores higher (LoRA 46.4\% at 7B, 49.7\% at 14B; runs in the repository), so our numbers are not comparable with BIRD leaderboards. The translator limits training to queries Cube can express; the noschema arm is database-specific. The adapters often write a stray token instead of Qwen's \texttt{<tool\_call>} tag (all calls of the 14B adapter; also seen without quantisation); the harness parses such text calls, but other clients would fail. BIRD is public and holds no private personal data. A chart from a wrong filter (case B) looks as convincing as a right one, so the demo app always shows the Cube query and tool trace beside it.
+Two test databases and one run per arm give about $\pm$5 points of uncertainty (95\%). With BIRD's hint (its standard setting) every arm scores higher (LoRA 46.4/49.7\%), so our numbers are not comparable with leaderboards. The translator limits training to queries Cube can express; the noschema arm is database-specific. The original adapters often write a stray token instead of \texttt{<tool\_call>} (all 14B calls), because the base model never trained that token; the harness parses such text calls, but other clients would fail. The retrain fixes this. BIRD is public and holds no private personal data. A chart from a wrong filter (case B) looks as convincing as a right one, so the demo app always shows the Cube query and tool trace beside it.
 
 \section{Conclusion}
-Keeping the harness fixed and adding a LoRA adapter trained on 3,273 execution-verified transcripts raised strict execution accuracy on unseen databases, with questions asked without BIRD's hint, from 21.4\% to 36.7\% (7B) and from 27.4\% to 40.7\% (14B), halved the model calls per question, and made a 7B model beat a 14B one. Most of the prompt can move into the weights: a lean prompt kept both models within about 2 points (not significant) at 40\% of the prompt tokens, but the schema must stay for unseen databases. The main limitation is that the adapter stopped looking up values. A first retrain of the 7B adapter with \texttt{search\_values} in more transcripts changed the behaviour (lookups on 38\% of questions, half as many empty answers) but not the accuracy (36.1\% vs 36.7\%, $p{=}0.88$): it emits a stray token instead of \texttt{<tool\_call>} at the start of its turns, so most calls go through the text fallback and some are malformed. Future work: find why that first token is not learned (check its training labels) or accept a short text prefix before a JSON call, then retest; and measure time to first token.
+Keeping the harness fixed and adding a LoRA adapter trained on 3,273 execution-verified transcripts raised strict execution accuracy on unseen databases, with questions asked without BIRD's hint, from 21.4\% to 36.7\% (7B) and from 27.4\% to 40.7\% (14B), halved the model calls per question, and made a 7B model beat a 14B one. Most of the prompt can move into the weights: a lean prompt kept both models within about 2 points (not significant) at 40\% of the prompt tokens, but the schema must stay for unseen databases. Retraining with value lookups and trained tool-call tokens raised accuracy further, to 41.9\% (7B) and 44.9\% (14B). Future work: the same retrain for the lean adapters, more databases, and time to first token.
 
 {\footnotesize
 \let\oldthebibliography\thebibliography

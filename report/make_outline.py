@@ -68,6 +68,7 @@ NOTES = {
         "Proposed: same model file + LoRA, same harness and prompt.",
         "No-hint runs: baseline and LoRA at both sizes with the hint hidden (adapters were trained with hints).",
         "Prompt-offloading arms: lean LoRA; noschema LoRA with no schema / with lean prompt; control = full LoRA given the lean prompt without retraining.",
+        "Extra arm: LoRA retrained to look up filter values (Section 6.2).",
     ],
     "Evaluation data and measures": [
         "332 test questions, 2 unseen dbs, difficulty mix 218/91/23, 77% need a join. Introduce Table 4.",
@@ -82,7 +83,7 @@ NOTES = {
         "Fig. 8: lean = 1.5k tokens per call vs 3.6k; loses 2.1 (7B, p=0.30) and 0.6 points (14B, p=0.83), n.s. No schema: 18.1% / 24.7% (invented members, 114/332 unknown-member errors at 14B); noschema + short schema 37.0 / 41.0. Full LoRA given lean prompt without retraining: 0%.",
     ],
     "Tool use": [
-        "Table 6: 7B baseline ~2 lookups, ~1 rejected call per q; adapters draft once and submit. But they never look values up: 13% of answers from an empty draft vs 2-10%. 14B models write most calls as text.",
+        "Table 6: 7B baseline ~2 lookups, ~1 rejected call per q; adapters draft once and submit. But they never look values up: 13% of answers from an empty draft vs 2-10%. 14B models write most calls as text.", "Extra arm (retrained for lookups): causes = only 22% of transcripts had a lookup + untrained <tool_call> tokens in Qwen2.5-Coder-Instruct. Fix: lookup before every text filter, train those token rows, tool schemas in template. 7B 41.9% (+5.1, p=0.019), 14B 44.9% (+4.2, p=0.020); lookups ~70%, empty answers 4-5%; no gain with hint; more tokens/steps.",
     ],
     "Resource use": [
         "Training time 5.3 h (7B), 9.0 h (14B), lean 2-3 h; one 16 GB GPU; converged within half an epoch (Fig. 6).",
@@ -98,13 +99,13 @@ NOTES = {
     "Limitations and responsible use": [
         "Two dbs, one run per arm (about +/-5 points). With BIRD's hint all arms score higher (LoRA 46.4 / 49.7); not comparable with leaderboards.",
         "Translator bias toward simple query shapes; noschema is database-specific.",
-        "Adapters often write a stray token instead of <tool_call>; the harness parses text calls.",
+        "Original adapters write a stray token instead of <tool_call> (untrained token); harness parses text; retrain fixes it.",
         "Public data only; a wrong filter gives a convincing wrong chart, so the app shows the query.",
     ],
     "Conclusion": [
         "Answer the RQ directly with the two headline numbers and the halved steps.",
         "Most of the prompt can move into the weights; the schema must stay for unseen dbs.",
-        "Future work: retrain so the adapter looks up values; measure time to first token.",
+        "Retrain with lookups: 41.9% / 44.9%. Future work: same retrain for lean adapters, more dbs, time to first token.",
     ],
 }
 

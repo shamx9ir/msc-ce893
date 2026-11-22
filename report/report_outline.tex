@@ -74,7 +74,7 @@ Constraints & Local model on a 16\,GB GPU; at most 8 model calls per question; o
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=0.76\linewidth]{figures/fig02_pipeline.pdf}
+\includegraphics[width=0.7\linewidth]{figures/fig02_pipeline.pdf}
 \caption{Steps from input to output. The agent loops between the model and the tools until it submits a query (max.\ 8 calls). The submitted query is scored against the gold SQL (5a) and shown as a chart in the demo app (5b). Every arm uses this same pipeline.}
 \label{fig:pipeline}
 \end{figure}
@@ -147,7 +147,7 @@ Final test & All BIRD dev questions on \texttt{formula\_1} (174) and \texttt{stu
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=0.75\linewidth]{figures/fig05_method.pdf}
+\includegraphics[width=0.7\linewidth]{figures/fig05_method.pdf}
 \caption{Fine-tuning pipeline (top) and the three prompt profiles (bottom). Only the adapter and the prompt profile change between arms.}
 \label{fig:method}
 \end{figure}
@@ -189,6 +189,7 @@ Hardware & one RTX 5070 Ti (16\,GB), 32\,GB RAM, Windows; training 5.3\,h (7B) a
   \item Proposed: same model file + LoRA, same harness and prompt.
   \item No-hint runs: baseline and LoRA at both sizes with the hint hidden (adapters were trained with hints).
   \item Prompt-offloading arms: lean LoRA; noschema LoRA with no schema / with lean prompt; control = full LoRA given the lean prompt without retraining.
+  \item Extra arm: LoRA retrained to look up filter values (Section 6.2).
 \end{itemize}}
 
 \subsection{Evaluation data and measures}
@@ -233,19 +234,22 @@ Significance & Exact McNemar test on paired per-question outcomes (strict)\\
  & & & & & {\scriptsize mean\,/\,med.\,/\,p90} & {\scriptsize output} & \\
 \midrule
 7B harness only (baseline) & 21.4 & 27.7 & 15,929 & 4.1 & 3.5\,/\,2.3\,/\,6.8 & 121 & --\\
-7B LoRA + harness & \textbf{36.7} & \textbf{40.7} & 7,672 & 2.1 & 1.3\,/\,1.2\,/\,1.7 & 104 & $5{\times}10^{-8}$\\
+7B LoRA + harness & 36.7 & 40.7 & 7,672 & 2.1 & 1.3\,/\,1.2\,/\,1.7 & 104 & $5{\times}10^{-8}$\\
 7B lean LoRA & 34.6 & 36.7 & 3,242 & 2.2 & 1.4\,/\,1.2\,/\,1.5 & 110 & $3{\times}10^{-6}$\\
 \midrule
 14B harness only (baseline) & 27.4 & 35.8 & 11,952 & 3.2 & 4.6\,/\,3.8\,/\,7.0 & 67 & --\\
-14B LoRA + harness & \textbf{40.7} & 45.5 & 7,344 & 2.0 & 2.4\,/\,2.3\,/\,3.2 & 61 & $2{\times}10^{-7}$\\
-14B lean LoRA & 40.1 & \textbf{46.1} & 2,988 & 2.0 & 2.3\,/\,2.2\,/\,3.3 & 65 & $1{\times}10^{-6}$\\
+14B LoRA + harness & 40.7 & 45.5 & 7,344 & 2.0 & 2.4\,/\,2.3\,/\,3.2 & 61 & $2{\times}10^{-7}$\\
+14B lean LoRA & 40.1 & 46.1 & 2,988 & 2.0 & 2.3\,/\,2.2\,/\,3.3 & 65 & $1{\times}10^{-6}$\\
+\midrule
+7B LoRA retrained for lookups & \textbf{41.9} & \textbf{47.6} & 12,204 & 3.3 & 1.7\,/\,1.5\,/\,2.3 & 102 & $2{\times}10^{-13}$\\
+14B LoRA retrained for lookups & \textbf{44.9} & \textbf{48.8} & 11,638 & 3.1 & 2.7\,/\,2.4\,/\,3.8 & 60 & $4{\times}10^{-11}$\\
 \bottomrule
 \end{tabularx}
 \end{table}
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=0.68\linewidth]{figures/fig07_main.pdf}
+\includegraphics[width=0.62\linewidth]{figures/fig07_main.pdf}
 \caption{Before and after fine-tuning (higher is better). (a) The LoRA adds 13--15 points of strict accuracy at both sizes, more than doubling the model size does. (b) The gain holds on both databases and is largest on questions that need a join (7B: 20\% to 35\%, 14B: 23\% to 41\%).}
 \label{fig:main}
 \end{figure}
@@ -262,12 +266,12 @@ Significance & Exact McNemar test on paired per-question outcomes (strict)\\
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=0.74\linewidth]{figures/fig08_offload.pdf}
+\includegraphics[width=0.68\linewidth]{figures/fig08_offload.pdf}
 \caption{Accuracy against prompt cost (up and left is better). The lean adapters (green) match the full LoRA's accuracy at 40\% of its prompt tokens; dropping the schema altogether (triangles) saves more tokens but loses 16--19 points.}
 \label{fig:offload}
 \end{figure}
 
-\subsection{Tool use}
+\subsection{Tool use}\label{sec:tooluse}
 \begin{table}[!htbp]
 \centering
 \footnotesize
@@ -281,13 +285,19 @@ Significance & Exact McNemar test on paired per-question outcomes (strict)\\
 7B LoRA + harness & 0.01 & 1.09 & 0.11 & 0 & 0.0 & 13.0\\
 14B harness only & 0.95 & 0.95 & 0.14 & 54 & 0.9 & 10.2\\
 14B LoRA + harness & 0.00 & 0.97 & 0.00 & 100 & 0.0 & 13.3\\
+\midrule
+7B LoRA retrained for lookups & 1.05 & 1.18 & 0.27 & 0 & 0.9 & 4.5\\
+14B LoRA retrained for lookups & 1.04 & 1.09 & 0.12 & 0 & 2.4 & 3.9\\
 \bottomrule
 \end{tabularx}
 \end{table}
 
 \resultplaceholder{\textbf{Write here:}\begin{itemize}[leftmargin=1.2em,itemsep=0.05em]
   \item Table 6: 7B baseline \textasciitilde{}2 lookups, \textasciitilde{}1 rejected call per q; adapters draft once and submit. But they never look values up: 13\% of answers from an empty draft vs 2-10\%. 14B models write most calls as text.
+  \item Extra arm (retrained for lookups): causes = only 22\% of transcripts had a lookup + untrained \textless{}tool\_call\textgreater{} tokens in Qwen2.5-Coder-Instruct. Fix: lookup before every text filter, train those token rows, tool schemas in template. 7B 41.9\% (+5.1, p=0.019), 14B 44.9\% (+4.2, p=0.020); lookups \textasciitilde{}70\%, empty answers 4-5\%; no gain with hint; more tokens/steps.
 \end{itemize}}
+
+\textbf{Retraining for lookups (extra arm).} Only 22\% of training transcripts looked a value up, and Qwen2.5-Coder-Instruct's \texttt{<tool\_call>} tokens are untrained, so the adapters wrote a stray token and fell back to text. The retrain adds a lookup before every text filter (plus recovery examples), trains those tokens' embedding and output rows, and lists the tool schemas in the Ollama template as in training. It looks values up on about 70\% of questions, makes no text calls and cuts empty answers to 4--5\%, gaining 5.1 points at 7B ($p{=}0.019$ against the original LoRA) and 4.2 at 14B ($p{=}0.020$). With the hint, which usually spells out the value, the gain vanishes (n.s.). The cost is more steps and prompt tokens, as the template re-adds the tool schemas; it is an extra arm because data and template changed, not only the adapter.
 
 \subsection{Resource use}
 \resultplaceholder{\textbf{Write here:}\begin{itemize}[leftmargin=1.2em,itemsep=0.05em]
@@ -301,7 +311,7 @@ Significance & Exact McNemar test on paired per-question outcomes (strict)\\
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=0.7\linewidth]{figures/fig09_outputs.pdf}
+\includegraphics[width=0.6\linewidth]{figures/fig09_outputs.pdf}
 \caption{Real tool traces from the test runs (\texttt{>} model call, \texttt{<} tool reply; long lines cut). A: the baseline groups by circuit and returns three rows, the LoRA asks for the single count. B: the LoRA skips the value lookup, filters on a value that does not exist and submits an empty result. C: without a schema the model invents \texttt{student.phone} and repeats it; the lean adapter writes \texttt{member.phone} (here as text, which the harness parses).}
 \label{fig:outputs}
 \end{figure}
@@ -315,7 +325,7 @@ Significance & Exact McNemar test on paired per-question outcomes (strict)\\
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=0.62\linewidth]{figures/fig10_errors.pdf}
+\includegraphics[width=0.52\linewidth]{figures/fig10_errors.pdf}
 \caption{Wrong answers by category (rules applied in order). The LoRA mainly removes failed runs, wrong filters and extra columns; about 55 per arm need SQL Cube cannot express.}
 \label{fig:errors}
 \end{figure}
@@ -324,7 +334,7 @@ Significance & Exact McNemar test on paired per-question outcomes (strict)\\
 \resultplaceholder{\textbf{Write here:}\begin{itemize}[leftmargin=1.2em,itemsep=0.05em]
   \item Two dbs, one run per arm (about $\pm$5 points). With BIRD's hint all arms score higher (LoRA 46.4 / 49.7); not comparable with leaderboards.
   \item Translator bias toward simple query shapes; noschema is database-specific.
-  \item Adapters often write a stray token instead of \textless{}tool\_call\textgreater{}; the harness parses text calls.
+  \item Original adapters write a stray token instead of \textless{}tool\_call\textgreater{} (untrained token); harness parses text; retrain fixes it.
   \item Public data only; a wrong filter gives a convincing wrong chart, so the app shows the query.
 \end{itemize}}
 
@@ -332,7 +342,7 @@ Significance & Exact McNemar test on paired per-question outcomes (strict)\\
 \resultplaceholder{\textbf{Write here:}\begin{itemize}[leftmargin=1.2em,itemsep=0.05em]
   \item Answer the RQ directly with the two headline numbers and the halved steps.
   \item Most of the prompt can move into the weights; the schema must stay for unseen dbs.
-  \item Future work: retrain so the adapter looks up values; measure time to first token.
+  \item Retrain with lookups: 41.9\% / 44.9\%. Future work: same retrain for lean adapters, more dbs, time to first token.
 \end{itemize}}
 
 {\footnotesize

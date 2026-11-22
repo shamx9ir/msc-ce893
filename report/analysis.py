@@ -32,6 +32,10 @@ TEST_RUNS = {
     "noschema_14b": ("test_nohint_noschema_14b", "14B no-schema LoRA, no schema"),
     "noschema_lean_7b": ("test_nohint_noschema_lean_prompt_7b", "7B no-schema LoRA, lean prompt"),
     "noschema_lean_14b": ("test_nohint_noschema_lean_prompt_14b", "14B no-schema LoRA, lean prompt"),
+    # extra arm: LoRA retrained to look values up (sv3: value-lookup data, trained <tool_call> tokens, tool-schema template)
+    "sv3_7b": ("test_nohint_lora_sv3_nt_7b", "7B LoRA retrained for lookups"),
+    "sv3_14b": ("test_nohint_lora_sv3_nt_14b", "14B LoRA retrained for lookups"),
+    "lora_nt_7b": ("test_nohint_lora_nt_7b", "7B original LoRA, retrain template"),
     # earlier runs WITH the hint (BIRD's standard setting); kept for reference and for harness development
     "hint_harness_v1_7b": ("test_harness_v1_7b", "7B harness v1 (hint)"),
     "hint_harness_v2_7b": ("test_harness_v2_7b", "7B harness v2 (hint)"),
@@ -39,6 +43,8 @@ TEST_RUNS = {
     "hint_harness_14b": ("test_harness_14b", "14B harness only (hint)"),
     "hint_lora_7b": ("test_lora_7b", "7B LoRA + harness (hint)"),
     "hint_lora_14b": ("test_lora_14b", "14B LoRA + harness (hint)"),
+    "hint_sv3_7b": ("test_lora_sv3_nt_7b", "7B LoRA retrained for lookups (hint)"),
+    "hint_sv3_14b": ("test_lora_sv3_nt_14b", "14B LoRA retrained for lookups (hint)"),
     "hint_lora_on_lean_7b": ("test_lora_on_lean_prompt_7b", "7B full LoRA, lean prompt (hint)"),
     "hint_lora_on_lean_14b": ("test_lora_on_lean_prompt_14b_partial", "14B full LoRA, lean prompt (hint, 127 q)"),
     "hint_lean_7b": ("test_lean_7b", "7B lean LoRA (hint)"),
