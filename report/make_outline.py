@@ -105,7 +105,7 @@ NOTES = {
     "Conclusion": [
         "Answer the RQ directly with the two headline numbers and the halved steps.",
         "Most of the prompt can move into the weights; the schema must stay for unseen dbs.",
-        "Retrain with lookups: 41.9% / 44.9%. Future work: same retrain for lean adapters, more dbs, time to first token.",
+        "Retrain with lookups: 41.9% / 44.9%. Future work: same retrain for lean adapters; trained tool tokens for the baseline (format vs knowledge); more dbs; time to first token.",
     ],
 }
 
