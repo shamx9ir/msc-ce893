@@ -108,9 +108,8 @@ Each question in the BIRD dataset includes an English prompt, a corresponding SQ
 \end{figure}
 
 \subsection{Data quality and limitations}
-\resultplaceholder{\textbf{Write here:}\begin{itemize}[leftmargin=1.2em,itemsep=0.05em]
-  \item Translator: no subqueries, CASE, string slicing; 30\% of test needs such SQL (ceiling 231/332).
-\end{itemize}}
+The translator is restricted to SQL constructs supported by Cube, meaning the training corpus excludes subqueries, CASE expressions, arithmetic, and string slicing. Consequently, the 30\% of test questions requiring these features fall outside the capability of any Cube query, placing an upper performance limit of 231/332 on the test set for this framework. Additionally, discrepancies and tied results exist within the BIRD benchmark's reference SQL. Evaluation relies on matching the expected output rows, allowing any functionally accurate Cube query to be marked correct. Finally, the ten largest databases in the training set (exceeding 600\,MB) were excluded.
+
 
 \section{Method}\label{sec:method}
 
