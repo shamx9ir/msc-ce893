@@ -176,6 +176,8 @@ def main():
     # The outline's notes run longer than the prose in places, so a few figures are smaller here to keep 10 pages.
     for fig, (w_old, w_new) in {"fig01_glance": ("0.7", "0.62"), "fig03_data": ("0.7", "0.64"), "fig05_method": ("0.7", "0.6"), "fig09_outputs": ("0.6", "0.52"), "fig10_errors": ("0.52", "0.48")}.items():
         text = text.replace(f"width={w_old}\\linewidth]{{figures/{fig}", f"width={w_new}\\linewidth]{{figures/{fig}")
+    # Shamir: explain why the funnel's 59 databases become 58 in the splits (outline only).
+    text = text.replace("790 gave different or empty results.", "790 gave different or empty results; one database (craftbeer) yielded no verified pairs, so the splits cover 58.", 1)
     # Shamir: in the outline, Fig. 2 sits before the Proposed solution subsection.
     m = re.search(r"\\begin\{figure\}\[!htbp\]\n(?:(?!\\end\{figure\}).)*fig02_pipeline.*?\\end\{figure\}\n\n?", text, flags=re.S)
     if m:
