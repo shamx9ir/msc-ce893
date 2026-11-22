@@ -76,10 +76,8 @@ The baseline architecture relies on a prompt-engineering framework consisting of
 \end{figure}
 
 \subsection{Expected improvement}
-\resultplaceholder{\textbf{Write here:}\begin{itemize}[leftmargin=1.2em,itemsep=0.05em]
-  \item Baseline errors on dev data: dimensions in measures, invented members, malformed tool calls.
-  \item Expectations: (1) higher accuracy, (2) fewer steps, (3) guide and tool definitions can be dropped once learned.
-\end{itemize}}
+On the tuning databases, most baseline failures were not missing knowledge but protocol errors: dimensions placed in ``measures'', invented member names, malformed tool calls, and extra grouping columns. Because the adapter is trained on transcripts in which every query was executed and checked, we expect four improvements. (1) Higher execution accuracy on the unseen test databases, mainly from fewer format and naming errors; we expect the largest gains on questions that need joins, where the schema is hardest to follow from the prompt alone. (2) Fewer steps and tokens per question, because the adapter should produce a valid query in fewer attempts, needing fewer rejected calls and retries. (3) Lower latency per question as a result of fewer and shorter model calls; output speed itself should not change, since the merged adapter adds no inference cost. (4) A shorter prompt without loss of accuracy: once the query guide and tool definitions have been learned, they should be removable, but the database schema will likely still be needed on unseen databases.
+
 
 \section{Data}
 \begin{table}[!htbp]
@@ -115,8 +113,6 @@ Final test & All BIRD dev questions on \texttt{formula\_1} (174) and \texttt{stu
 \subsection{Data quality and limitations}
 \resultplaceholder{\textbf{Write here:}\begin{itemize}[leftmargin=1.2em,itemsep=0.05em]
   \item Translator coverage: no subqueries, CASE arithmetic, string slicing; 30\% of test needs such SQL (ceiling 231/332).
-  \item BIRD gold SQL has some errors and ties; scoring against gold rows means any correct query counts.
-  \item Ten largest training dbs skipped (over 600 MB).
 \end{itemize}}
 
 \section{Method}\label{sec:method}
@@ -253,7 +249,6 @@ Significance & Exact McNemar test on paired per-question outcomes (strict)\\
 \resultplaceholder{\textbf{Write here:}\begin{itemize}[leftmargin=1.2em,itemsep=0.05em]
   \item Lead with Table 5: +15.4 points (7B, 70 fixed vs 19 broken) and +13.3 points (14B, 58 vs 14).
   \item 7B LoRA beats 14B baseline by 9.3 points (p=0.0009); 14B LoRA vs 7B LoRA not significant (p=0.09).
-  \item 14B baseline relaxed \textgreater{}\textgreater{} strict (35.8 vs 27.4, extra columns); adapter mostly removes this.
   \item Fig. 8: lean = 1.5k tokens per call vs 3.6k; loses 2.1 (7B, p=0.30) and 0.6 points (14B, p=0.83), n.s. No schema: 18.1\% / 24.7\% (invented members, 114/332 unknown-member errors at 14B); noschema + short schema 37.0 / 41.0. Full LoRA given lean prompt without retraining: 0\%.
 \end{itemize}}
 
@@ -298,8 +293,7 @@ Significance & Exact McNemar test on paired per-question outcomes (strict)\\
 \resultplaceholder{\textbf{Write here:}\begin{itemize}[leftmargin=1.2em,itemsep=0.05em]
   \item Training time 5.3 h (7B), 9.0 h (14B), lean 2-3 h; one 16 GB GPU; converged within half an epoch (Fig. 6).
   \item Steps 4.1 to 2.1, prompt tokens per question halve, model time 3.5 s to 1.3 s (7B), p90 6.8 s to 1.7 s.
-  \item Output speed unchanged (\textasciitilde{}105-120 tok/s 7B, 60-67 14B), so the saving is fewer and shorter calls.
-  \item Caveat: part of the saving is because the adapter skips search\_values (1\% vs 92\%).
+  \item Output speed unchanged, so the saving is fewer, shorter calls (partly from skipping search\_values).
 \end{itemize}}
 
 \section{Discussion}\label{sec:discussion}
@@ -315,7 +309,6 @@ Significance & Exact McNemar test on paired per-question outcomes (strict)\\
 \resultplaceholder{\textbf{Write here:}\begin{itemize}[leftmargin=1.2em,itemsep=0.05em]
   \item Walk through Fig. 9 case A (extra grouping dimension) and case B (guessed value, empty result) and case C (invented member without schema).
   \item Fig. 10: failed runs 45 to 4 (7B); wrong filters 64 to 50 (7B), 48 to 39 (14B); \textasciitilde{}55 per arm need SQL Cube cannot express (ceiling, not a model error).
-  \item Explain the value-lookup weakness: only 22\% of training transcripts had search\_values.
 \end{itemize}}
 
 \begin{figure}[!htbp]
@@ -328,15 +321,13 @@ Significance & Exact McNemar test on paired per-question outcomes (strict)\\
 \subsection{Limitations and responsible use}
 \resultplaceholder{\textbf{Write here:}\begin{itemize}[leftmargin=1.2em,itemsep=0.05em]
   \item Two dbs, one run per arm (about $\pm$5 points). Setting differs from BIRD's standard one: not comparable with its leaderboard.
-  \item Translator bias toward simple query shapes; noschema is database-specific.
   \item Original adapters write a stray token instead of \textless{}tool\_call\textgreater{} (untrained token); harness parses text; retrain fixes it.
   \item Public data only; a wrong filter gives a convincing wrong chart, so the app shows the query.
 \end{itemize}}
 
 \section{Conclusion}
 \resultplaceholder{\textbf{Write here:}\begin{itemize}[leftmargin=1.2em,itemsep=0.05em]
-  \item Answer the RQ directly with the two headline numbers and the halved steps.
-  \item Most of the prompt can move into the weights; the schema must stay for unseen dbs.
+  \item Answer the RQ with the headline numbers; most of the prompt can move into the weights, the schema must stay.
   \item Retrain with lookups: 41.9\% / 44.9\%. Future work: same retrain for lean adapters; trained tool tokens for the baseline (format vs knowledge); newer open-weight families, not only Qwen; more dbs; time to first token.
 \end{itemize}}
 

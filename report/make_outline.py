@@ -48,8 +48,6 @@ NOTES = {
     ],
     "Data quality and limitations": [
         "Translator coverage: no subqueries, CASE arithmetic, string slicing; 30% of test needs such SQL (ceiling 231/332).",
-        "BIRD gold SQL has some errors and ties; scoring against gold rows means any correct query counts.",
-        "Ten largest training dbs skipped (over 600 MB).",
     ],
     "Base model and baseline": [
         "Qwen2.5-Coder 7B/14B Instruct, Ollama Q4_K_M, temperature 0, 16k context.",
@@ -78,7 +76,6 @@ NOTES = {
     "Main findings": [
         "Lead with Table 5: +15.4 points (7B, 70 fixed vs 19 broken) and +13.3 points (14B, 58 vs 14).",
         "7B LoRA beats 14B baseline by 9.3 points (p=0.0009); 14B LoRA vs 7B LoRA not significant (p=0.09).",
-        "14B baseline relaxed >> strict (35.8 vs 27.4, extra columns); adapter mostly removes this.",
         "Fig. 8: lean = 1.5k tokens per call vs 3.6k; loses 2.1 (7B, p=0.30) and 0.6 points (14B, p=0.83), n.s. No schema: 18.1% / 24.7% (invented members, 114/332 unknown-member errors at 14B); noschema + short schema 37.0 / 41.0. Full LoRA given lean prompt without retraining: 0%.",
     ],
     "Tool use": [
@@ -87,23 +84,19 @@ NOTES = {
     "Resource use": [
         "Training time 5.3 h (7B), 9.0 h (14B), lean 2-3 h; one 16 GB GPU; converged within half an epoch (Fig. 6).",
         "Steps 4.1 to 2.1, prompt tokens per question halve, model time 3.5 s to 1.3 s (7B), p90 6.8 s to 1.7 s.",
-        "Output speed unchanged (~105-120 tok/s 7B, 60-67 14B), so the saving is fewer and shorter calls.",
-        "Caveat: part of the saving is because the adapter skips search_values (1% vs 92%).",
+        "Output speed unchanged, so the saving is fewer, shorter calls (partly from skipping search_values).",
     ],
     "Interpretation and error analysis": [
         "Walk through Fig. 9 case A (extra grouping dimension) and case B (guessed value, empty result) and case C (invented member without schema).",
         "Fig. 10: failed runs 45 to 4 (7B); wrong filters 64 to 50 (7B), 48 to 39 (14B); ~55 per arm need SQL Cube cannot express (ceiling, not a model error).",
-        "Explain the value-lookup weakness: only 22% of training transcripts had search_values.",
     ],
     "Limitations and responsible use": [
         "Two dbs, one run per arm (about +/-5 points). Setting differs from BIRD's standard one: not comparable with its leaderboard.",
-        "Translator bias toward simple query shapes; noschema is database-specific.",
         "Original adapters write a stray token instead of <tool_call> (untrained token); harness parses text; retrain fixes it.",
         "Public data only; a wrong filter gives a convincing wrong chart, so the app shows the query.",
     ],
     "Conclusion": [
-        "Answer the RQ directly with the two headline numbers and the halved steps.",
-        "Most of the prompt can move into the weights; the schema must stay for unseen dbs.",
+        "Answer the RQ with the headline numbers; most of the prompt can move into the weights, the schema must stay.",
         "Retrain with lookups: 41.9% / 44.9%. Future work: same retrain for lean adapters; trained tool tokens for the baseline (format vs knowledge); newer open-weight families, not only Qwen; more dbs; time to first token.",
     ],
 }
@@ -126,6 +119,8 @@ To demonstrate this, we focus on a common business scenario involving data analy
     "Problem definition": r"""As outlined in Table~\ref{tab:task}, the objective is to take an analyst's natural-language query regarding an unfamiliar database and translate it into a single Cube query yielding output rows identical to BIRD's gold SQL reference, all executed using a local model on a single 16\,GB GPU.
 """,
     "Proposed solution": r"""The baseline architecture relies on a prompt-engineering framework consisting of a system prompt with a Cube query guide, operational rules, four worked examples, a question-linked database schema, and three dedicated tools (Fig.~\ref{fig:pipeline}). The proposed approach integrates a LoRA adapter fine-tuned on verified interaction transcripts using the identical prompt and toolset. Fine-tuning is particularly effective here because the task requires producing strict JSON with precise field names, whereas baseline failures primarily stem from formatting and protocol errors rather than missing domain knowledge. By training the model to internalize both the query language and tool protocol directly from examples, portions of the prompt can be systematically removed. To evaluate the adapter's capacity to absorb these instructions, we also train variants using abbreviated prompts: a ``lean'' configuration that omits the query guide and tool definitions, and a ``no schema'' setup that provides only the database name.
+""",
+    "Expected improvement": r"""On the tuning databases, most baseline failures were not missing knowledge but protocol errors: dimensions placed in ``measures'', invented member names, malformed tool calls, and extra grouping columns. Because the adapter is trained on transcripts in which every query was executed and checked, we expect four improvements. (1) Higher execution accuracy on the unseen test databases, mainly from fewer format and naming errors; we expect the largest gains on questions that need joins, where the schema is hardest to follow from the prompt alone. (2) Fewer steps and tokens per question, because the adapter should produce a valid query in fewer attempts, needing fewer rejected calls and retries. (3) Lower latency per question as a result of fewer and shorter model calls; output speed itself should not change, since the merged adapter adds no inference cost. (4) A shorter prompt without loss of accuracy: once the query guide and tool definitions have been learned, they should be removable, but the database schema will likely still be needed on unseen databases.
 """,
     "Related work": r"""The evaluation of text-to-SQL tasks has progressed from Spider~\cite{yu2018spider} to BIRD~\cite{li2023bird}, a benchmark that incorporates substantial real-world databases, dirty values, and question-level ``evidence'' annotations to assess execution accuracy. In prompt-driven approaches, frameworks like DIN-SQL~\cite{pourreza2023din} implement task decomposition and self-correction, whereas ReAct~\cite{yao2023react} style agent loops enable models to evaluate queries dynamically prior to final response generation, an approach adopted by our harness. For open-weights architectures, specialized fine-tuned models such as CodeS~\cite{li2024codes} achieve competitive performance on BIRD even at smaller parameter scales, while Gorilla~\cite{patil2023gorilla} demonstrates that targeted fine-tuning outperforms pure prompting for accurate API invocation. Parameter-efficient methods like LoRA~\cite{hu2021lora} and QLoRA~\cite{dettmers2023qlora} facilitate this fine-tuning process on single consumer-grade GPUs. Lastly, context distillation~\cite{askell2021general,snell2022distilling} techniques enable models to emulate the behavior of extensive system prompts, providing the foundational concept behind moving the harness prompt into the LoRA weights.
 """,
