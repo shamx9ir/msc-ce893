@@ -85,7 +85,7 @@ def ygrid(ax):
 def fig_glance():
     fig, ax = canvas(W, 1.75)
     box(ax, 0.02, 0.15, 1.45, 1.5, "Question",
-        "\"How many Formula 1\nraces took place on\nthe circuits in Italy?\"\n\n+ BIRD hint", fs=6.8)
+        "\"How many Formula 1\nraces took place on\nthe circuits in Italy?\"\n\n(no BIRD hint)", fs=6.8)
     box(ax, 1.75, 0.15, 1.75, 1.5, "Agent (ADK)",
         "Qwen2.5-Coder 7B/14B\nprompt + 3 Cube tools\n\nA: base model\nB: base + LoRA adapter",
         color=C_L, fill="#fdf0ea", fs=6.8)
@@ -104,9 +104,9 @@ def fig_glance():
 # ------------------------------------------------------------------ Fig 2: pipeline
 def fig_pipeline():
     fig, ax = canvas(W, 3.05)
-    box(ax, 0.02, 1.45, 1.3, 1.25, "1 Input", "question\n+ BIRD hint\n(evidence)\n+ database id", fs=6.8)
+    box(ax, 0.02, 1.45, 1.3, 1.25, "1 Input", "question\n+ database id\n\n(BIRD hint only\nin training)", fs=6.8)
     box(ax, 1.6, 1.15, 1.95, 1.85, "2 ADK agent loop",
-        "system prompt: query guide,\nCube schema, tool list\nuser msg: question, hint,\nlinked fields\n\n"
+        "system prompt: query guide,\nCube schema, tool list\nuser msg: question,\nlinked fields\n\n"
         "LiteLLM -> Ollama\nQwen2.5-Coder Q4_K_M\n(base, or + LoRA)", color=C_L, fill="#fdf0ea", fs=6.6)
     box(ax, 3.85, 1.15, 1.45, 1.85, "3 Tools",
         "search_values\nrun_query\nsubmit_answer\n\nharness checks:\nunknown member,\ndim vs measure,\n"
@@ -184,7 +184,7 @@ def fig_data():
 def fig_harness_versions():
     fig, axes = plt.subplots(1, 2, figsize=(W, 2.05), gridspec_kw={"width_ratios": [1.1, 1]})
     ax = axes[0]
-    names = ["harness_v1_7b", "harness_v2_7b", "harness_7b"]
+    names = ["hint_harness_v1_7b", "hint_harness_v2_7b", "hint_harness_7b"]
     labels = ["v1\nfirst prompt", "v2\n+ rules, 4 examples,\nmeasure/dim check", "v4.2 (frozen)\n+ value lookup,\nlinking, guards"]
     s = [A.summary(A.test_run(n)) for n in names]
     x = np.arange(3)
@@ -339,8 +339,8 @@ def fig_offload():
         ygrid(ax)
         ax.set_title(f"{'a' if size == '7b' else 'b'}) {size.upper()}: accuracy vs prompt cost", loc="left")
     axes[0].set_ylabel("strict accuracy (%)")
-    axes[0].set_ylim(20, 60)
-    axes[1].set_ylim(20, 60)
+    axes[0].set_ylim(10, 50)
+    axes[1].set_ylim(10, 50)
     fig.tight_layout(w_pad=1.0, rect=(0, 0.08, 1, 1))
     h, l = axes[0].get_legend_handles_labels()
     fig.legend(h, l, frameon=False, fontsize=6.6, loc="lower center", ncol=5, bbox_to_anchor=(0.5, 0.0))

@@ -19,7 +19,6 @@ cd report && latexmk -xelatex main.tex && latexmk -xelatex main_outline.tex
 ```
 
 `main.tex` adds float settings and `needspace` after the template preamble so that figures share
-pages with text; the template's look is unchanged. Before submitting: fill in the registration
-number on the title page and check the PDF is still 10 pages.
+pages with text; the template's look is unchanged. Before submitting: check the PDF is still 10 pages.
 
 The runnable notebook that reproduces all numbers and figures is `../notebook/CE893_evaluation.ipynb`.

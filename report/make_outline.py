@@ -10,7 +10,7 @@ HERE = Path(__file__).parent
 
 NOTES = {
     "TITLE": [
-        "Summary (3 sentences): task (questions to Cube queries with an ADK agent), intervention (LoRA, harness fixed), headline numbers (7B 27.7 to 46.4, 14B 28.9 to 49.7 strict) and the prompt-offloading result (lean prompt, 2.4x fewer tokens per call).",
+        "Summary (3 sentences): task (questions to Cube queries with an ADK agent), intervention (LoRA, harness fixed), headline numbers without BIRD's hint (7B 21.4 to 36.7, 14B 27.4 to 40.7 strict) and the prompt-offloading result (lean prompt matches it with 2.4x fewer tokens per call).",
     ],
     "Motivation and context": [
         "Who asks: analysts/managers who want a number or a chart, not SQL.",
@@ -59,7 +59,6 @@ NOTES = {
         "QLoRA with PEFT: 4-bit NF4 base, rank-16 adapters on all attention + MLP projections (Fig. 5).",
         "Export: merge, GGUF, Q4_K_M, base chat template, so only the adapter differs.",
         "Prompt profiles: lean (no guide, no tool schemas, compact schema) and noschema (needs ~1,300 synthetic questions on the test schemas; no BIRD dev data used).",
-        "Fig. 6 (training curves) can be described here or in Results.",
     ],
     "Implementation details": [
         "One sentence introducing Table 3.",
@@ -69,51 +68,64 @@ NOTES = {
         "Proposed: same model file + LoRA, same harness and prompt.",
         "No-hint runs: baseline and LoRA at both sizes with the hint hidden (adapters were trained with hints).",
         "Prompt-offloading arms: lean LoRA; noschema LoRA with no schema / with lean prompt; control = full LoRA given the lean prompt without retraining.",
+        "Extra arm: LoRA retrained to look up filter values (Section 6.2).",
     ],
     "Evaluation data and measures": [
         "332 test questions, 2 unseen dbs, difficulty mix 218/91/23, 77% need a join. Introduce Table 4.",
     ],
     "Experimental procedure": [
         "Order: freeze test split + scoring, tune harness on tuning dbs, freeze v4.2, train each adapter once (seed 7), run each arm once.",
-        "List what is identical across arms within a size.",
     ],
     "Main findings": [
-        "Lead with Table 5: +18.7 points (7B, 78 fixed vs 16 broken) and +20.8 points (14B, 77 vs 8).",
-        "7B LoRA beats 14B baseline by 17.5 points; 14B LoRA vs 7B LoRA not significant (p=0.12).",
-        "14B baseline relaxed >> strict (extra columns); adapter mostly removes this.",
-        "Training curves (Fig. 6): converged within half an epoch, val loss 1.00 to 0.27 (7B), no overfitting.",
-        "Fig. 8: lean = 1.5k tokens per call vs 3.6-3.9k; loses 2.1 points at 14B (n.s.) and 4.5 at 7B (p=0.008). No schema: 38.3% (invented members). Full LoRA given lean prompt without retraining: 0%.",
+        "All test runs without BIRD's hint. Lead with Table 5: +15.4 points (7B, 70 fixed vs 19 broken) and +13.3 points (14B, 58 vs 14).",
+        "7B LoRA beats 14B baseline by 9.3 points (p=0.0009); 14B LoRA vs 7B LoRA not significant (p=0.09).",
+        "14B baseline relaxed >> strict (35.8 vs 27.4, extra columns); adapter mostly removes this.",
+        "Fig. 8: lean = 1.5k tokens per call vs 3.6k; loses 2.1 (7B, p=0.30) and 0.6 points (14B, p=0.83), n.s. No schema: 18.1% / 24.7% (invented members, 114/332 unknown-member errors at 14B); noschema + short schema 37.0 / 41.0. Full LoRA given lean prompt without retraining: 0%.",
     ],
-    "Without the hint": [
-        "Table 6: hiding the hint costs the adapters -9.6 (7B) and -9.0 (14B) points strict vs -6.3 and -1.5 (n.s.) for the baselines.",
-        "Why: adapters were trained with hints and never call search_values, so they guess values; empty answers 7.5% to 13.0% (7B). Baselines look up more (1.6 to 2.0 per q at 7B).",
-        "LoRA still leads by 15.3 (7B) and 13.3 (14B) points, both p<1e-6.",
-        "Tool use: 7B baseline has 0.8-1.1 rejected calls per q, adapters about 0.1; 14B models write most calls as text (71% / 100%).",
+    "Tool use": [
+        "Table 6: 7B baseline ~2 lookups, ~1 rejected call per q; adapters draft once and submit. But they never look values up: 13% of answers from an empty draft vs 2-10%. 14B models write most calls as text.", "Extra arm (retrained for lookups): causes = only 22% of transcripts had a lookup + untrained <tool_call> tokens in Qwen2.5-Coder-Instruct. Fix: lookup before every text filter, train those token rows, tool schemas in template. 7B 41.9% (+5.1, p=0.019), 14B 44.9% (+4.2, p=0.020); lookups ~70%, empty answers 4-5%; no gain with hint; more tokens/steps.",
     ],
     "Resource use": [
-        "Training time 5.3 h (7B), 9.0 h (14B), lean 2-3 h; one 16 GB GPU.",
-        "Steps 4.0 to 2.1, prompt tokens per question halve, model time 3.2 s to 1.3 s (7B).",
-        "Latency columns in Table 5: p90 5.9 s to 1.7 s (7B); output speed unchanged (~110 tok/s 7B, 60-65 14B), so the saving is fewer and shorter calls.",
-        "Time to first token not measured: future work (would separate prompt processing from decoding).",
-        "Caveat: part of the saving is because the adapter skips search_values (0.3% vs 92%).",
+        "Training time 5.3 h (7B), 9.0 h (14B), lean 2-3 h; one 16 GB GPU; converged within half an epoch (Fig. 6).",
+        "Steps 4.1 to 2.1, prompt tokens per question halve, model time 3.5 s to 1.3 s (7B), p90 6.8 s to 1.7 s.",
+        "Output speed unchanged (~105-120 tok/s 7B, 60-67 14B), so the saving is fewer and shorter calls.",
+        "Caveat: part of the saving is because the adapter skips search_values (1% vs 92%).",
     ],
     "Interpretation and error analysis": [
         "Walk through Fig. 9 case A (extra grouping dimension) and case B (guessed value, empty result) and case C (invented member without schema).",
-        "Fig. 10: failed runs 38 to 5 (7B); wrong filters 27 to 15 (14B); ~50 per arm need SQL Cube cannot express (ceiling, not a model error).",
+        "Fig. 10: failed runs 45 to 4 (7B); wrong filters 64 to 50 (7B), 48 to 39 (14B); ~55 per arm need SQL Cube cannot express (ceiling, not a model error).",
         "Explain the value-lookup weakness: only 22% of training transcripts had search_values.",
     ],
     "Limitations and responsible use": [
-        "Two dbs, one run per arm: about +/-5 points 95% interval.",
+        "Two dbs, one run per arm (about +/-5 points). With BIRD's hint all arms score higher (LoRA 46.4 / 49.7); not comparable with leaderboards.",
         "Translator bias toward simple query shapes; noschema is database-specific.",
-        "14B quantised adapter writes a stray token instead of <tool_call>; harness parses text calls.",
-        "Data: public, no private personal data. Use: wrong filter gives a convincing wrong chart, so the app shows query and trace.",
+        "Original adapters write a stray token instead of <tool_call> (untrained token); harness parses text; retrain fixes it.",
+        "Public data only; a wrong filter gives a convincing wrong chart, so the app shows the query.",
     ],
     "Conclusion": [
         "Answer the RQ directly with the two headline numbers and the halved steps.",
-        "Most of the prompt can move into the weights (lean within 2 points at 14B, 40% of tokens); the schema must stay for unseen dbs.",
-        "No hint: adapters lose about 9 points (more than baselines) but still lead by 13-15.",
-        "Main limitation: adapter stopped looking up values (worst without the hint). Next steps: retrain with search_values in every text-filter transcript and some hints removed; measure time to first token.",
+        "Most of the prompt can move into the weights; the schema must stay for unseen dbs.",
+        "Retrain with lookups: 41.9% / 44.9%. Future work: same retrain for lean adapters; trained tool tokens for the baseline (format vs knowledge); newer open-weight families, not only Qwen; more dbs; time to first token.",
     ],
+}
+
+
+# Shamir's research question, used in the outline's RQ box.
+OWN_RQ = r"\resultplaceholder{With the agent harness held constant, to what extent can training a LoRA adapter on verified tool-use transcripts boost execution accuracy on unfamiliar databases? How much of the prompt, comprising the query guide, tool definitions, and database schema, can be offloaded into the LoRA adapter without compromising performance in terms of accuracy, saved tokens, and generation speed?}"
+
+
+# Text Shamir has written for the outline version: used as-is instead of the notes for that section.
+OWN_TEXT = {
+    "Motivation and context": r"""As open-weights models continue to gain capabilities, local Large Language Models (LLMs) are set to become more and more significant. Due to their smaller footprint, open-weights models are highly accessible for local fine-tuning, offering greater customization potential despite being less powerful than large-scale foundation models.
+
+Current industry practice is to build a harness around the model. LLM harness is the surrounding support components to turn a model to a reliable, goal oriented agent. Typically we would customise a local LLM to a specific use case with a specific workflow and deploy it within a constrained hardware in the most efficient way.
+
+To demonstrate this, we focus on a common business scenario involving data analysis on domain-specific datasets. Analysts submit questions to the LLM, which then query the underlying data source. Our implementation leverages a semantic layer powered by Cube~\cite{cube} to serve as the backend language in contrast to direct SQL. To guide the LLM in answering data-related queries, we will construct a prompt equipped with tools.
+""",
+    "Research question and contribution": r"""A key feature of this experiment is that the evaluation harness remains strictly fixed while only model weights are varied. Every test arm utilizes the identical 4-bit model file hosted in Ollama, alongside identical prompts and available tools, ensuring that any performance variations stem directly from the LoRA adapter. Departing from traditional text-to-SQL paradigms, the model generates queries targeted at a semantic-layer API. Furthermore, we evaluate the extent to which the adapter can absorb components of the harness prompt, including the query guide, tool definitions, and schema details. All assessments are conducted across two unseen databases using realistic, analyst-style questions.
+""",
+    "Related work": r"""The evaluation of text-to-SQL tasks has progressed from Spider~\cite{yu2018spider} to BIRD~\cite{li2023bird}, a benchmark that incorporates substantial real-world databases, dirty values, and question-level ``evidence'' annotations to assess execution accuracy. In prompt-driven approaches, frameworks like DIN-SQL~\cite{pourreza2023din} implement task decomposition and self-correction, whereas ReAct~\cite{yao2023react} style agent loops enable models to evaluate queries dynamically prior to final response generation, an approach adopted by our harness. For open-weights architectures, specialized fine-tuned models such as CodeS~\cite{li2024codes} achieve competitive performance on BIRD even at smaller parameter scales, while Gorilla~\cite{patil2023gorilla} demonstrates that targeted fine-tuning outperforms pure prompting for accurate API invocation. Parameter-efficient methods like LoRA~\cite{hu2021lora} and QLoRA~\cite{dettmers2023qlora} facilitate this fine-tuning process on single consumer-grade GPUs. Lastly, context distillation~\cite{askell2021general,snell2022distilling} techniques enable models to emulate the behavior of extensive system prompts, providing the foundational concept behind moving the harness prompt into the LoRA weights.
+""",
 }
 
 
@@ -146,9 +158,12 @@ def main():
                 in_env == 0 and current and s.startswith("\\resultplaceholder")):
             # prose paragraph (or RQ box kept) -> replace with notes once per subsection
             if s.startswith("\\resultplaceholder"):
-                out.append(line)
+                out.append(OWN_RQ + "\n" if "textbf{RQ.}" in s else line)
                 continue
-            if current in NOTES and current not in emitted:
+            if current in OWN_TEXT and current not in emitted:
+                out.append(OWN_TEXT[current] + "\n")
+                emitted.add(current)
+            elif current in NOTES and current not in emitted:
                 out.append(bullets(NOTES[current]))
                 emitted.add(current)
             continue
@@ -160,6 +175,10 @@ def main():
     # title page summary -> notes
     text = re.sub(r"\\textbf\{Summary\.\}.*?\n", "\\\\textbf{Summary (to write).} " + esc(NOTES["TITLE"][0]).replace("\\", "\\\\") + "\n", text, count=1)
     text = text.replace("{\\footnotesize\n\\bibliographystyle", "{\\footnotesize\n\\nocite{*}\n\\bibliographystyle")
+    # The outline's notes run longer than the prose in places, so a few figures are smaller here to keep 10 pages.
+    for fig, (w_old, w_new) in {"fig03_data": ("0.78", "0.7"), "fig04_harness_versions": ("0.8", "0.7"),
+                                "fig06_training": ("0.78", "0.7")}.items():
+        text = text.replace(f"width={w_old}\\linewidth]{{figures/{fig}", f"width={w_new}\\linewidth]{{figures/{fig}")
     text = text.replace("% Full draft.", "% OUTLINE version, generated by make_outline.py from report.tex.")
     # sections whose only prose came after the floats still need notes
     for sec, items in NOTES.items():

@@ -19,26 +19,40 @@ RUNS = ROOT / "results" / "runs"
 TRAINING = ROOT / "results" / "training"
 
 # name -> (file stem, label used in tables and figures)
+# All reported test runs hide BIRD's evidence hint from the model (evaluate.py --no-evidence).
 TEST_RUNS = {
-    "harness_v1_7b": ("test_harness_v1_7b", "7B harness v1"),
-    "harness_v2_7b": ("test_harness_v2_7b", "7B harness v2"),
-    "harness_7b": ("test_harness_7b", "7B harness only"),
-    "harness_14b": ("test_harness_14b", "14B harness only"),
-    "lora_7b": ("test_lora_7b", "7B LoRA + harness"),
-    "lora_14b": ("test_lora_14b", "14B LoRA + harness"),
-    "lora_on_lean_7b": ("test_lora_on_lean_prompt_7b", "7B full LoRA, lean prompt"),
-    "lora_on_lean_14b": ("test_lora_on_lean_prompt_14b_partial", "14B full LoRA, lean prompt (127 q)"),
-    "lean_7b": ("test_lean_7b", "7B lean LoRA"),
-    "lean_14b": ("test_lean_14b", "14B lean LoRA"),
-    "noschema_7b": ("test_noschema_7b", "7B no-schema LoRA, no schema"),
-    "noschema_14b": ("test_noschema_14b", "14B no-schema LoRA, no schema"),
-    "noschema_lean_7b": ("test_noschema_lean_prompt_7b", "7B no-schema LoRA, lean prompt"),
-    "noschema_lean_14b": ("test_noschema_lean_prompt_14b", "14B no-schema LoRA, lean prompt"),
-    # the four main arms again with BIRD's hint hidden from the model (evaluate.py --no-evidence)
-    "nohint_harness_7b": ("test_nohint_harness_7b", "7B harness only, no hint"),
-    "nohint_harness_14b": ("test_nohint_harness_14b", "14B harness only, no hint"),
-    "nohint_lora_7b": ("test_nohint_lora_7b", "7B LoRA + harness, no hint"),
-    "nohint_lora_14b": ("test_nohint_lora_14b", "14B LoRA + harness, no hint"),
+    "harness_7b": ("test_nohint_harness_7b", "7B harness only"),
+    "harness_14b": ("test_nohint_harness_14b", "14B harness only"),
+    "lora_7b": ("test_nohint_lora_7b", "7B LoRA + harness"),
+    "lora_14b": ("test_nohint_lora_14b", "14B LoRA + harness"),
+    "lora_on_lean_7b": ("test_nohint_lora_on_lean_prompt_7b", "7B full LoRA, lean prompt"),
+    "lean_7b": ("test_nohint_lean_7b", "7B lean LoRA"),
+    "lean_14b": ("test_nohint_lean_14b", "14B lean LoRA"),
+    "noschema_7b": ("test_nohint_noschema_7b", "7B no-schema LoRA, no schema"),
+    "noschema_14b": ("test_nohint_noschema_14b", "14B no-schema LoRA, no schema"),
+    "noschema_lean_7b": ("test_nohint_noschema_lean_prompt_7b", "7B no-schema LoRA, lean prompt"),
+    "noschema_lean_14b": ("test_nohint_noschema_lean_prompt_14b", "14B no-schema LoRA, lean prompt"),
+    # extra arm: LoRA retrained to look values up (sv3: value-lookup data, trained <tool_call> tokens, tool-schema template)
+    "sv3_7b": ("test_nohint_lora_sv3_nt_7b", "7B LoRA retrained for lookups"),
+    "sv3_14b": ("test_nohint_lora_sv3_nt_14b", "14B LoRA retrained for lookups"),
+    "lora_nt_7b": ("test_nohint_lora_nt_7b", "7B original LoRA, retrain template"),
+    # earlier runs WITH the hint (BIRD's standard setting); kept for reference and for harness development
+    "hint_harness_v1_7b": ("test_harness_v1_7b", "7B harness v1 (hint)"),
+    "hint_harness_v2_7b": ("test_harness_v2_7b", "7B harness v2 (hint)"),
+    "hint_harness_7b": ("test_harness_7b", "7B harness only (hint)"),
+    "hint_harness_14b": ("test_harness_14b", "14B harness only (hint)"),
+    "hint_lora_7b": ("test_lora_7b", "7B LoRA + harness (hint)"),
+    "hint_lora_14b": ("test_lora_14b", "14B LoRA + harness (hint)"),
+    "hint_sv3_7b": ("test_lora_sv3_nt_7b", "7B LoRA retrained for lookups (hint)"),
+    "hint_sv3_14b": ("test_lora_sv3_nt_14b", "14B LoRA retrained for lookups (hint)"),
+    "hint_lora_on_lean_7b": ("test_lora_on_lean_prompt_7b", "7B full LoRA, lean prompt (hint)"),
+    "hint_lora_on_lean_14b": ("test_lora_on_lean_prompt_14b_partial", "14B full LoRA, lean prompt (hint, 127 q)"),
+    "hint_lean_7b": ("test_lean_7b", "7B lean LoRA (hint)"),
+    "hint_lean_14b": ("test_lean_14b", "14B lean LoRA (hint)"),
+    "hint_noschema_7b": ("test_noschema_7b", "7B no-schema LoRA, no schema (hint)"),
+    "hint_noschema_14b": ("test_noschema_14b", "14B no-schema LoRA, no schema (hint)"),
+    "hint_noschema_lean_7b": ("test_noschema_lean_prompt_7b", "7B no-schema LoRA, lean prompt (hint)"),
+    "hint_noschema_lean_14b": ("test_noschema_lean_prompt_14b", "14B no-schema LoRA, lean prompt (hint)"),
 }
 MAIN_ARMS = ["harness_7b", "lora_7b", "harness_14b", "lora_14b"]
 TUNE_RUNS = {
@@ -141,8 +155,13 @@ def tool_table(names=None) -> pd.DataFrame:
                         index=names)
 
 
+def available(names):
+    """The run names whose files are present (the no-hint prompt-offloading runs come later)."""
+    return [n for n in names if (RUNS / f"{TEST_RUNS[n][0]}.jsonl.gz").exists()]
+
+
 def summary_table(names=None) -> pd.DataFrame:
-    names = names or list(TEST_RUNS)
+    names = names or available([n for n in TEST_RUNS if not n.startswith("hint_")])
     out = []
     for n in names:
         s = summary(test_run(n))
