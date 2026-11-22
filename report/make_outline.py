@@ -146,6 +146,19 @@ Addressing the second component of the Research Question, Fig.~\ref{fig:offload}
 """,
     "Limitations and responsible use": r"""Results come from two test databases and one run per arm, so each accuracy has a 95\% margin of about $\pm$5 points. Questions are answered as Cube queries from the question text alone, so the numbers are not comparable with the BIRD leaderboard. The translation pipeline keeps only queries Cube can express, and the no-schema adapter is tied to the databases it was trained on. The original 14B adapter wrote a stray token instead of \texttt{<tool\_call>} on every call, because the base model never learned that token; our harness parsed these text calls, but other clients would fail, and retraining fixed it. BIRD is public and contains no sensitive personal data.
 """,
+    "Conclusion": r"""Integrating a LoRA adapter trained on the 3,273-transcript, execution-verified training split while keeping the agent harness fixed yielded substantial performance gains. On unseen databases, strict accuracy rose from 21.4\% to 36.7\% for the 7B model and from 27.4\% to 40.7\% for the 14B model. Furthermore, this approach halved (7B) or cut by a third (14B) the number of model calls required per question, allowing the fine-tuned 7B model to outperform the 14B baseline.
+
+The findings demonstrate that key prompt instructions can be successfully offloaded into model weights. Transitioning to a lean prompt reduced context usage to 40\% of the original prompt tokens while maintaining accuracy within approximately 2 percentage points (a non-significant difference); however, retaining the database schema remains essential. Incorporating value lookups and trained tool-call tokens during retraining further enhanced strict accuracy, reaching 41.9\% for the 7B variant and 44.9\% for the 14B model.
+
+Promising directions for future work include:
+\begin{itemize}[nosep,leftmargin=1.5em]
+\item Applying the retraining procedure to lean adapter configurations.
+\item Training tool-call tokens for baseline models to isolate call formatting from domain-specific task knowledge.
+\item Evaluating newer open-weight model families beyond Qwen with dedicated tool-call token training.
+\item Expanding evaluations across a broader range of databases.
+\item Analysing latency metrics, specifically time to first token.
+\end{itemize}
+""",
     "Tool use": r"""The 7B baseline makes about two value lookups and has about one call rejected by the name and type checks per question; the adapters usually submit their first draft without rejection but never look values up. As a result, 13\% of their answers come from queries that return no rows (case B, Fig.~\ref{fig:outputs}), against 2--10\% for the baselines (Table~\ref{tab:tools}). The 14B models write most calls as text, which the harness parses.
 
 \textbf{Retraining for lookups (extra arm).} Only 22\% of training transcripts looked a value up, and Qwen2.5-Coder-Instruct's \texttt{<tool\_call>} tokens are untrained, so the 14B adapter emitted a stray token before every call and fell back to text. The retrained variant adds a lookup before every text filter plus recovery examples, trains those tokens' embedding and output rows, and lists the tool schemas in the Ollama template. It looks values up on about 70\% of questions, makes no text calls and cuts empty answers to 4.5\% (7B) and 3.9\% (14B), raising accuracy by 5.1 points at 7B ($p{=}0.019$ against the original LoRA) and 4.2 at 14B ($p{=}0.020$). The tool schemas in the template cost extra steps and prompt tokens, and since data and template changed as well as the weights, this is a separate arm.
@@ -202,7 +215,7 @@ def main():
     text = re.sub(r"\\textbf\{Summary\.\}.*?\n", "\\\\textbf{Summary (to write).} " + esc(NOTES["TITLE"][0]).replace("\\", "\\\\") + "\n", text, count=1)
     text = text.replace("{\\footnotesize\n\\bibliographystyle", "{\\footnotesize\n\\nocite{*}\n\\bibliographystyle")
     # The outline's notes run longer than the prose in places, so a few figures are smaller here to keep 10 pages.
-    for fig, (w_old, w_new) in {}.items():
+    for fig, (w_old, w_new) in {"fig04_harness_versions": ("0.8", "0.74"), "fig06_training": ("0.78", "0.72")}.items():
         text = text.replace(f"width={w_old}\\linewidth]{{figures/{fig}", f"width={w_new}\\linewidth]{{figures/{fig}")
     # Shamir: Fig. 9 in the outline uses the wider two-column layout (shorter traces, larger text).
     text = text.replace("{figures/fig09_outputs.pdf}", "{figures/fig09_outputs_wide.pdf}", 1)

@@ -119,7 +119,7 @@ Both experimental setups employ the Qwen2.5-Coder-7B-Instruct and -14B-Instruct 
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=0.8\linewidth]{figures/fig04_harness_versions.pdf}
+\includegraphics[width=0.74\linewidth]{figures/fig04_harness_versions.pdf}
 \caption{Prompt-engineering progress for the 7B baseline (development runs, with BIRD's hint). (a) The three versions that were also run on the test set: strict accuracy doubled from v1 to v4.2. (b) The development loop used only tuning databases; on all 363 tuning questions v4.2 beat v3 (32.0\% vs 26.2\%, McNemar $p{=}0.011$), and the 14B model reached 38.8\%.}
 \label{fig:versions}
 \end{figure}
@@ -157,7 +157,7 @@ Hardware & one RTX 5070 Ti (16\,GB), 32\,GB RAM, Windows; training 5.3\,h (7B) a
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=0.78\linewidth]{figures/fig06_training.pdf}
+\includegraphics[width=0.72\linewidth]{figures/fig06_training.pdf}
 \caption{Training progress for all six adapters. The loss drops within the first quarter epoch and then stays flat; validation loss on the three held-out databases follows it, so the adapters did not overfit. Lean and noschema adapters start higher because the model has never seen those short prompts.}
 \label{fig:training}
 \end{figure}
@@ -302,10 +302,19 @@ Results come from two test databases and one run per arm, so each accuracy has a
 
 
 \section{Conclusion}
-\resultplaceholder{\textbf{Write here:}\begin{itemize}[leftmargin=1.2em,itemsep=0.05em]
-  \item Answer the RQ with the headline numbers; most of the prompt can move into the weights, the schema must stay.
-  \item Retrain: 41.9 / 44.9\%. Future: retrain lean adapters; tool tokens for baseline; newer open-weight families (not only Qwen); more dbs; time to first token.
-\end{itemize}}
+Integrating a LoRA adapter trained on the 3,273-transcript, execution-verified training split while keeping the agent harness fixed yielded substantial performance gains. On unseen databases, strict accuracy rose from 21.4\% to 36.7\% for the 7B model and from 27.4\% to 40.7\% for the 14B model. Furthermore, this approach halved (7B) or cut by a third (14B) the number of model calls required per question, allowing the fine-tuned 7B model to outperform the 14B baseline.
+
+The findings demonstrate that key prompt instructions can be successfully offloaded into model weights. Transitioning to a lean prompt reduced context usage to 40\% of the original prompt tokens while maintaining accuracy within approximately 2 percentage points (a non-significant difference); however, retaining the database schema remains essential. Incorporating value lookups and trained tool-call tokens during retraining further enhanced strict accuracy, reaching 41.9\% for the 7B variant and 44.9\% for the 14B model.
+
+Promising directions for future work include:
+\begin{itemize}[nosep,leftmargin=1.5em]
+\item Applying the retraining procedure to lean adapter configurations.
+\item Training tool-call tokens for baseline models to isolate call formatting from domain-specific task knowledge.
+\item Evaluating newer open-weight model families beyond Qwen with dedicated tool-call token training.
+\item Expanding evaluations across a broader range of databases.
+\item Analysing latency metrics, specifically time to first token.
+\end{itemize}
+
 
 {\footnotesize
 \let\oldthebibliography\thebibliography
