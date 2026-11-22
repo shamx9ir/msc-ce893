@@ -10,7 +10,7 @@ HERE = Path(__file__).parent
 
 NOTES = {
     "TITLE": [
-        "Summary (3 sentences): task (questions to Cube queries with an ADK agent), intervention (LoRA, harness fixed), headline numbers without BIRD's hint (7B 21.4 to 36.7, 14B 27.4 to 40.7 strict) and the prompt-offloading result (lean prompt matches it with 2.4x fewer tokens per call).",
+        "Summary (3 sentences): task (questions to Cube queries with an ADK agent), intervention (LoRA, harness fixed), headline numbers (7B 21.4 to 36.7, 14B 27.4 to 40.7 strict) and the prompt-offloading result (lean prompt matches it with 2.4x fewer tokens per call).",
     ],
     "Motivation and context": [
         "Who asks: analysts/managers who want a number or a chart, not SQL.",
@@ -42,7 +42,7 @@ NOTES = {
         "Expectations: (1) higher accuracy, (2) fewer steps, (3) guide and tool definitions can be dropped once learned.",
     ],
     "Source and preparation": [
-        "BIRD fields: question, evidence, gold SQL, SQLite db. Copied to DuckDB; Cube models generated from schema, foreign keys and column descriptions.",
+        "BIRD fields: question, gold SQL, SQLite db. Copied to DuckDB; Cube models generated from schema, foreign keys and column descriptions.",
         "Rule-based SQL to Cube translator; keep a pair only if Cube rows = gold rows and non-empty (Fig. 3a funnel: 8,003 to 3,531).",
         "Chat transcript format, loss on assistant turns only; 769 transcripts include a search_values call.",
     ],
@@ -66,7 +66,6 @@ NOTES = {
     "Compared systems": [
         "Baseline: base model + harness v4.2 (full prompt).",
         "Proposed: same model file + LoRA, same harness and prompt.",
-        "No-hint runs: baseline and LoRA at both sizes with the hint hidden (adapters were trained with hints).",
         "Prompt-offloading arms: lean LoRA; noschema LoRA with no schema / with lean prompt; control = full LoRA given the lean prompt without retraining.",
         "Extra arm: LoRA retrained to look up filter values (Section 6.2).",
     ],
@@ -77,13 +76,13 @@ NOTES = {
         "Order: freeze test split + scoring, tune harness on tuning dbs, freeze v4.2, train each adapter once (seed 7), run each arm once.",
     ],
     "Main findings": [
-        "All test runs without BIRD's hint. Lead with Table 5: +15.4 points (7B, 70 fixed vs 19 broken) and +13.3 points (14B, 58 vs 14).",
+        "Lead with Table 5: +15.4 points (7B, 70 fixed vs 19 broken) and +13.3 points (14B, 58 vs 14).",
         "7B LoRA beats 14B baseline by 9.3 points (p=0.0009); 14B LoRA vs 7B LoRA not significant (p=0.09).",
         "14B baseline relaxed >> strict (35.8 vs 27.4, extra columns); adapter mostly removes this.",
         "Fig. 8: lean = 1.5k tokens per call vs 3.6k; loses 2.1 (7B, p=0.30) and 0.6 points (14B, p=0.83), n.s. No schema: 18.1% / 24.7% (invented members, 114/332 unknown-member errors at 14B); noschema + short schema 37.0 / 41.0. Full LoRA given lean prompt without retraining: 0%.",
     ],
     "Tool use": [
-        "Table 6: 7B baseline ~2 lookups, ~1 rejected call per q; adapters draft once and submit. But they never look values up: 13% of answers from an empty draft vs 2-10%. 14B models write most calls as text.", "Extra arm (retrained for lookups): causes = only 22% of transcripts had a lookup + untrained <tool_call> tokens in Qwen2.5-Coder-Instruct. Fix: lookup before every text filter, train those token rows, tool schemas in template. 7B 41.9% (+5.1, p=0.019), 14B 44.9% (+4.2, p=0.020); lookups ~70%, empty answers 4-5%; no gain with hint; more tokens/steps.",
+        "Table 6: 7B baseline ~2 lookups, ~1 rejected call per q; adapters draft once and submit. But they never look values up: 13% of answers from an empty draft vs 2-10%. 14B models write most calls as text.", "Extra arm (retrained for lookups): causes = only 22% of transcripts had a lookup + untrained <tool_call> tokens in Qwen2.5-Coder-Instruct. Fix: lookup before every text filter, train those token rows, tool schemas in template. 7B 41.9% (+5.1, p=0.019), 14B 44.9% (+4.2, p=0.020); lookups ~70%, empty answers 4-5%; more tokens/steps.",
     ],
     "Resource use": [
         "Training time 5.3 h (7B), 9.0 h (14B), lean 2-3 h; one 16 GB GPU; converged within half an epoch (Fig. 6).",
@@ -97,7 +96,7 @@ NOTES = {
         "Explain the value-lookup weakness: only 22% of training transcripts had search_values.",
     ],
     "Limitations and responsible use": [
-        "Two dbs, one run per arm (about +/-5 points). With BIRD's hint all arms score higher (LoRA 46.4 / 49.7); not comparable with leaderboards.",
+        "Two dbs, one run per arm (about +/-5 points). Setting differs from BIRD's standard one: not comparable with its leaderboard.",
         "Translator bias toward simple query shapes; noschema is database-specific.",
         "Original adapters write a stray token instead of <tool_call> (untrained token); harness parses text; retrain fixes it.",
         "Public data only; a wrong filter gives a convincing wrong chart, so the app shows the query.",

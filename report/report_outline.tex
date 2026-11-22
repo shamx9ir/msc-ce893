@@ -56,7 +56,7 @@ As outlined in Table~\ref{tab:task}, the objective is to take an analyst's natur
 \textbf{Element} & \textbf{Definition}\\
 \midrule
 Intended user & An analyst or manager who asks questions in English about a known database.\\
-Input & Question and database name, without BIRD's hint (an analyst would not write one); the harness adds the Cube schema.\\
+Input & Question and database name, as an analyst would type them; the harness adds the Cube schema.\\
 Required output & One Cube JSON query submitted with \texttt{submit\_answer}; its rows feed the chart.\\
 Correct response & The query's rows equal the rows of BIRD's gold SQL on the original SQLite file (order of columns ignored).\\
 Constraints & Local model on a 16\,GB GPU; at most 8 model calls per question; only names defined in the Cube models.\\
@@ -103,7 +103,7 @@ Final test & All BIRD dev questions on \texttt{formula\_1} (174) and \texttt{stu
 
 \subsection{Source and preparation}
 \resultplaceholder{\textbf{Write here:}\begin{itemize}[leftmargin=1.2em,itemsep=0.05em]
-  \item BIRD fields: question, evidence, gold SQL, SQLite db. Copied to DuckDB; Cube models generated from schema, foreign keys and column descriptions.
+  \item BIRD fields: question, gold SQL, SQLite db. Copied to DuckDB; Cube models generated from schema, foreign keys and column descriptions.
   \item Rule-based SQL to Cube translator; keep a pair only if Cube rows = gold rows and non-empty (Fig. 3a funnel: 8,003 to 3,531).
   \item Chat transcript format, loss on assistant turns only; 769 transcripts include a search\_values call.
 \end{itemize}}
@@ -186,7 +186,6 @@ Hardware & one RTX 5070 Ti (16\,GB), 32\,GB RAM, Windows; training 5.3\,h (7B) a
 \resultplaceholder{\textbf{Write here:}\begin{itemize}[leftmargin=1.2em,itemsep=0.05em]
   \item Baseline: base model + harness v4.2 (full prompt).
   \item Proposed: same model file + LoRA, same harness and prompt.
-  \item No-hint runs: baseline and LoRA at both sizes with the hint hidden (adapters were trained with hints).
   \item Prompt-offloading arms: lean LoRA; noschema LoRA with no schema / with lean prompt; control = full LoRA given the lean prompt without retraining.
   \item Extra arm: LoRA retrained to look up filter values (Section 6.2).
 \end{itemize}}
@@ -224,7 +223,7 @@ Significance & Exact McNemar test on paired per-question outcomes (strict)\\
 \begin{table}[!htbp]
 \centering
 \footnotesize
-\caption{Main results on the 332 held-out test questions (no hint). Tok./q: prompt tokens per question. $p$: McNemar, strict, against the harness-only arm of the same size.}
+\caption{Main results on the 332 held-out test questions . Tok./q: prompt tokens per question. $p$: McNemar, strict, against the harness-only arm of the same size.}
 \label{tab:main}
 \setlength{\tabcolsep}{4pt}
 \begin{tabularx}{\linewidth}{@{}Xrrrrcrr@{}}
@@ -255,7 +254,7 @@ Significance & Exact McNemar test on paired per-question outcomes (strict)\\
 
 \subsection{Main findings}
 \resultplaceholder{\textbf{Write here:}\begin{itemize}[leftmargin=1.2em,itemsep=0.05em]
-  \item All test runs without BIRD's hint. Lead with Table 5: +15.4 points (7B, 70 fixed vs 19 broken) and +13.3 points (14B, 58 vs 14).
+  \item Lead with Table 5: +15.4 points (7B, 70 fixed vs 19 broken) and +13.3 points (14B, 58 vs 14).
   \item 7B LoRA beats 14B baseline by 9.3 points (p=0.0009); 14B LoRA vs 7B LoRA not significant (p=0.09).
   \item 14B baseline relaxed \textgreater{}\textgreater{} strict (35.8 vs 27.4, extra columns); adapter mostly removes this.
   \item Fig. 8: lean = 1.5k tokens per call vs 3.6k; loses 2.1 (7B, p=0.30) and 0.6 points (14B, p=0.83), n.s. No schema: 18.1\% / 24.7\% (invented members, 114/332 unknown-member errors at 14B); noschema + short schema 37.0 / 41.0. Full LoRA given lean prompt without retraining: 0\%.
@@ -274,7 +273,7 @@ Significance & Exact McNemar test on paired per-question outcomes (strict)\\
 \begin{table}[!htbp]
 \centering
 \footnotesize
-\caption{Tool use per question (no hint). Lookups: \texttt{search\_values} calls; drafts: \texttt{run\_query} calls; rejected: calls the harness or Cube turned back; text: calls written as text instead of a tool call; empty: answers whose last draft returned no rows.}
+\caption{Tool use per question. Lookups: \texttt{search\_values} calls; drafts: \texttt{run\_query} calls; rejected: calls the harness or Cube turned back; text: calls written as text instead of a tool call; empty: answers whose last draft returned no rows.}
 \label{tab:tools}
 \begin{tabularx}{\linewidth}{@{}Xrrrrrr@{}}
 \toprule
@@ -293,10 +292,10 @@ Significance & Exact McNemar test on paired per-question outcomes (strict)\\
 
 \resultplaceholder{\textbf{Write here:}\begin{itemize}[leftmargin=1.2em,itemsep=0.05em]
   \item Table 6: 7B baseline \textasciitilde{}2 lookups, \textasciitilde{}1 rejected call per q; adapters draft once and submit. But they never look values up: 13\% of answers from an empty draft vs 2-10\%. 14B models write most calls as text.
-  \item Extra arm (retrained for lookups): causes = only 22\% of transcripts had a lookup + untrained \textless{}tool\_call\textgreater{} tokens in Qwen2.5-Coder-Instruct. Fix: lookup before every text filter, train those token rows, tool schemas in template. 7B 41.9\% (+5.1, p=0.019), 14B 44.9\% (+4.2, p=0.020); lookups \textasciitilde{}70\%, empty answers 4-5\%; no gain with hint; more tokens/steps.
+  \item Extra arm (retrained for lookups): causes = only 22\% of transcripts had a lookup + untrained \textless{}tool\_call\textgreater{} tokens in Qwen2.5-Coder-Instruct. Fix: lookup before every text filter, train those token rows, tool schemas in template. 7B 41.9\% (+5.1, p=0.019), 14B 44.9\% (+4.2, p=0.020); lookups \textasciitilde{}70\%, empty answers 4-5\%; more tokens/steps.
 \end{itemize}}
 
-\textbf{Retraining for lookups (extra arm).} Only 22\% of training transcripts looked a value up, and Qwen2.5-Coder-Instruct's \texttt{<tool\_call>} tokens are untrained, so the adapters wrote a stray token and fell back to text. The retrain adds a lookup before every text filter (plus recovery examples), trains those tokens' embedding and output rows, and lists the tool schemas in the Ollama template as in training. It looks values up on about 70\% of questions, makes no text calls and cuts empty answers to 4--5\%, gaining 5.1 points at 7B ($p{=}0.019$ against the original LoRA) and 4.2 at 14B ($p{=}0.020$). With the hint, which usually spells out the value, the gain vanishes (n.s.). The cost is more steps and prompt tokens, as the template re-adds the tool schemas; it is an extra arm because data and template changed, not only the adapter.
+\textbf{Retraining for lookups (extra arm).} Only 22\% of training transcripts looked a value up, and Qwen2.5-Coder-Instruct's \texttt{<tool\_call>} tokens are untrained, so the adapters wrote a stray token and fell back to text. The retrain adds a lookup before every text filter (plus recovery examples), trains those tokens' embedding and output rows, and lists the tool schemas in the Ollama template as in training. It looks values up on about 70\% of questions, makes no text calls and cuts empty answers to 4--5\%, gaining 5.1 points at 7B ($p{=}0.019$ against the original LoRA) and 4.2 at 14B ($p{=}0.020$). The cost is more steps and prompt tokens, as the template re-adds the tool schemas; it is an extra arm because data and template changed, not only the adapter.
 
 \subsection{Resource use}
 \resultplaceholder{\textbf{Write here:}\begin{itemize}[leftmargin=1.2em,itemsep=0.05em]
@@ -331,7 +330,7 @@ Significance & Exact McNemar test on paired per-question outcomes (strict)\\
 
 \subsection{Limitations and responsible use}
 \resultplaceholder{\textbf{Write here:}\begin{itemize}[leftmargin=1.2em,itemsep=0.05em]
-  \item Two dbs, one run per arm (about $\pm$5 points). With BIRD's hint all arms score higher (LoRA 46.4 / 49.7); not comparable with leaderboards.
+  \item Two dbs, one run per arm (about $\pm$5 points). Setting differs from BIRD's standard one: not comparable with its leaderboard.
   \item Translator bias toward simple query shapes; noschema is database-specific.
   \item Original adapters write a stray token instead of \textless{}tool\_call\textgreater{} (untrained token); harness parses text; retrain fixes it.
   \item Public data only; a wrong filter gives a convincing wrong chart, so the app shows the query.

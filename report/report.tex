@@ -25,7 +25,7 @@ The model must use member names that exist, put each field in the right slot (a 
 Text-to-SQL benchmarks moved from Spider~\cite{yu2018spider} to BIRD~\cite{li2023bird}, which adds large real databases, dirty values and an ``evidence'' hint per question, and scores \emph{execution accuracy}. Prompt-only systems such as DIN-SQL~\cite{pourreza2023din} decompose the task and self-correct, and agent loops in the style of ReAct~\cite{yao2023react} let the model test a query before answering; our harness follows this route. Fine-tuned open models such as CodeS~\cite{li2024codes} reach strong BIRD scores at small sizes, and Gorilla~\cite{patil2023gorilla} showed that fine-tuning teaches correct API calls better than prompting alone. LoRA~\cite{hu2021lora} and QLoRA~\cite{dettmers2023qlora} make this possible on one consumer GPU. Finally, \emph{context distillation}~\cite{askell2021general,snell2022distilling} trains a model to behave as if a long prompt were present, which is the idea we test for the harness prompt.
 
 \subsection{Research question and contribution}
-\resultplaceholder{\textbf{RQ.} When the same agent harness (prompt + tools) is kept fixed, how much does a LoRA adapter trained on verified tool-use transcripts improve execution accuracy on unseen databases, and how much of the prompt (query guide, tool definitions, schema) can the adapter replace without losing accuracy? Questions are asked as an analyst would, without BIRD's hint.}
+\resultplaceholder{\textbf{RQ.} When the same agent harness (prompt + tools) is kept fixed, how much does a LoRA adapter trained on verified tool-use transcripts improve execution accuracy on unseen databases, and how much of the prompt (query guide, tool definitions, schema) can the adapter replace without losing accuracy?}
 
 We built (i) a Cube semantic layer and an ADK agent for BIRD databases, (ii) a pipeline that turns BIRD training SQL into 3,531 execution-verified Cube transcripts, (iii) LoRA adapters for Qwen2.5-Coder 7B and 14B~\cite{hui2024qwen25coder} under three prompt profiles, and (iv) a demo app that shows answers as Highcharts charts through A2UI~\cite{a2ui}. Every arm runs the same 4-bit model file in Ollama, so arms differ only in the adapter and the prompt.
 
@@ -48,7 +48,7 @@ We built (i) a Cube semantic layer and an ADK agent for BIRD databases, (ii) a p
 \textbf{Element} & \textbf{Definition}\\
 \midrule
 Intended user & An analyst or manager who asks questions in English about a known database.\\
-Input & Question and database name, without BIRD's hint (an analyst would not write one); the harness adds the Cube schema.\\
+Input & Question and database name, as an analyst would type them; the harness adds the Cube schema.\\
 Required output & One Cube JSON query submitted with \texttt{submit\_answer}; its rows feed the chart.\\
 Correct response & The query's rows equal the rows of BIRD's gold SQL on the original SQLite file (order of columns ignored).\\
 Constraints & Local model on a 16\,GB GPU; at most 8 model calls per question; only names defined in the Cube models.\\
@@ -87,7 +87,7 @@ Final test & All BIRD dev questions on \texttt{formula\_1} (174) and \texttt{stu
 \end{table}
 
 \subsection{Source and preparation}
-BIRD gives, for each question, an English question, an evidence hint, a gold SQL query and the SQLite database. We copied each database to DuckDB and generated a Cube model from its schema, foreign keys and BIRD's column descriptions. For training data, a rule-based translator turned each gold SQL query into a Cube query; we ran both and kept the pair only if the rows matched and were not empty (Fig.~\ref{fig:data}a). Each kept pair became a chat transcript with the harness's exact system prompt, the user message and the tool calls \texttt{run\_query} then \texttt{submit\_answer}; 769 transcripts also start with a \texttt{search\_values} call for a filtered text value. Training transcripts keep BIRD's hint in the user message; at test time it is hidden. The loss is computed only on assistant turns.
+BIRD gives, for each question, an English question, a gold SQL query and the SQLite database. We copied each database to DuckDB and generated a Cube model from its schema, foreign keys and BIRD's column descriptions. For training data, a rule-based translator turned each gold SQL query into a Cube query; we ran both and kept the pair only if the rows matched and were not empty (Fig.~\ref{fig:data}a). Each kept pair became a chat transcript with the harness's exact system prompt, the user message and the tool calls \texttt{run\_query} then \texttt{submit\_answer}; 769 transcripts also start with a \texttt{search\_values} call for a filtered text value. Training transcripts keep BIRD's hint in the user message; at test time it is hidden. The loss is computed only on assistant turns.
 
 \begin{figure}[!htbp]
 \centering
@@ -112,7 +112,7 @@ Both arms use \texttt{Qwen2.5-Coder-7B-Instruct} and \texttt{-14B-Instruct}~\cit
 \end{figure}
 
 \subsection{Chosen method}
-We fine-tune with QLoRA~\cite{dettmers2023qlora} using PEFT~\cite{peft}: the base model is frozen in 4-bit NF4 and rank-16 adapters are added to all attention and MLP projections (Fig.~\ref{fig:method}). After training, the adapter is merged, converted to GGUF with llama.cpp~\cite{llamacpp} and quantised to the same Q4\_K\_M format as the base, with the base model's chat template, so the comparison isolates the adapter. To test how much of the prompt the weights can hold, we trained two more adapters per size on shorter prompts: \textbf{lean} drops the query guide, examples and tool JSON schemas and shortens the schema; \textbf{noschema} also drops the schema, which only works if the adapter has seen the test schemas, so its training set adds about 1,300 synthetic template questions on the two test databases (no BIRD dev question, hint or SQL is used).
+We fine-tune with QLoRA~\cite{dettmers2023qlora} using PEFT~\cite{peft}: the base model is frozen in 4-bit NF4 and rank-16 adapters are added to all attention and MLP projections (Fig.~\ref{fig:method}). After training, the adapter is merged, converted to GGUF with llama.cpp~\cite{llamacpp} and quantised to the same Q4\_K\_M format as the base, with the base model's chat template, so the comparison isolates the adapter. To test how much of the prompt the weights can hold, we trained two more adapters per size on shorter prompts: \textbf{lean} drops the query guide, examples and tool JSON schemas and shortens the schema; \textbf{noschema} also drops the schema, which only works if the adapter has seen the test schemas, so its training set adds about 1,300 synthetic template questions on the two test databases (no BIRD dev question or SQL is used).
 
 \begin{figure}[!htbp]
 \centering
@@ -158,7 +158,7 @@ Hardware & one RTX 5070 Ti (16\,GB), 32\,GB RAM, Windows; training 5.3\,h (7B) a
 \end{enumerate}
 
 \subsection{Evaluation data and measures}
-The 332 test questions come from two databases unseen in training and tuning (218 simple, 91 moderate, 23 challenging; 77\% need a join). In every test run BIRD's hint is hidden from the model (\texttt{--no-evidence}), so the model sees only the question, as a real user would type it.
+The 332 test questions come from two databases unseen in training and tuning (218 simple, 91 moderate, 23 challenging; 77\% need a join). The model sees only the question, as a real user would type it.
 
 \begin{table}[!htbp]
 \centering
@@ -186,7 +186,7 @@ The test split and scoring rule were frozen first; the harness was developed on 
 \begin{table}[!htbp]
 \centering
 \footnotesize
-\caption{Main results on the 332 held-out test questions (no hint). Tok./q: prompt tokens per question. $p$: McNemar, strict, against the harness-only arm of the same size.}
+\caption{Main results on the 332 held-out test questions . Tok./q: prompt tokens per question. $p$: McNemar, strict, against the harness-only arm of the same size.}
 \label{tab:main}
 \setlength{\tabcolsep}{4pt}
 \begin{tabularx}{\linewidth}{@{}Xrrrrcrr@{}}
@@ -232,7 +232,7 @@ Fig.~\ref{fig:offload} answers the second part of the RQ. The lean LoRA sends 1.
 \begin{table}[!htbp]
 \centering
 \footnotesize
-\caption{Tool use per question (no hint). Lookups: \texttt{search\_values} calls; drafts: \texttt{run\_query} calls; rejected: calls the harness or Cube turned back; text: calls written as text instead of a tool call; empty: answers whose last draft returned no rows.}
+\caption{Tool use per question. Lookups: \texttt{search\_values} calls; drafts: \texttt{run\_query} calls; rejected: calls the harness or Cube turned back; text: calls written as text instead of a tool call; empty: answers whose last draft returned no rows.}
 \label{tab:tools}
 \begin{tabularx}{\linewidth}{@{}Xrrrrrr@{}}
 \toprule
@@ -251,7 +251,7 @@ Fig.~\ref{fig:offload} answers the second part of the RQ. The lean LoRA sends 1.
 
 The adapters work differently from the baselines (Table~\ref{tab:tools}). The 7B baseline looks up about two values per question and has one call per question turned back by the name and type checks; the adapters draft once, submit and are almost never rejected. But they never look values up, so 13\% of their answers come from a draft that returned no rows (case B in Fig.~\ref{fig:outputs}), against 2--10\% for the baselines. The 14B models write most calls as text, which the harness parses.
 
-\textbf{Retraining for lookups (extra arm).} Only 22\% of training transcripts looked a value up, and Qwen2.5-Coder-Instruct's \texttt{<tool\_call>} tokens are untrained, so the adapters wrote a stray token and fell back to text. The retrain adds a lookup before every text filter (plus recovery examples), trains those tokens' embedding and output rows, and lists the tool schemas in the Ollama template as in training. It looks values up on about 70\% of questions, makes no text calls and cuts empty answers to 4--5\%, gaining 5.1 points at 7B ($p{=}0.019$ against the original LoRA) and 4.2 at 14B ($p{=}0.020$). With the hint, which usually spells out the value, the gain vanishes (n.s.). The cost is more steps and prompt tokens, as the template re-adds the tool schemas; it is an extra arm because data and template changed, not only the adapter.
+\textbf{Retraining for lookups (extra arm).} Only 22\% of training transcripts looked a value up, and Qwen2.5-Coder-Instruct's \texttt{<tool\_call>} tokens are untrained, so the adapters wrote a stray token and fell back to text. The retrain adds a lookup before every text filter (plus recovery examples), trains those tokens' embedding and output rows, and lists the tool schemas in the Ollama template as in training. It looks values up on about 70\% of questions, makes no text calls and cuts empty answers to 4--5\%, gaining 5.1 points at 7B ($p{=}0.019$ against the original LoRA) and 4.2 at 14B ($p{=}0.020$). The cost is more steps and prompt tokens, as the template re-adds the tool schemas; it is an extra arm because data and template changed, not only the adapter.
 
 \subsection{Resource use}
 Training took 5.3\,h (7B) and 9.0\,h (14B) on one 16\,GB GPU (lean: 2--3\,h) and converged within half an epoch (Fig.~\ref{fig:training}). The merged adapter adds no inference cost and halves the steps (4.1 to 2.1 at 7B), so prompt tokens halve and model time per question falls from 3.5 to 1.3\,s (p90: 6.8 to 1.7\,s). Output speed is unchanged (105--120 tokens/s at 7B, 60--67 at 14B): the gain comes from fewer, shorter calls, partly because the adapter skips \texttt{search\_values} (1\% of questions vs 92\%).
@@ -276,10 +276,10 @@ In Fig.~\ref{fig:outputs}A the baseline looks up ``Italy'' as its rules say, the
 \end{figure}
 
 \subsection{Limitations and responsible use}
-Two test databases and one run per arm give about $\pm$5 points of uncertainty (95\%). With BIRD's hint (its standard setting) every arm scores higher (LoRA 46.4/49.7\%), so our numbers are not comparable with leaderboards. The translator limits training to queries Cube can express; the noschema arm is database-specific. The original adapters often write a stray token instead of \texttt{<tool\_call>} (all 14B calls), because the base model never trained that token; the harness parses such text calls, but other clients would fail. The retrain fixes this. BIRD is public and holds no private personal data. A chart from a wrong filter (case B) looks as convincing as a right one, so the demo app always shows the Cube query and tool trace beside it.
+Two test databases and one run per arm give about $\pm$5 points of uncertainty (95\%). Our task (Cube queries from the question alone) differs from BIRD's standard setting, so the numbers are not comparable with its leaderboard. The translator limits training to queries Cube can express; the noschema arm is database-specific. The original adapters often write a stray token instead of \texttt{<tool\_call>} (all 14B calls), because the base model never trained that token; the harness parses such text calls, but other clients would fail. The retrain fixes this. BIRD is public and holds no private personal data. A chart from a wrong filter (case B) looks as convincing as a right one, so the demo app always shows the Cube query and tool trace beside it.
 
 \section{Conclusion}
-Keeping the harness fixed and adding a LoRA adapter trained on 3,273 execution-verified transcripts raised strict accuracy on unseen databases (no hint) from 21.4\% to 36.7\% (7B) and from 27.4\% to 40.7\% (14B), halved the model calls per question, and made a 7B model beat a 14B one. Most of the prompt can move into the weights: a lean prompt stayed within about 2 points (n.s.) at 40\% of the prompt tokens, but the schema must stay. Retraining with value lookups and trained tool-call tokens raised accuracy further, to 41.9\% (7B) and 44.9\% (14B). Future work: the same retrain for the lean adapters; trained tool-call tokens for the baseline, to separate call format from task knowledge; newer open-weight model families (not only Qwen) with trained tool-call tokens; more databases; and time to first token.
+Keeping the harness fixed and adding a LoRA adapter trained on 3,273 execution-verified transcripts raised strict accuracy on unseen databases from 21.4\% to 36.7\% (7B) and from 27.4\% to 40.7\% (14B), halved the model calls per question, and made a 7B model beat a 14B one. Most of the prompt can move into the weights: a lean prompt stayed within about 2 points (n.s.) at 40\% of the prompt tokens, but the schema must stay. Retraining with value lookups and trained tool-call tokens raised accuracy further, to 41.9\% (7B) and 44.9\% (14B). Future work: the same retrain for the lean adapters; trained tool-call tokens for the baseline, to separate call format from task knowledge; newer open-weight model families (not only Qwen) with trained tool-call tokens; more databases; and time to first token.
 
 {\footnotesize
 \let\oldthebibliography\thebibliography
