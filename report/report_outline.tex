@@ -296,7 +296,7 @@ Significance & Exact McNemar test on paired per-question outcomes (strict)\\
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=0.52\linewidth]{figures/fig09_outputs.pdf}
+\includegraphics[width=0.7\linewidth]{figures/fig09_outputs_wide.pdf}
 \caption{Real tool traces from the test runs (\texttt{>} model call, \texttt{<} tool reply; long lines cut). A: the baseline groups by circuit and returns three rows, the LoRA asks for the single count. B: the LoRA skips the value lookup, filters on a value that does not exist and submits an empty result. C: without a schema the model invents \texttt{student.phone} and repeats it; the lean adapter writes \texttt{member.phone} (here as text, which the harness parses).}
 \label{fig:outputs}
 \end{figure}
