@@ -76,14 +76,13 @@ NOTES = {
     "Main findings": [
         "Lead with Table 5: +15.4 points (7B, 70 fixed vs 19 broken) and +13.3 points (14B, 58 vs 14).",
         "7B LoRA beats 14B baseline by 9.3 points (p=0.0009); 14B LoRA vs 7B LoRA not significant (p=0.09).",
-        "Fig. 8: lean = 1.5k tokens per call vs 3.6k; loses 2.1 (7B, p=0.30) and 0.6 points (14B, p=0.83), n.s. No schema: 18.1% / 24.7% (invented members, 114/332 unknown-member errors at 14B); noschema + short schema 37.0 / 41.0. Full LoRA given lean prompt without retraining: 0%.",
+        "Fig. 8: lean = 1.5k vs 3.6k tokens per call, loses 2.1 / 0.6 points (n.s.). No schema: 18.1 / 24.7%; noschema + short schema 37.0 / 41.0. Full LoRA on lean prompt: 0%.",
     ],
     "Tool use": [
-        "Table 6: 7B baseline ~2 lookups, ~1 rejected call per q; adapters draft once and submit. But they never look values up: 13% of answers from an empty draft vs 2-10%. 14B models write most calls as text.", "Extra arm (retrained for lookups): causes = only 22% of transcripts had a lookup + untrained <tool_call> tokens in Qwen2.5-Coder-Instruct. Fix: lookup before every text filter, train those token rows, tool schemas in template. 7B 41.9% (+5.1, p=0.019), 14B 44.9% (+4.2, p=0.020); lookups ~70%, empty answers 4-5%; more tokens/steps.",
+        "Table 6: baseline ~2 lookups, ~1 rejected call per q; adapters draft once, never look values up (13% empty answers).", "Extra arm (retrained for lookups; untrained <tool_call> tokens fixed): 7B 41.9% (+5.1, p=0.019), 14B 44.9% (+4.2, p=0.020); lookups ~70%, empty answers 4-5%.",
     ],
     "Resource use": [
-        "Training time 5.3 h (7B), 9.0 h (14B), lean 2-3 h; one 16 GB GPU; converged within half an epoch (Fig. 6).",
-        "Steps 4.1 to 2.1, prompt tokens per question halve, model time 3.5 s to 1.3 s (7B), p90 6.8 s to 1.7 s.",
+        "Training 5.3 h (7B), 9.0 h (14B) on one 16 GB GPU (Fig. 6). Steps 4.1 to 2.1, tokens halve, time 3.5 s to 1.3 s (7B).",
         "Output speed unchanged, so the saving is fewer, shorter calls (partly from skipping search_values).",
     ],
     "Interpretation and error analysis": [
@@ -92,12 +91,11 @@ NOTES = {
     ],
     "Limitations and responsible use": [
         "Two dbs, one run per arm (about +/-5 points). Setting differs from BIRD's standard one: not comparable with its leaderboard.",
-        "Original adapters write a stray token instead of <tool_call> (untrained token); harness parses text; retrain fixes it.",
-        "Public data only; a wrong filter gives a convincing wrong chart, so the app shows the query.",
+        "Stray token instead of <tool_call> (untrained); retrain fixes it. Public data; app shows the query.",
     ],
     "Conclusion": [
         "Answer the RQ with the headline numbers; most of the prompt can move into the weights, the schema must stay.",
-        "Retrain with lookups: 41.9% / 44.9%. Future work: same retrain for lean adapters; trained tool tokens for the baseline (format vs knowledge); newer open-weight families, not only Qwen; more dbs; time to first token.",
+        "Retrain: 41.9 / 44.9%. Future: retrain lean adapters; tool tokens for baseline; newer open-weight families (not only Qwen); more dbs; time to first token.",
     ],
 }
 
@@ -127,6 +125,8 @@ To demonstrate this, we focus on a common business scenario involving data analy
     "Data quality and limitations": r"""The translator is restricted to SQL constructs supported by Cube, meaning the training corpus excludes subqueries, CASE expressions, arithmetic, and string slicing. Consequently, the 30\% of test questions requiring these features fall outside the capability of any Cube query, placing an upper performance limit of 231/332 on the test set for this framework. Additionally, discrepancies and tied results exist within the BIRD benchmark's reference SQL. Evaluation relies on matching the expected output rows, allowing any functionally accurate Cube query to be marked correct. Finally, the ten largest databases in the training set (exceeding 600\,MB) were excluded.
 """,
     "Base model and baseline": r"""Both experimental setups employ the Qwen2.5-Coder-7B-Instruct and -14B-Instruct architectures, served as Q4\_K\_M GGUF format through Ollama with zero temperature and a context window of 16,384 tokens. Serving as the baseline, the agent harness was refined across five iterations using strictly the tuning databases (Fig.~\ref{fig:versions}). Version 2 introduced four worked examples alongside rules targeted at common error patterns; versions 3 through 4.2 integrated numerical and date field value lookups, schema linking (wherein matching field names are provided in the user prompt), repeated-call prevention, and pre-submission column verification. Version 4.2 was finalised and frozen prior to initiating any LoRA fine-tuning runs.
+""",
+    "Chosen method": r"""Fine-tuning is conducted via QLoRA~\cite{dettmers2023qlora} utilising PEFT~\cite{peft}, where rank-16 adapters are attached to all attention and MLP layers while the underlying base model remains frozen in 4-bit NF4 (Fig.~\ref{fig:method}). Upon completion of training, each adapter is merged with the base model, converted into GGUF format via llama.cpp~\cite{llamacpp}, and quantised to Q4\_K\_M to match the base setup. By preserving the base model's original chat template, the evaluation strictly isolates the influence of the adapter. To evaluate how effectively model weights can internalise prompt instructions, two additional adapter variants were trained per model size using reduced prompts: the lean variant strips out the query guide, worked examples, and tool JSON schemas, while offering an abbreviated schema; the noschema variant omits schema definitions entirely. Because operating without a schema requires prior exposure to target structures, the noschema training set was augmented with roughly 1,300 synthetic template questions covering the two evaluation databases, explicitly avoiding any BIRD dev questions or SQL.
 """,
     "Related work": r"""The evaluation of text-to-SQL tasks has progressed from Spider~\cite{yu2018spider} to BIRD~\cite{li2023bird}, a benchmark that incorporates substantial real-world databases, dirty values, and question-level ``evidence'' annotations to assess execution accuracy. In prompt-driven approaches, frameworks like DIN-SQL~\cite{pourreza2023din} implement task decomposition and self-correction, whereas ReAct~\cite{yao2023react} style agent loops enable models to evaluate queries dynamically prior to final response generation, an approach adopted by our harness. For open-weights architectures, specialised fine-tuned models such as CodeS~\cite{li2024codes} achieve competitive performance on BIRD even at smaller parameter scales, while Gorilla~\cite{patil2023gorilla} demonstrates that targeted fine-tuning outperforms pure prompting for accurate API invocation. Parameter-efficient methods like LoRA~\cite{hu2021lora} and QLoRA~\cite{dettmers2023qlora} facilitate this fine-tuning process on single consumer-grade GPUs. Lastly, context distillation~\cite{askell2021general,snell2022distilling} techniques enable models to emulate the behaviour of extensive system prompts, providing the foundational concept behind moving the harness prompt into the LoRA weights.
 """,
@@ -180,7 +180,7 @@ def main():
     text = re.sub(r"\\textbf\{Summary\.\}.*?\n", "\\\\textbf{Summary (to write).} " + esc(NOTES["TITLE"][0]).replace("\\", "\\\\") + "\n", text, count=1)
     text = text.replace("{\\footnotesize\n\\bibliographystyle", "{\\footnotesize\n\\nocite{*}\n\\bibliographystyle")
     # The outline's notes run longer than the prose in places, so a few figures are smaller here to keep 10 pages.
-    for fig, (w_old, w_new) in {"fig01_glance": ("0.7", "0.62"), "fig03_data": ("0.7", "0.64"), "fig05_method": ("0.7", "0.6"), "fig09_outputs": ("0.6", "0.7"), "fig10_errors": ("0.52", "0.48")}.items():
+    for fig, (w_old, w_new) in {"fig01_glance": ("0.7", "0.62"), "fig03_data": ("0.7", "0.64"), "fig05_method": ("0.7", "0.6"), "fig04_harness_versions": ("0.7", "0.62"), "fig06_training": ("0.7", "0.62"), "fig07_main": ("0.62", "0.56"), "fig08_offload": ("0.68", "0.6"), "fig09_outputs": ("0.6", "0.7"), "fig10_errors": ("0.52", "0.44")}.items():
         text = text.replace(f"width={w_old}\\linewidth]{{figures/{fig}", f"width={w_new}\\linewidth]{{figures/{fig}")
     # Shamir: Fig. 9 in the outline uses the wider two-column layout (shorter traces, larger text).
     text = text.replace("{figures/fig09_outputs.pdf}", "{figures/fig09_outputs_wide.pdf}", 1)
@@ -190,6 +190,10 @@ def main():
                             "\\begin{minipage}[c]{0.3\\linewidth}\\small\\raggedright " + m.group(1) + m.group(2) + "\\end{minipage}", text, count=1, flags=re.S)
     # Shamir: explain why the funnel's 59 databases become 58 in the splits (outline only).
     text = text.replace("790 gave different or empty results.", "790 gave different or empty results; one database (craftbeer) yielded no verified pairs, so the splits cover 58.", 1)
+    # Outline only: Fig. 7 placed before 5.3 so it can fill the end of page 7 (keeps 10 pages).
+    m5 = re.search(r"\\begin\{figure\}\[!htbp\]\n(?:(?!\\end\{figure\}).)*fig07_main.*?\\end\{figure\}\n\n?", text, flags=re.S)
+    if m5:
+        text = text.replace(m5.group(0), "", 1).replace("\\subsection{Experimental procedure}", m5.group(0) + "\\subsection{Experimental procedure}", 1)
     # Shamir: in the outline, Fig. 2 sits before the Proposed solution subsection.
     m = re.search(r"\\begin\{figure\}\[!htbp\]\n(?:(?!\\end\{figure\}).)*fig02_pipeline.*?\\end\{figure\}\n\n?", text, flags=re.S)
     if m:

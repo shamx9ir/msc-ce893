@@ -119,17 +119,14 @@ Both experimental setups employ the Qwen2.5-Coder-7B-Instruct and -14B-Instruct 
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=0.7\linewidth]{figures/fig04_harness_versions.pdf}
+\includegraphics[width=0.62\linewidth]{figures/fig04_harness_versions.pdf}
 \caption{Prompt-engineering progress for the 7B baseline (development runs, with BIRD's hint). (a) The three versions that were also run on the test set: strict accuracy doubled from v1 to v4.2. (b) The development loop used only tuning databases; on all 363 tuning questions v4.2 beat v3 (32.0\% vs 26.2\%, McNemar $p{=}0.011$), and the 14B model reached 38.8\%.}
 \label{fig:versions}
 \end{figure}
 
 \subsection{Chosen method}
-\resultplaceholder{\textbf{Write here:}\begin{itemize}[leftmargin=1.2em,itemsep=0.05em]
-  \item QLoRA with PEFT: 4-bit NF4 base, rank-16 adapters on all attention + MLP projections (Fig. 5).
-  \item Export: merge, GGUF, Q4\_K\_M, base chat template.
-  \item Prompt profiles: lean and noschema (needs \textasciitilde{}1,300 synthetic questions on the test schemas).
-\end{itemize}}
+Fine-tuning is conducted via QLoRA~\cite{dettmers2023qlora} utilising PEFT~\cite{peft}, where rank-16 adapters are attached to all attention and MLP layers while the underlying base model remains frozen in 4-bit NF4 (Fig.~\ref{fig:method}). Upon completion of training, each adapter is merged with the base model, converted into GGUF format via llama.cpp~\cite{llamacpp}, and quantised to Q4\_K\_M to match the base setup. By preserving the base model's original chat template, the evaluation strictly isolates the influence of the adapter. To evaluate how effectively model weights can internalise prompt instructions, two additional adapter variants were trained per model size using reduced prompts: the lean variant strips out the query guide, worked examples, and tool JSON schemas, while offering an abbreviated schema; the noschema variant omits schema definitions entirely. Because operating without a schema requires prior exposure to target structures, the noschema training set was augmented with roughly 1,300 synthetic template questions covering the two evaluation databases, explicitly avoiding any BIRD dev questions or SQL.
+
 
 \begin{figure}[!htbp]
 \centering
@@ -162,7 +159,7 @@ Hardware & one RTX 5070 Ti (16\,GB), 32\,GB RAM, Windows; training 5.3\,h (7B) a
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=0.7\linewidth]{figures/fig06_training.pdf}
+\includegraphics[width=0.62\linewidth]{figures/fig06_training.pdf}
 \caption{Training progress for all six adapters. The loss drops within the first quarter epoch and then stays flat; validation loss on the three held-out databases follows it, so the adapters did not overfit. Lean and noschema adapters start higher because the model has never seen those short prompts.}
 \label{fig:training}
 \end{figure}
@@ -200,6 +197,13 @@ Significance & Exact McNemar test on paired per-question outcomes (strict)\\
 \end{tabularx}
 \end{table}
 
+\begin{figure}[!htbp]
+\centering
+\includegraphics[width=0.56\linewidth]{figures/fig07_main.pdf}
+\caption{Before and after fine-tuning (higher is better). (a) The LoRA adds 13--15 points of strict accuracy at both sizes, more than doubling the model size does. (b) The gain holds on both databases and is largest on questions that need a join (7B: 20\% to 35\%, 14B: 23\% to 41\%).}
+\label{fig:main}
+\end{figure}
+
 \subsection{Experimental procedure}
 \resultplaceholder{\textbf{Write here:}\begin{itemize}[leftmargin=1.2em,itemsep=0.05em]
   \item Order: freeze test split, tune harness, freeze v4.2, train each adapter once, run each arm once.
@@ -232,25 +236,18 @@ Significance & Exact McNemar test on paired per-question outcomes (strict)\\
 \end{tabularx}
 \end{table}
 
-\begin{figure}[!htbp]
-\centering
-\includegraphics[width=0.62\linewidth]{figures/fig07_main.pdf}
-\caption{Before and after fine-tuning (higher is better). (a) The LoRA adds 13--15 points of strict accuracy at both sizes, more than doubling the model size does. (b) The gain holds on both databases and is largest on questions that need a join (7B: 20\% to 35\%, 14B: 23\% to 41\%).}
-\label{fig:main}
-\end{figure}
-
 \subsection{Main findings}
 \resultplaceholder{\textbf{Write here:}\begin{itemize}[leftmargin=1.2em,itemsep=0.05em]
   \item Lead with Table 5: +15.4 points (7B, 70 fixed vs 19 broken) and +13.3 points (14B, 58 vs 14).
   \item 7B LoRA beats 14B baseline by 9.3 points (p=0.0009); 14B LoRA vs 7B LoRA not significant (p=0.09).
-  \item Fig. 8: lean = 1.5k tokens per call vs 3.6k; loses 2.1 (7B, p=0.30) and 0.6 points (14B, p=0.83), n.s. No schema: 18.1\% / 24.7\% (invented members, 114/332 unknown-member errors at 14B); noschema + short schema 37.0 / 41.0. Full LoRA given lean prompt without retraining: 0\%.
+  \item Fig. 8: lean = 1.5k vs 3.6k tokens per call, loses 2.1 / 0.6 points (n.s.). No schema: 18.1 / 24.7\%; noschema + short schema 37.0 / 41.0. Full LoRA on lean prompt: 0\%.
 \end{itemize}}
 
 
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=0.68\linewidth]{figures/fig08_offload.pdf}
+\includegraphics[width=0.6\linewidth]{figures/fig08_offload.pdf}
 \caption{Accuracy against prompt cost (up and left is better). The lean adapters (green) match the full LoRA's accuracy at 40\% of its prompt tokens; dropping the schema altogether (triangles) saves more tokens but loses 16--19 points.}
 \label{fig:offload}
 \end{figure}
@@ -277,15 +274,14 @@ Significance & Exact McNemar test on paired per-question outcomes (strict)\\
 \end{table}
 
 \resultplaceholder{\textbf{Write here:}\begin{itemize}[leftmargin=1.2em,itemsep=0.05em]
-  \item Table 6: 7B baseline \textasciitilde{}2 lookups, \textasciitilde{}1 rejected call per q; adapters draft once and submit. But they never look values up: 13\% of answers from an empty draft vs 2-10\%. 14B models write most calls as text.
-  \item Extra arm (retrained for lookups): causes = only 22\% of transcripts had a lookup + untrained \textless{}tool\_call\textgreater{} tokens in Qwen2.5-Coder-Instruct. Fix: lookup before every text filter, train those token rows, tool schemas in template. 7B 41.9\% (+5.1, p=0.019), 14B 44.9\% (+4.2, p=0.020); lookups \textasciitilde{}70\%, empty answers 4-5\%; more tokens/steps.
+  \item Table 6: baseline \textasciitilde{}2 lookups, \textasciitilde{}1 rejected call per q; adapters draft once, never look values up (13\% empty answers).
+  \item Extra arm (retrained for lookups; untrained \textless{}tool\_call\textgreater{} tokens fixed): 7B 41.9\% (+5.1, p=0.019), 14B 44.9\% (+4.2, p=0.020); lookups \textasciitilde{}70\%, empty answers 4-5\%.
 \end{itemize}}
 
 
 \subsection{Resource use}
 \resultplaceholder{\textbf{Write here:}\begin{itemize}[leftmargin=1.2em,itemsep=0.05em]
-  \item Training time 5.3 h (7B), 9.0 h (14B), lean 2-3 h; one 16 GB GPU; converged within half an epoch (Fig. 6).
-  \item Steps 4.1 to 2.1, prompt tokens per question halve, model time 3.5 s to 1.3 s (7B), p90 6.8 s to 1.7 s.
+  \item Training 5.3 h (7B), 9.0 h (14B) on one 16 GB GPU (Fig. 6). Steps 4.1 to 2.1, tokens halve, time 3.5 s to 1.3 s (7B).
   \item Output speed unchanged, so the saving is fewer, shorter calls (partly from skipping search\_values).
 \end{itemize}}
 
@@ -304,7 +300,7 @@ Significance & Exact McNemar test on paired per-question outcomes (strict)\\
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=0.48\linewidth]{figures/fig10_errors.pdf}
+\includegraphics[width=0.44\linewidth]{figures/fig10_errors.pdf}
 \caption{Wrong answers by category (rules applied in order). The LoRA mainly removes failed runs, wrong filters and extra columns; about 55 per arm need SQL Cube cannot express.}
 \label{fig:errors}
 \end{figure}
@@ -312,14 +308,13 @@ Significance & Exact McNemar test on paired per-question outcomes (strict)\\
 \subsection{Limitations and responsible use}
 \resultplaceholder{\textbf{Write here:}\begin{itemize}[leftmargin=1.2em,itemsep=0.05em]
   \item Two dbs, one run per arm (about $\pm$5 points). Setting differs from BIRD's standard one: not comparable with its leaderboard.
-  \item Original adapters write a stray token instead of \textless{}tool\_call\textgreater{} (untrained token); harness parses text; retrain fixes it.
-  \item Public data only; a wrong filter gives a convincing wrong chart, so the app shows the query.
+  \item Stray token instead of \textless{}tool\_call\textgreater{} (untrained); retrain fixes it. Public data; app shows the query.
 \end{itemize}}
 
 \section{Conclusion}
 \resultplaceholder{\textbf{Write here:}\begin{itemize}[leftmargin=1.2em,itemsep=0.05em]
   \item Answer the RQ with the headline numbers; most of the prompt can move into the weights, the schema must stay.
-  \item Retrain with lookups: 41.9\% / 44.9\%. Future work: same retrain for lean adapters; trained tool tokens for the baseline (format vs knowledge); newer open-weight families, not only Qwen; more dbs; time to first token.
+  \item Retrain: 41.9 / 44.9\%. Future: retrain lean adapters; tool tokens for baseline; newer open-weight families (not only Qwen); more dbs; time to first token.
 \end{itemize}}
 
 {\footnotesize
