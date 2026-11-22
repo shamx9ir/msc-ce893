@@ -165,16 +165,16 @@ Hardware & one RTX 5070 Ti (16\,GB), 32\,GB RAM, Windows; training 5.3\,h (7B) a
 \section{Experiments}
 
 \subsection{Compared systems}
-\begin{enumerate}
-  \item \textbf{Baseline:} base Qwen2.5-Coder 7B or 14B with harness v4.2 (full prompt, tools sent as JSON schemas).
-  \item \textbf{Proposed system:} the same model file plus the LoRA adapter, same harness and prompt.
-  \item \textbf{Prompt-offloading arms:} LoRA trained and run with the \emph{lean} prompt; the \emph{noschema} LoRA run with no schema and with the lean prompt. As a control, the full-prompt LoRA was also given the lean prompt without retraining.
-  \item \textbf{Extra arm:} the LoRA retrained to look up filter values (Section~\ref{sec:tooluse}).
+\begin{enumerate}[nosep,leftmargin=1.5em]
+  \item \textbf{Baseline:} base Qwen2.5-Coder 7B/14B with harness v4.2 (full prompt, tools as JSON schemas).
+  \item \textbf{Proposed:} same model file plus the LoRA adapter, same harness and prompt.
+  \item \textbf{Prompt offloading:} \emph{lean} LoRA; \emph{noschema} LoRA with no schema or the lean prompt; control: full LoRA on the lean prompt, not retrained.
+  \item \textbf{Extra arm:} LoRA retrained to look up filter values (Section~\ref{sec:tooluse}).
 \end{enumerate}
 
 
 \subsection{Evaluation data and measures}
-The 332 test questions come from two databases unseen in training and tuning (218 simple, 91 moderate, 23 challenging; 77\% need a join). The model sees only the question, as a real user would type it.
+332 test questions from two databases unseen in training and tuning (218 simple, 91 moderate, 23 challenging; 77\% need a join). The model sees only the question.
 
 
 \begin{table}[!htbp]
@@ -203,7 +203,7 @@ Significance & Exact McNemar test on paired per-question outcomes (strict)\\
 \end{figure}
 
 \subsection{Experimental procedure}
-The test split and scoring rule were frozen first; the harness was developed on tuning databases only and frozen at v4.2. Each adapter was trained once (fixed seed) and each arm run once on all 332 questions. Within a size, all arms share the model file, quantisation, context, temperature, step limit and Cube models.
+The test split and scoring were frozen first, and the harness was tuned on tuning databases only and frozen at v4.2. Each adapter was trained once (fixed seed) and each arm run once; within a size, arms share model file, quantisation, context, temperature, step limit and Cube models.
 
 
 \section{Results}
