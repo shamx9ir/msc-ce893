@@ -235,6 +235,10 @@ Across both sizes the fixes give a significant gain without the hint (7B +5.2 / 
 run / same-template run, 14B +4.2) and none with it, where the hint already spells out most values. sv3-nt 14B vs
 7B: no hint p = 0.13, hint p = 0.86. Runs: `results/runs/test_{nohint_,}lora_{sv3_nt,nt}_14b.jsonl.gz`.
 
+Future work: give the harness-only base models trained tool-call tokens too (separating "tool-call format" from
+"task knowledge" in the LoRA gain), and repeat the comparison on newer open-weight model families, not only newer
+Qwen releases, whose tool-call tokens are trained.
+
 ## Schema-offloading arms (prompt profiles)
 
 Can the LoRA carry what the prompt spells out, so each question costs fewer tokens?
