@@ -59,10 +59,10 @@ NOTES = {
         "Prompt profiles: lean and noschema (needs ~1,300 synthetic questions on the test schemas).",
     ],
     "Compared systems": [
-        "Baseline: base model + harness v4.2 (full prompt).",
-        "Proposed: same model file + LoRA, same harness and prompt.",
-        "Prompt-offloading arms: lean LoRA; noschema LoRA with no schema / with lean prompt; control = full LoRA given the lean prompt without retraining.",
-        "Extra arm: LoRA retrained to look up filter values (Section 6.2).",
+        "Harness only (baseline): base model + harness v4.2 (full prompt).",
+        "LoRA, full prompt (proposed): same model file + LoRA, same harness and prompt.",
+        "Prompt-offloading arms: LoRA, lean prompt; noschema LoRA, no schema / lean prompt; control = full-prompt LoRA given the lean prompt without retraining.",
+        "Extra arms: lookup LoRA, full prompt / lean prompt (LoRAs retrained to look up filter values, Section 6.2). All arms share the harness.",
     ],
     "Evaluation data and measures": [
         "332 test questions, 2 unseen dbs, difficulty mix 218/91/23, 77% need a join. Introduce Table 4.",
@@ -73,10 +73,10 @@ NOTES = {
     "Main findings": [
         "Lead with Table 5: +15.4 points (7B, 70 fixed vs 19 broken) and +13.3 points (14B, 58 vs 14).",
         "7B LoRA beats 14B baseline by 9.3 points (p=0.0009); 14B LoRA vs 7B LoRA not significant (p=0.09).",
-        "Fig. 8: lean = 1.5k vs 3.6k tokens per call, loses 2.1 / 0.6 points (n.s.). No schema: 18.1 / 24.7%; noschema + short schema 37.0 / 41.0. Full LoRA on lean prompt: 0%.",
+        "Fig. 8: LoRA, lean prompt = 1.5k vs 3.6k tokens per call, loses 2.1 / 0.6 points (n.s.). No schema: 18.1 / 24.7%; noschema + short schema 37.0 / 41.0. Full-prompt LoRA on lean prompt: 0%.",
     ],
     "Tool use": [
-        "Table 6: baseline ~2 lookups, ~1 rejected call per q; adapters draft once, never look values up (13% empty answers).", "Extra arm (retrained for lookups; untrained <tool_call> tokens fixed): 7B 41.9% (+5.1, p=0.019), 14B 44.9% (+4.2, p=0.020); lookups ~70%, empty answers 4-5%.",
+        "Table 6: baseline ~2 lookups, ~1 rejected call per q; adapters draft once, never look values up (13% empty answers).", "Extra arm (lookup LoRA, full prompt; untrained <tool_call> tokens fixed): 7B 41.9% (+5.1, p=0.019), 14B 44.9% (+4.2, p=0.020); lookups ~70%, empty answers 4-5%.",
     ],
     "Resource use": [
         "Training 5.3 h (7B), 9.0 h (14B) on one 16 GB GPU (Fig. 6). Steps 4.1 to 2.1, tokens halve, time 3.5 s to 1.3 s (7B).",
@@ -92,7 +92,7 @@ NOTES = {
     ],
     "Conclusion": [
         "Answer the RQ with the headline numbers; most of the prompt can move into the weights, the schema must stay.",
-        "Retrain: 41.9 / 44.9%. Future: retrain lean adapters; tool tokens for baseline; newer open-weight families (not only Qwen); more dbs; time to first token.",
+        "Lookup LoRA, full prompt: 41.9 / 44.9%. Future: fix the 7B lookup LoRA's loops with the lean prompt; tool tokens for baseline; newer open-weight families (not only Qwen); more dbs; time to first token.",
     ],
 }
 
@@ -126,10 +126,10 @@ To demonstrate this, we focus on a common business scenario involving data analy
     "Chosen method": r"""Fine-tuning is conducted via QLoRA~\cite{dettmers2023qlora} utilising PEFT~\cite{peft}, where rank-16 adapters are attached to all attention and MLP layers while the underlying base model remains frozen in 4-bit NF4 (Fig.~\ref{fig:method}). Upon completion of training, each adapter is merged with the base model, converted into GGUF format via llama.cpp~\cite{llamacpp}, and quantised to Q4\_K\_M to match the base setup. By preserving the base model's original chat template, the evaluation strictly isolates the influence of the adapter. To evaluate how effectively model weights can internalise prompt instructions, two additional adapter variants were trained per model size using reduced prompts: the lean variant strips out the query guide, worked examples, and tool JSON schemas, while offering an abbreviated schema; the noschema variant omits schema definitions entirely. Because operating without a schema requires prior exposure to target structures, the noschema training set was augmented with roughly 1,300 synthetic template questions covering the two evaluation databases, explicitly avoiding any BIRD dev questions or SQL.
 """,
     "Compared systems": r"""\begin{enumerate}[nosep,leftmargin=1.5em]
-  \item \textbf{Baseline:} base Qwen2.5-Coder 7B/14B with harness v4.2 (full prompt, tools as JSON schemas).
-  \item \textbf{Proposed:} same model file plus the LoRA adapter, same harness and prompt.
-  \item \textbf{Prompt offloading:} \emph{lean} LoRA; \emph{noschema} LoRA with no schema or the lean prompt; control: full LoRA on the lean prompt, not retrained.
-  \item \textbf{Extra arm:} LoRA retrained to look up filter values (Section~\ref{sec:tooluse}).
+  \item \textbf{Harness only (baseline):} base Qwen2.5-Coder 7B/14B, harness v4.2, full prompt.
+  \item \textbf{LoRA, full prompt (proposed):} same model plus the LoRA adapter. All arms share the harness.
+  \item \textbf{Prompt offloading:} \emph{LoRA, lean prompt}; \emph{noschema LoRA, no schema / lean prompt}; control: full-prompt LoRA on the lean prompt.
+  \item \textbf{Extra arms:} \emph{lookup LoRA, full / lean prompt}, retrained to look up filter values (Section~\ref{sec:tooluse}).
 \end{enumerate}
 """,
     "Evaluation data and measures": r"""332 test questions from two databases unseen in training and tuning (218 simple, 91 moderate, 23 challenging; 77\% need a join). The model sees only the question.
@@ -138,7 +138,7 @@ To demonstrate this, we focus on a common business scenario involving data analy
 """,
     "Main findings": r"""The introduction of the adapter serves as the primary driver of performance improvements (Table~\ref{tab:main}, Fig.~\ref{fig:main}). For the 7B model, strict accuracy increased by 15.4 percentage points, with 70 previously incorrect questions turning correct against 19 regressions. Similarly, the 14B model demonstrated a gain of 13.3 points (58 gains versus 14 losses). Notably, the 7B LoRA model outperformed the 14B baseline model by 9.3 points ($p{=}0.0009$). In contrast, the performance gap between the 14B LoRA and 7B LoRA models was only 3.9 points, which is not statistically significant ($p{=}0.09$). A key issue with the 14B baseline was its tendency to output correct data rows alongside redundant columns (reflected in a relaxed accuracy of 35.8 vs.\ a strict accuracy of 27.4); integrating the adapter largely eliminated these extraneous columns.
 
-Addressing the second component of the Research Question, Fig.~\ref{fig:offload} illustrates the efficiency of prompt reduction. The lean LoRA setup decreases context usage from 3.6k to 1.5k prompt tokens per call. This reduction incurs minor, statistically insignificant accuracy drops of 2.1 points at 7B ($p{=}0.30$) and 0.6 points at 14B ($p{=}0.83$). Conversely, entirely eliminating the schema results in substantial performance penalties, dropping accuracy to 18.1\% at 7B and 24.7\% at 14B, primarily because the model begins hallucinating non-existent database entities (evidenced by ``unknown member'' errors in 114 out of 332 runs on the 14B model). Reintroducing a condensed schema to the noschema adapter restores performance to levels comparable with the full LoRA (37.0\% for 7B and 41.0\% for 14B). Finally, applying the lean prompt to a full-prompt LoRA without retraining yielded a 0\% success rate, proving that the adapter specialised to its specific prompt structure rather than mastering general task execution.
+Addressing the second component of the Research Question, Fig.~\ref{fig:offload} illustrates the efficiency of prompt reduction. The \emph{LoRA, lean prompt} setup decreases context usage from 3.6k to 1.5k prompt tokens per call. This reduction incurs minor, statistically insignificant accuracy drops of 2.1 points at 7B ($p{=}0.30$) and 0.6 points at 14B ($p{=}0.83$). Conversely, entirely eliminating the schema results in substantial performance penalties, dropping accuracy to 18.1\% at 7B and 24.7\% at 14B, primarily because the model begins hallucinating non-existent database entities (evidenced by ``unknown member'' errors in 114 out of 332 runs on the 14B model). Reintroducing a condensed schema to the noschema adapter restores performance to levels comparable with \emph{LoRA, full prompt} (37.0\% for 7B and 41.0\% for 14B). Finally, applying the lean prompt to a full-prompt LoRA without retraining yielded a 0\% success rate, proving that the adapter specialised to its specific prompt structure rather than mastering general task execution.
 """,
     "Resource use": r"""Training took 5.3\,h (7B) and 9.0\,h (14B) on one 16\,GB GPU (2--3\,h for the lean setup) and converged within half an epoch (Fig.~\ref{fig:training}). The merged adapter adds no inference cost and halves the model calls per question (4.1 to 2.1 at 7B), so prompt tokens halve and model time per question falls from 3.5 to 1.3\,s (p90: 6.8 to 1.7\,s). Output speed is unchanged (105--120 tokens/s at 7B, 60--67 at 14B), so the saving comes from fewer, shorter calls, partly because the adapter skips \texttt{search\_values} (1\% of questions vs 92\%).
 """,
@@ -148,11 +148,11 @@ Addressing the second component of the Research Question, Fig.~\ref{fig:offload}
 """,
     "Conclusion": r"""Integrating a LoRA adapter trained on the 3,273-transcript, execution-verified training split while keeping the agent harness fixed yielded substantial performance gains. On unseen databases, strict accuracy rose from 21.4\% to 36.7\% for the 7B model and from 27.4\% to 40.7\% for the 14B model. Furthermore, this approach halved (7B) or cut by a third (14B) the number of model calls required per question, allowing the fine-tuned 7B model to outperform the 14B baseline.
 
-The findings demonstrate that key prompt instructions can be successfully offloaded into model weights. Transitioning to a lean prompt reduced context usage to 40\% of the original prompt tokens while maintaining accuracy within approximately 2 percentage points (a non-significant difference); however, retaining the database schema remains essential. Incorporating value lookups and trained tool-call tokens during retraining further enhanced strict accuracy, reaching 41.9\% for the 7B variant and 44.9\% for the 14B model. The retrained 14B lean adapter reached 46.1\%, the best result.
+The findings demonstrate that key prompt instructions can be successfully offloaded into model weights. Transitioning to a lean prompt reduced context usage to 40\% of the original prompt tokens while maintaining accuracy within approximately 2 percentage points (a non-significant difference); however, retaining the database schema remains essential. Incorporating value lookups and trained tool-call tokens during retraining further enhanced strict accuracy, reaching 41.9\% for the 7B variant and 44.9\% for the 14B model. The 14B \emph{lookup LoRA, lean prompt} reached 46.1\%, the best result.
 
 Directions for future work include:
 \begin{itemize}[nosep,leftmargin=1.5em]
-\item Fixing the lookup loops of the retrained 7B lean adapter.
+\item Fixing the lookup loops of the 7B \emph{lookup LoRA, lean prompt}.
 \item Training tool-call tokens for baseline models to isolate call formatting from domain-specific task knowledge.
 \item Evaluating newer open-weight model families beyond Qwen with dedicated tool-call token training.
 \item Expanding evaluations across a broader range of databases.
@@ -161,7 +161,7 @@ Directions for future work include:
 """,
     "Tool use": r"""The 7B baseline makes about two value lookups and has about one call rejected by the name and type checks per question; the adapters usually submit their first draft without rejection but never look values up. As a result, 13\% of their answers come from queries that return no rows (case B, Fig.~\ref{fig:outputs}), against 2--10\% for the baselines (Table~\ref{tab:tools}). The 14B models write most calls as text, which the harness parses.
 
-\textbf{Retraining for lookups (extra arm).} Only 22\% of training transcripts looked a value up, and Qwen2.5-Coder-Instruct's \texttt{<tool\_call>} tokens are untrained, so the 14B adapter emitted a stray token before every call and fell back to text. The retrained variant adds a lookup before every text filter plus recovery examples, trains those tokens' embedding and output rows, and lists the tool schemas in the Ollama template. It looks values up on about 70\% of questions, makes no text calls and cuts empty answers to 4.5\% (7B) and 3.9\% (14B), raising accuracy by 5.1 points at 7B ($p{=}0.019$ against the original LoRA) and 4.2 at 14B ($p{=}0.020$). The tool schemas in the template cost extra steps and prompt tokens, and since data and template changed as well as the weights, this is a separate arm. On the lean adapter the same recipe gave the best 14B result (46.1\%; $p{=}0.0008$ against the lean LoRA) but no gain at 7B (33.4\%, lookup loops).
+\textbf{Retraining for lookups (extra arm).} Only 22\% of training transcripts looked a value up, and Qwen2.5-Coder-Instruct's \texttt{<tool\_call>} tokens are untrained, so the 14B adapter emitted a stray token before every call and fell back to text. \emph{Lookup LoRA, full prompt} adds a lookup before every text filter plus recovery examples, trains those tokens' embedding and output rows, and lists the tool schemas in the Ollama template. It looks values up on about 70\% of questions, makes no text calls and cuts empty answers to 4.5\% (7B) and 3.9\% (14B), raising accuracy by 5.1 points at 7B ($p{=}0.019$ against the original LoRA) and 4.2 at 14B ($p{=}0.020$). The tool schemas in the template cost extra steps and prompt tokens, and since data and template changed as well as the weights, this is a separate arm. \emph{Lookup LoRA, lean prompt} gave the best 14B result (46.1\%; $p{=}0.0008$ against \emph{LoRA, lean prompt}) but no gain at 7B (33.4\%, lookup loops).
 """,
     "Related work": r"""The evaluation of text-to-SQL tasks has progressed from Spider~\cite{yu2018spider} to BIRD~\cite{li2023bird}, a benchmark that incorporates substantial real-world databases, dirty values, and question-level ``evidence'' annotations to assess execution accuracy. In prompt-driven approaches, frameworks like DIN-SQL~\cite{pourreza2023din} implement task decomposition and self-correction, whereas ReAct~\cite{yao2023react} style agent loops enable models to evaluate queries dynamically prior to final response generation, an approach adopted by our harness. For open-weights architectures, specialised fine-tuned models such as CodeS~\cite{li2024codes} achieve competitive performance on BIRD even at smaller parameter scales, while Gorilla~\cite{patil2023gorilla} demonstrates that targeted fine-tuning outperforms pure prompting for accurate API invocation. Parameter-efficient methods like LoRA~\cite{hu2021lora} and QLoRA~\cite{dettmers2023qlora} facilitate this fine-tuning process on single consumer-grade GPUs. Lastly, context distillation~\cite{askell2021general,snell2022distilling} techniques enable models to emulate the behaviour of extensive system prompts, providing the foundational concept behind moving the harness prompt into the LoRA weights.
 """,
