@@ -203,9 +203,9 @@ The test split and scoring rule were frozen first; the harness was developed on 
 14B lean LoRA & 40.1 & 46.1 & 2,988 & 2.0 & 2.3\,/\,2.2\,/\,3.3 & 65 & $1{\times}10^{-6}$\\
 \midrule
 7B LoRA retrained for lookups & \textbf{41.9} & \textbf{47.6} & 12,204 & 3.3 & 1.7\,/\,1.5\,/\,2.3 & 102 & $2{\times}10^{-13}$\\
-7B lean LoRA retrained & 33.4 & 37.3 & 5,813 & 3.8 & 1.8\,/\,1.4\,/\,3.2 & 108 & $9{\times}10^{-6}$\\
+7B lean LoRA retrained for lookups & 33.4 & 37.3 & 5,813 & 3.8 & 1.8\,/\,1.4\,/\,3.2 & 108 & $9{\times}10^{-6}$\\
 14B LoRA retrained for lookups & 44.9 & 48.8 & 11,638 & 3.1 & 2.7\,/\,2.4\,/\,3.8 & 60 & $4{\times}10^{-11}$\\
-14B lean LoRA retrained & \textbf{46.1} & \textbf{52.1} & 4,728 & 3.2 & 2.7\,/\,2.4\,/\,4.0 & 65 & $9{\times}10^{-12}$\\
+14B lean LoRA retrained for lookups & \textbf{46.1} & \textbf{52.1} & 4,728 & 3.2 & 2.7\,/\,2.4\,/\,4.0 & 65 & $9{\times}10^{-12}$\\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -246,9 +246,9 @@ Fig.~\ref{fig:offload} answers the second part of the RQ. The lean LoRA sends 1.
 14B LoRA + harness & 0.00 & 0.97 & 0.00 & 100 & 0.0 & 13.3\\
 \midrule
 7B LoRA retrained for lookups & 1.05 & 1.18 & 0.27 & 0 & 0.9 & 4.5\\
-7B lean LoRA retrained & 1.28 & 1.50 & 0.94 & 0 & 6.6 & 6.3\\
+7B lean LoRA retrained for lookups & 1.28 & 1.50 & 0.94 & 0 & 6.6 & 6.3\\
 14B LoRA retrained for lookups & 1.04 & 1.09 & 0.12 & 0 & 2.4 & 3.9\\
-14B lean LoRA retrained & 1.08 & 1.12 & 0.20 & 0 & 1.8 & 5.7\\
+14B lean LoRA retrained for lookups & 1.08 & 1.12 & 0.20 & 0 & 1.8 & 5.7\\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -265,7 +265,7 @@ Training took 5.3\,h (7B) and 9.0\,h (14B) on one 16\,GB GPU (lean: 2--3\,h) and
 \begin{figure}[!htbp]
 \centering
 \includegraphics[width=0.7\linewidth]{figures/fig09_outputs.pdf}
-\caption{Real tool traces from the test runs (\texttt{>} model call, \texttt{<} tool reply; long lines cut). A: the baseline groups by circuit and returns three rows, the LoRA asks for the single count. B: the LoRA skips the value lookup, filters on a value that does not exist and submits an empty result. C: without a schema the model invents \texttt{student.phone} and repeats it; the lean adapter writes \texttt{member.phone} (here as text, which the harness parses).}
+\caption{Real tool traces from the test runs (\texttt{>} model call, \texttt{<} tool reply; long lines cut). A: the baseline groups by circuit and returns three rows, the LoRA asks for the single count. B: the LoRA skips the value lookup, filters on a value that does not exist and submits an empty result. C: without a schema the model invents \texttt{student.phone\_number} and repeats it; the lean adapter writes \texttt{member.phone} (here as text, which the harness parses).}
 \label{fig:outputs}
 \end{figure}
 
