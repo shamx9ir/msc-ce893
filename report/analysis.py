@@ -36,6 +36,9 @@ TEST_RUNS = {
     "sv3_7b": ("test_nohint_lora_sv3_nt_7b", "7B LoRA retrained for lookups"),
     "sv3_14b": ("test_nohint_lora_sv3_nt_14b", "14B LoRA retrained for lookups"),
     "lora_nt_7b": ("test_nohint_lora_nt_7b", "7B original LoRA, retrain template"),
+    # lean LoRA retrained with the same sv3 recipe (lean prompt, stock Ollama template)
+    "lean_sv3_7b": ("test_nohint_lean_sv3_7b", "7B lean LoRA retrained for lookups"),
+    "lean_sv3_14b": ("test_nohint_lean_sv3_14b", "14B lean LoRA retrained for lookups"),
     # earlier runs WITH the hint (BIRD's standard setting); kept for reference and for harness development
     "hint_harness_v1_7b": ("test_harness_v1_7b", "7B harness v1 (hint)"),
     "hint_harness_v2_7b": ("test_harness_v2_7b", "7B harness v2 (hint)"),

@@ -148,11 +148,11 @@ Addressing the second component of the Research Question, Fig.~\ref{fig:offload}
 """,
     "Conclusion": r"""Integrating a LoRA adapter trained on the 3,273-transcript, execution-verified training split while keeping the agent harness fixed yielded substantial performance gains. On unseen databases, strict accuracy rose from 21.4\% to 36.7\% for the 7B model and from 27.4\% to 40.7\% for the 14B model. Furthermore, this approach halved (7B) or cut by a third (14B) the number of model calls required per question, allowing the fine-tuned 7B model to outperform the 14B baseline.
 
-The findings demonstrate that key prompt instructions can be successfully offloaded into model weights. Transitioning to a lean prompt reduced context usage to 40\% of the original prompt tokens while maintaining accuracy within approximately 2 percentage points (a non-significant difference); however, retaining the database schema remains essential. Incorporating value lookups and trained tool-call tokens during retraining further enhanced strict accuracy, reaching 41.9\% for the 7B variant and 44.9\% for the 14B model.
+The findings demonstrate that key prompt instructions can be successfully offloaded into model weights. Transitioning to a lean prompt reduced context usage to 40\% of the original prompt tokens while maintaining accuracy within approximately 2 percentage points (a non-significant difference); however, retaining the database schema remains essential. Incorporating value lookups and trained tool-call tokens during retraining further enhanced strict accuracy, reaching 41.9\% for the 7B variant and 44.9\% for the 14B model. The retrained 14B lean adapter reached 46.1\%, the best result.
 
 Directions for future work include:
 \begin{itemize}[nosep,leftmargin=1.5em]
-\item Applying the retraining procedure to lean adapter configurations.
+\item Fixing the lookup loops of the retrained 7B lean adapter.
 \item Training tool-call tokens for baseline models to isolate call formatting from domain-specific task knowledge.
 \item Evaluating newer open-weight model families beyond Qwen with dedicated tool-call token training.
 \item Expanding evaluations across a broader range of databases.
@@ -161,7 +161,7 @@ Directions for future work include:
 """,
     "Tool use": r"""The 7B baseline makes about two value lookups and has about one call rejected by the name and type checks per question; the adapters usually submit their first draft without rejection but never look values up. As a result, 13\% of their answers come from queries that return no rows (case B, Fig.~\ref{fig:outputs}), against 2--10\% for the baselines (Table~\ref{tab:tools}). The 14B models write most calls as text, which the harness parses.
 
-\textbf{Retraining for lookups (extra arm).} Only 22\% of training transcripts looked a value up, and Qwen2.5-Coder-Instruct's \texttt{<tool\_call>} tokens are untrained, so the 14B adapter emitted a stray token before every call and fell back to text. The retrained variant adds a lookup before every text filter plus recovery examples, trains those tokens' embedding and output rows, and lists the tool schemas in the Ollama template. It looks values up on about 70\% of questions, makes no text calls and cuts empty answers to 4.5\% (7B) and 3.9\% (14B), raising accuracy by 5.1 points at 7B ($p{=}0.019$ against the original LoRA) and 4.2 at 14B ($p{=}0.020$). The tool schemas in the template cost extra steps and prompt tokens, and since data and template changed as well as the weights, this is a separate arm.
+\textbf{Retraining for lookups (extra arm).} Only 22\% of training transcripts looked a value up, and Qwen2.5-Coder-Instruct's \texttt{<tool\_call>} tokens are untrained, so the 14B adapter emitted a stray token before every call and fell back to text. The retrained variant adds a lookup before every text filter plus recovery examples, trains those tokens' embedding and output rows, and lists the tool schemas in the Ollama template. It looks values up on about 70\% of questions, makes no text calls and cuts empty answers to 4.5\% (7B) and 3.9\% (14B), raising accuracy by 5.1 points at 7B ($p{=}0.019$ against the original LoRA) and 4.2 at 14B ($p{=}0.020$). The tool schemas in the template cost extra steps and prompt tokens, and since data and template changed as well as the weights, this is a separate arm. On the lean adapter the same recipe gave the best 14B result (46.1\%; $p{=}0.0008$ against the lean LoRA) but no gain at 7B (33.4\%, lookup loops).
 """,
     "Related work": r"""The evaluation of text-to-SQL tasks has progressed from Spider~\cite{yu2018spider} to BIRD~\cite{li2023bird}, a benchmark that incorporates substantial real-world databases, dirty values, and question-level ``evidence'' annotations to assess execution accuracy. In prompt-driven approaches, frameworks like DIN-SQL~\cite{pourreza2023din} implement task decomposition and self-correction, whereas ReAct~\cite{yao2023react} style agent loops enable models to evaluate queries dynamically prior to final response generation, an approach adopted by our harness. For open-weights architectures, specialised fine-tuned models such as CodeS~\cite{li2024codes} achieve competitive performance on BIRD even at smaller parameter scales, while Gorilla~\cite{patil2023gorilla} demonstrates that targeted fine-tuning outperforms pure prompting for accurate API invocation. Parameter-efficient methods like LoRA~\cite{hu2021lora} and QLoRA~\cite{dettmers2023qlora} facilitate this fine-tuning process on single consumer-grade GPUs. Lastly, context distillation~\cite{askell2021general,snell2022distilling} techniques enable models to emulate the behaviour of extensive system prompts, providing the foundational concept behind moving the harness prompt into the LoRA weights.
 """,
@@ -214,15 +214,17 @@ def main():
     # title page summary -> notes
     text = re.sub(r"\\textbf\{Summary\.\}.*?\n", "\\\\textbf{Summary (to write).} " + esc(NOTES["TITLE"][0]).replace("\\", "\\\\") + "\n", text, count=1)
     text = text.replace("{\\footnotesize\n\\bibliographystyle", "{\\footnotesize\n\\nocite{*}\n\\bibliographystyle")
+    # outline only: slightly smaller reference list so the outline keeps title + 10 pages
+    text = text.replace("{\\footnotesize\n\\let\\oldthebibliography", "{\\scriptsize\n\\let\\oldthebibliography", 1)
     # The outline's notes run longer than the prose in places, so a few figures are smaller here to keep 10 pages.
-    for fig, (w_old, w_new) in {"fig04_harness_versions": ("0.8", "0.74"), "fig06_training": ("0.78", "0.72")}.items():
+    for fig, (w_old, w_new) in {"fig04_harness_versions": ("0.8", "0.74"), "fig06_training": ("0.78", "0.72"), "fig08_offload": ("0.74", "0.68"), "fig07_main": ("0.68", "0.62"), "fig10_errors": ("0.62", "0.56")}.items():
         text = text.replace(f"width={w_old}\\linewidth]{{figures/{fig}", f"width={w_new}\\linewidth]{{figures/{fig}")
     # Shamir: Fig. 9 in the outline uses the wider two-column layout (shorter traces, larger text).
     text = text.replace("{figures/fig09_outputs.pdf}", "{figures/fig09_outputs_wide.pdf}", 1)
     # Shamir: Fig. 9 caption beside the figure (outline only), to avoid white space at the sides.
     text = re.sub(r"\\centering\n\\includegraphics\[width=[0-9.]+\\linewidth\]\{figures/fig09_outputs_wide\.pdf\}\n(\\caption\{.*?\})\n(\\label\{fig:outputs\})",
-                  lambda m: "\\begin{minipage}[c]{0.68\\linewidth}\\includegraphics[width=\\linewidth]{figures/fig09_outputs_wide.pdf}\\end{minipage}\\hfill\n"
-                            "\\begin{minipage}[c]{0.3\\linewidth}\\small\\raggedright " + m.group(1) + m.group(2) + "\\end{minipage}", text, count=1, flags=re.S)
+                  lambda m: "\\begin{minipage}[c]{0.6\\linewidth}\\includegraphics[width=\\linewidth]{figures/fig09_outputs_wide.pdf}\\end{minipage}\\hfill\n"
+                            "\\begin{minipage}[c]{0.38\\linewidth}\\small\\raggedright " + m.group(1) + m.group(2) + "\\end{minipage}", text, count=1, flags=re.S)
     # Shamir: explain why the funnel's 59 databases become 58 in the splits (outline only).
     text = text.replace(r"\texttt{<} tool reply; long lines cut)", r"\texttt{<} tool reply; shortened to fit, full traces in the saved runs)", 1)
     text = text.replace("790 gave different or empty results.", "790 gave different or empty results; one database (craftbeer) yielded no verified pairs, so the splits cover 58.", 1)

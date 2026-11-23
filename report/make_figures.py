@@ -321,10 +321,11 @@ def fig_main():
 
 # ------------------------------------------------------------------ Fig 8: tokens vs accuracy
 def fig_offload():
-    fig, axes = plt.subplots(1, 2, figsize=(W, 2.3), sharey=True)
+    fig, axes = plt.subplots(1, 2, figsize=(W, 2.5), sharey=True)
     arms = [("harness", "harness only", C_H, "o"), ("lora", "LoRA, full prompt", C_L, "o"),
             ("lean", "LoRA, lean prompt", C_LEAN, "s"), ("noschema_lean", "noschema LoRA + lean prompt", C_NS, "D"),
-            ("noschema", "noschema LoRA, no schema", C_NS, "^")]
+            ("noschema", "noschema LoRA, no schema", C_NS, "^"),
+            ("sv3", "retrained, full prompt", C_L, "P"), ("lean_sv3", "retrained, lean prompt", C_LEAN, "P")]
     for ax, size in zip(axes, ["7b", "14b"]):
         for key, lab, c, m in arms:
             s = A.summary(A.test_run(f"{key}_{size}"))
@@ -341,9 +342,9 @@ def fig_offload():
     axes[0].set_ylabel("strict accuracy (%)")
     axes[0].set_ylim(10, 50)
     axes[1].set_ylim(10, 50)
-    fig.tight_layout(w_pad=1.0, rect=(0, 0.08, 1, 1))
+    fig.tight_layout(w_pad=1.0, rect=(0, 0.13, 1, 1))
     h, l = axes[0].get_legend_handles_labels()
-    fig.legend(h, l, frameon=False, fontsize=6.6, loc="lower center", ncol=5, bbox_to_anchor=(0.5, 0.0))
+    fig.legend(h, l, frameon=False, fontsize=6.6, loc="lower center", ncol=4, bbox_to_anchor=(0.5, 0.0))
     save(fig, "fig08_offload")
 
 
