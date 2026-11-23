@@ -28,10 +28,10 @@ TEST_RUNS = {
     "lora_on_lean_7b": ("test_nohint_lora_on_lean_prompt_7b", "7B full LoRA, lean prompt"),
     "lean_7b": ("test_nohint_lean_7b", "7B lean LoRA"),
     "lean_14b": ("test_nohint_lean_14b", "14B lean LoRA"),
-    "noschema_7b": ("test_nohint_noschema_7b", "7B no-schema LoRA, no schema"),
-    "noschema_14b": ("test_nohint_noschema_14b", "14B no-schema LoRA, no schema"),
-    "noschema_lean_7b": ("test_nohint_noschema_lean_prompt_7b", "7B no-schema LoRA, lean prompt"),
-    "noschema_lean_14b": ("test_nohint_noschema_lean_prompt_14b", "14B no-schema LoRA, lean prompt"),
+    "noschema_7b": ("test_nohint_noschema_7b", "7B noschema LoRA, no schema"),
+    "noschema_14b": ("test_nohint_noschema_14b", "14B noschema LoRA, no schema"),
+    "noschema_lean_7b": ("test_nohint_noschema_lean_prompt_7b", "7B noschema LoRA, lean prompt"),
+    "noschema_lean_14b": ("test_nohint_noschema_lean_prompt_14b", "14B noschema LoRA, lean prompt"),
     # extra arm: LoRA retrained to look values up (sv3: value-lookup data, trained <tool_call> tokens, tool-schema template)
     "sv3_7b": ("test_nohint_lora_sv3_nt_7b", "7B LoRA retrained for lookups"),
     "sv3_14b": ("test_nohint_lora_sv3_nt_14b", "14B LoRA retrained for lookups"),
@@ -52,10 +52,10 @@ TEST_RUNS = {
     "hint_lora_on_lean_14b": ("test_lora_on_lean_prompt_14b_partial", "14B full LoRA, lean prompt (hint, 127 q)"),
     "hint_lean_7b": ("test_lean_7b", "7B lean LoRA (hint)"),
     "hint_lean_14b": ("test_lean_14b", "14B lean LoRA (hint)"),
-    "hint_noschema_7b": ("test_noschema_7b", "7B no-schema LoRA, no schema (hint)"),
-    "hint_noschema_14b": ("test_noschema_14b", "14B no-schema LoRA, no schema (hint)"),
-    "hint_noschema_lean_7b": ("test_noschema_lean_prompt_7b", "7B no-schema LoRA, lean prompt (hint)"),
-    "hint_noschema_lean_14b": ("test_noschema_lean_prompt_14b", "14B no-schema LoRA, lean prompt (hint)"),
+    "hint_noschema_7b": ("test_noschema_7b", "7B noschema LoRA, no schema (hint)"),
+    "hint_noschema_14b": ("test_noschema_14b", "14B noschema LoRA, no schema (hint)"),
+    "hint_noschema_lean_7b": ("test_noschema_lean_prompt_7b", "7B noschema LoRA, lean prompt (hint)"),
+    "hint_noschema_lean_14b": ("test_noschema_lean_prompt_14b", "14B noschema LoRA, lean prompt (hint)"),
 }
 MAIN_ARMS = ["harness_7b", "lora_7b", "harness_14b", "lora_14b"]
 TUNE_RUNS = {

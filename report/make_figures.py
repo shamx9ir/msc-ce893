@@ -322,10 +322,10 @@ def fig_main():
 # ------------------------------------------------------------------ Fig 8: tokens vs accuracy
 def fig_offload():
     fig, axes = plt.subplots(1, 2, figsize=(W, 2.5), sharey=True)
-    arms = [("harness", "harness only", C_H, "o"), ("lora", "LoRA, full prompt", C_L, "o"),
-            ("lean", "LoRA, lean prompt", C_LEAN, "s"), ("noschema_lean", "noschema LoRA + lean prompt", C_NS, "D"),
+    arms = [("harness", "harness only", C_H, "o"), ("lora", "LoRA + harness", C_L, "o"),
+            ("lean", "lean LoRA", C_LEAN, "s"), ("noschema_lean", "noschema LoRA, lean prompt", C_NS, "D"),
             ("noschema", "noschema LoRA, no schema", C_NS, "^"),
-            ("sv3", "retrained, full prompt", C_L, "P"), ("lean_sv3", "retrained, lean prompt", C_LEAN, "P")]
+            ("sv3", "LoRA retrained for lookups", C_L, "P"), ("lean_sv3", "lean LoRA retrained for lookups", C_LEAN, "P")]
     for ax, size in zip(axes, ["7b", "14b"]):
         for key, lab, c, m in arms:
             s = A.summary(A.test_run(f"{key}_{size}"))
