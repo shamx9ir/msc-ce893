@@ -240,6 +240,24 @@ Across both sizes the fixes give a significant gain without the hint (7B +5.2 / 
 run / same-template run, 14B +4.2) and none with it, where the hint already spells out most values. sv3-nt 14B vs
 7B: no hint p = 0.13, hint p = 0.86. Runs: `results/runs/test_{nohint_,}lora_{sv3_nt,nt}_14b.jsonl.gz`.
 
+**Lean (short-prompt) adapters with the same fixes** (2026-11-22/23). `make_sft.py --profile lean` on
+`training_data_sv3`, `--train-tokens`, same settings as the lean adapters (`--match` against the full-prompt sv3 data);
+Ollama `qwen{7,14}b-cube-lean-sv3` with the stock template (the lean profile sends no tool declarations, so no `-nt`
+template is needed). No hint, 332 questions:
+
+| Lean LoRA | Strict | Relaxed | Prompt tokens / q | Calls search_values | McNemar strict vs old lean |
+|---|---|---|---|---|---|
+| 7B old lean | 34.6% | 36.7% | 3,242 | 0.3% | |
+| 7B lean-sv3 | 33.4% | 37.3% | 5,813 | 72.6% | 28 vs 32, p = 0.70 |
+| 14B old lean | 40.1% | 46.1% | 2,988 | 0% | |
+| **14B lean-sv3** | **46.1%** | **52.1%** | 4,728 | 69.3% | 27 vs 7, p = 0.001 |
+
+The 14B lean-sv3 adapter is the best no-hint run: level with the full-prompt sv3-nt 14B (44.9%, p = 0.54) at 41% of
+its prompt tokens, and above the original 14B LoRA (40.7%, 28 vs 10, p = 0.005). The 7B lean-sv3 calls tools
+correctly but loops between search_values and run_query without the query guide (41 questions hit the call limit),
+so it does not improve; it is far below the full-prompt sv3-nt 7B (9 vs 37, p < 0.001). Runs:
+`results/runs/test_nohint_lean_sv3_{7b,14b}.jsonl.gz`; training logs `results/training/lora_lean_sv3_*.json`.
+
 Future work: give the harness-only base models trained tool-call tokens too (separating "tool-call format" from
 "task knowledge" in the LoRA gain), and repeat the comparison on newer open-weight model families, not only newer
 Qwen releases, whose tool-call tokens are trained.
