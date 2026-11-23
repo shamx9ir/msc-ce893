@@ -72,7 +72,7 @@ def bar14(ax, pos, vals, width, run, horizontal=False):
     c = C_L if "lora" in run else C_H
     big = run.endswith("14b")
     kw = dict(color="white" if big else c, edgecolor=c, hatch="//////" if big else None, lw=0.8,
-              label=A.TEST_RUNS[run][1].replace(" + harness", ""))
+              label=A.TEST_RUNS[run][1])
     return ax.barh(pos, vals, width, **kw) if horizontal else ax.bar(pos, vals, width, **kw)
 
 
@@ -294,7 +294,7 @@ def fig_main():
     ax.set_ylim(0, 78)
     ax.set_ylabel("execution accuracy (%)")
     ygrid(ax)
-    ax.legend(handles=[Patch(color=C_H, label="harness only"), Patch(color=C_L, label="LoRA + harness"),
+    ax.legend(handles=[Patch(color=C_H, label="harness only"), Patch(color=C_L, label="LoRA, full prompt"),
                        Patch(color="#9a9994", label="dark = strict"),
                        Patch(color="#9a9994", alpha=0.45, label="light = relaxed")],
               frameon=False, fontsize=6.5, loc="upper left", ncol=2)
@@ -322,10 +322,10 @@ def fig_main():
 # ------------------------------------------------------------------ Fig 8: tokens vs accuracy
 def fig_offload():
     fig, axes = plt.subplots(1, 2, figsize=(W, 2.5), sharey=True)
-    arms = [("harness", "harness only", C_H, "o"), ("lora", "LoRA + harness", C_L, "o"),
-            ("lean", "lean LoRA", C_LEAN, "s"), ("noschema_lean", "noschema LoRA, lean prompt", C_NS, "D"),
+    arms = [("harness", "harness only", C_H, "o"), ("lora", "LoRA, full prompt", C_L, "o"),
+            ("lean", "LoRA, lean prompt", C_LEAN, "s"), ("noschema_lean", "noschema LoRA, lean prompt", C_NS, "D"),
             ("noschema", "noschema LoRA, no schema", C_NS, "^"),
-            ("sv3", "LoRA retrained for lookups", C_L, "P"), ("lean_sv3", "lean LoRA retrained for lookups", C_LEAN, "P")]
+            ("sv3", "lookup LoRA, full prompt", C_L, "P"), ("lean_sv3", "lookup LoRA, lean prompt", C_LEAN, "P")]
     for ax, size in zip(axes, ["7b", "14b"]):
         for key, lab, c, m in arms:
             s = A.summary(A.test_run(f"{key}_{size}"))
@@ -428,7 +428,7 @@ def fig_errors():
     y = np.arange(len(cats))[::-1]
     for k, r in enumerate(runs):
         b = bar14(ax, y + (1.5 - k) * 0.2, data[k], 0.19, r, horizontal=True)
-        b.set_label(f"{A.TEST_RUNS[r][1].replace(' + harness', '')} ({332 - int(A.test_run(r)['correct'].sum())} wrong)")
+        b.set_label(f"{A.TEST_RUNS[r][1]} ({332 - int(A.test_run(r)['correct'].sum())} wrong)")
         for yy, v in zip(y + (1.5 - k) * 0.2, data[k]):
             ax.text(v + 0.6, yy, str(int(v)), va="center", fontsize=5.6, color=MUTED)
     ax.set_yticks(y)
