@@ -61,6 +61,10 @@ MODELS = [
      "lora": True, "strict": 47.6, "profile": "full", "group": "LoRA v3 (value lookups)", "core": False},
     {"id": "ollama_chat/qwen14b-cube-sv3-nt", "label": "Qwen 14B + LoRA v3 (looks up values)", "short": "14B LoRA v3",
      "lora": True, "strict": 48.2, "profile": "full", "group": "LoRA v3 (value lookups)", "core": False},
+    # lean-profile retrain with the same fixes; strict is the no-hint test score (no with-hint run).
+    {"id": "ollama_chat/qwen14b-cube-lean-sv3", "label": "Qwen 14B + lean LoRA v3 (looks up values)",
+     "short": "14B lean v3", "lora": True, "strict": 46.1, "profile": "lean", "group": "LoRA v3 (value lookups)",
+     "core": False},
 ]
 DATABASES = ["formula_1", "student_club"]
 

@@ -36,3 +36,4 @@ def test_harness_gets_profile_and_tool_schemas(monkeypatch, tmp_path):
     assert built["ollama_chat/qwen7b-cube-lean"] == (False, "lean")
     assert built["ollama_chat/qwen14b-cube-noschema"] == (False, "lean")
     assert built["ollama_chat/qwen7b-cube-sv3-nt"] == (True, "full")
+    assert built["ollama_chat/qwen14b-cube-lean-sv3"] == (False, "lean")
