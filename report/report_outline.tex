@@ -302,7 +302,7 @@ As shown in Fig.~\ref{fig:outputs}A, the baseline follows its rules by looking u
 \end{figure}
 
 \subsection{Limitations and responsible use}
-Results come from two test databases and one run per arm, so each accuracy has a 95\% margin of about $\pm$5 points. Questions are answered as Cube queries from the question text alone, so the numbers are not comparable with the BIRD leaderboard. The translation pipeline keeps only queries Cube can express, and the no-schema adapter is tied to the databases it was trained on. The base model's \texttt{<tool\_call>} token was never trained, so whether an adapter produces it is fragile at both sizes: the original 14B adapter wrote a stray token instead on every call, the 7B one almost never. Our harness parsed these text calls, but other clients would fail; retraining fixed it. BIRD is public and contains no sensitive personal data.
+Questions are answered as Cube queries from the question text alone, so the numbers are not comparable with the BIRD leaderboard. The translation pipeline keeps only queries Cube can express, and the no-schema adapter is tied to the databases it was trained on. The base model's \texttt{<tool\_call>} token was never trained, so whether an adapter produces it is fragile at both sizes: the original 14B adapter wrote a stray token instead on every call, the 7B one almost never. Our harness parsed these text calls, but other clients would fail; retraining fixed it. BIRD is public and contains no sensitive personal data.
 
 
 \section{Conclusion}
