@@ -91,7 +91,7 @@ DIMAA21403-project/
 |---|---|---|
 | Final report PDF | `report.pdf` | ✅ outline version (decided) |
 | LaTeX source: .tex, figures, bibliography | `report-source/` | ✅ every `\input`, figure and `.bib` it references is included; compile once to confirm (check 4) |
-| Max 10 pages | both PDFs are **11 pages** (title page + 10) | ⚠️ question 2 |
+| Max 10 pages | both PDFs are 11 pages = title page + 10, confirmed OK with the module on 2026-11-26 | ✅ |
 | Module LaTeX template | yes (`preamble.tex`, `ce893.bst`, logo, Archivo font) | ✅ |
 | Self-contained without the notebook | problem, data, method, experiment, results, conclusions all in the report | ✅ |
 
@@ -101,7 +101,7 @@ DIMAA21403-project/
 2. [ ] Every file the code loads is in the ZIP or can be obtained: notebooks read only `code/` files; the pipeline reads `data/bird` (copy from `data/original/bird`, see the ZIP README) and BIRD train (download instructions).
 3. [ ] Saved outputs agree with the reported numbers: the notebooks recompute every table from `results/runs/`; compare with the PDF's tables.
 4. [ ] Compile `report-source/` (`latexmk -xelatex main.tex`, or upload the folder to Overleaf with the XeLaTeX compiler) and check figures, tables, citations and references.
-5. [ ] Page count and readable figure text (the script warns above 10 pages).
+5. [ ] Page count and readable figure text (the script warns above 11 pages, title page + 10).
 6. [ ] Open the ZIP and check it contains code, data and the full report source (the script also checks the key files).
 
 ## Left out of the ZIP, and why
@@ -120,9 +120,7 @@ DIMAA21403-project/
 
 1. ~~Which report goes in?~~ Decided 2026-11-26: the outline version (`main_outline.pdf`, your own text), the
    script's default.
-2. **Page limit.** The guide says "The final PDF must be no longer than ten pages". Both PDFs are 11 pages
-   (title page + 10). We assumed earlier that the title page does not count; the guide does not say so. Worth
-   confirming with the lecturer, or cutting one page.
+2. ~~Page limit~~ Confirmed 2026-11-26: 11 pages (title page + 10) is fine. The script warns only above 11.
 3. ~~LoRA adapters~~ Decided 2026-11-26: include them (`models/lora/`). The base models and the merged/Ollama
    exports stay out (15 to 30 GB each, rebuildable). Your PC has 11 adapters, 2.4 GB in total (7B: 170 MB,
    14B: 278 MB each; 7 in `msc-ce893/lora/`, the 4 lean/noschema ones in `msc-ce893-schema/lora/`); the script

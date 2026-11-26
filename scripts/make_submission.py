@@ -38,7 +38,7 @@ ROOT = Path(__file__).resolve().parent.parent
 TEST_DBS = ["formula_1", "student_club"]
 TUNE_DBS = ["superhero", "toxicology", "california_schools"]
 USED_DEV_DBS = TEST_DBS + TUNE_DBS
-PAGE_LIMIT = 10
+PAGE_LIMIT = 11  # 10 pages + title page (confirmed with the module 2026-11-26)
 
 # Report files per version: (file in report/, name inside report-source/)
 REPORT_COMMON = ["preamble.tex", "references.bib", "ce893.bst", "essex_logo.png"]
@@ -112,8 +112,7 @@ def build_report(stage: Path, version: str, files: list[str]) -> list[str]:
     if pages is None:
         warnings.append("pypdf not installed: page count of report.pdf not checked (pip install pypdf).")
     elif pages > PAGE_LIMIT:
-        warnings.append(f"report.pdf has {pages} pages; the guide says no more than {PAGE_LIMIT} "
-                        f"(title page included unless the module says otherwise).")
+        warnings.append(f"report.pdf has {pages} pages; the limit is 10 pages plus the title page ({PAGE_LIMIT}).")
     log(f"report.pdf <- report/{spec['pdf']} ({pages if pages is not None else '?'} pages)")
 
     src = stage / "report-source"
