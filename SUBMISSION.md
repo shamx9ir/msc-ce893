@@ -7,7 +7,7 @@ repository, and how to build the ZIP. Build it with:
 python scripts/make_submission.py
 ```
 
-It writes `dist/DIMAA21403-project.zip` (about 39 MB) plus an unzipped copy in `dist/DIMAA21403-project/`
+It writes `dist/DIMAA21403-project.zip` (about 39 MB plus the LoRA adapters) plus an unzipped copy in `dist/DIMAA21403-project/`
 to look through, and ends with a **CHECK BEFORE UPLOADING** list of anything that still needs attention.
 It uses only the Python standard library (plus `pypdf` for the page count, `jupyter` for `--run-notebooks`) and
 works the same on Windows. Run it on the experiment PC, where `data/bird` and `data/synth/synth.jsonl` already
@@ -20,6 +20,9 @@ exist; elsewhere add `--download-bird` (350 MB download).
 | `--download-bird` | downloads BIRD dev if `data/bird` is missing |
 | `--bird-dir PATH` | BIRD dev folder somewhere else |
 | `--no-sft` | leaves out the LoRA training files (smaller ZIP) |
+| `--lora-dir PATH` | where the trained adapters are (default `lora/`, each as `<name>/final`) |
+| `--weights-zip` | puts the adapters in a second ZIP, `DIMAA21403-project-weights.zip`, if one file is too big for FASER |
+| `--no-weights` | leaves the adapters out |
 | `--reg` | registration number in the folder name (default `DIMAA21403`) |
 
 ## Suggested ZIP structure
@@ -45,6 +48,9 @@ DIMAA21403-project/
 |   |-- results/runs/  results/training/                      stored outputs of every reported run
 |   |-- report/analysis.py, make_figures.py, figures/         the notebooks import these
 |   |-- splits/  requirements*.txt  README.md  docs/README_technical.md
+|-- models/
+|   |-- README.md                  which adapter is which system, sizes, how to load them (PEFT or Ollama)
+|   `-- lora/<adapter>/            every trained adapter: lora/<name>/final + train_info.json (no checkpoints)
 `-- data/
     |-- original/bird/             BIRD dev, only the 5 databases used: dev.json, dev_tables.json, dev_databases/<db>/
     |-- processed/
@@ -103,7 +109,7 @@ DIMAA21403-project/
 | Item | Why | How a reader gets it |
 |---|---|---|
 | Base models (Qwen2.5-Coder 7B / 14B) | third-party weights, 15 to 30 GB | Hugging Face / Ollama, named in the README |
-| LoRA adapters (`lora/`) and merged/GGUF/Ollama exports | hundreds of MB per adapter, tens of GB of exports; not asked for by the guide | retrain with `train_lora.py` from the included training files |
+| Merged / GGUF / Ollama exports of the adapters | tens of GB, and rebuilt exactly from the included adapters | `export_ollama.py` (command in `models/README.md`) |
 | BIRD train databases (`data/bird_train`) | several GB; only needed to rebuild the training pairs, which are included | URL + command in `source_and_licence.txt` |
 | The other 6 BIRD dev databases | not used | `scripts/download_bird.py` |
 | `data/bird.duckdb`, `node_modules/`, raw `runs/` | generated / reinstallable; gzipped copies of all reported runs are in `results/runs/` | commands in the README |
@@ -117,9 +123,11 @@ DIMAA21403-project/
 2. **Page limit.** The guide says "The final PDF must be no longer than ten pages". Both PDFs are 11 pages
    (title page + 10). We assumed earlier that the title page does not count; the guide does not say so. Worth
    confirming with the lecturer, or cutting one page.
-3. **LoRA adapters.** Not included (the guide does not ask for weights and FASER's size limit is unknown). Say if
-   you want the final adapters added as an optional extra.
+3. ~~LoRA adapters~~ Decided 2026-11-26: include them (`models/lora/`). The base models and the merged/Ollama
+   exports stay out (15 to 30 GB each, rebuildable). Adapter sizes are only known on the PC; if the ZIP gets too
+   big for FASER, use `--weights-zip` to split them into a second file.
 4. **noschema adapter training file** (`data/synth/synth.jsonl`) only exists on your PC, so build the final ZIP
    there to include it.
-5. **FASER upload limit.** The guide gives none; the ZIP is about 39 MB (14 MB of it the BIRD databases,
-   13 MB the LoRA training files). `--no-sft` brings it to about 26 MB if needed.
+5. **FASER upload limit.** The guide gives none. Without weights the ZIP is about 39 MB (14 MB BIRD databases,
+   13 MB LoRA training files); the adapters add roughly 100 to 300 MB each (estimate, rank 16). The script prints
+   each adapter's size.

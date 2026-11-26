@@ -16,6 +16,7 @@ Snapshot of GitHub repository `shamx9ir/msc-ce893`, commit `{COMMIT}`, packed on
 | `code/` | all code, in the repository's own layout so every relative path works (see the table below) |
 | `data/original/bird/` | the BIRD dev files of the five databases used: `dev.json` (their questions, hints and gold SQL), `dev_tables.json`, and `dev_databases/<db>/` (SQLite file + BIRD's column descriptions) |
 | `data/processed/` | `test_questions.jsonl` (332 frozen test questions with gold SQL), `tune_questions.jsonl` (all 363 questions of the three harness-development databases; `splits/tune_ids.json` marks the 120-question subset used early on), `splits/`, and `lora_training/<adapter>/sft_tools_{train,val}.jsonl` (the exact LoRA training and validation files, with `split.json`) |
+| `models/` | the trained LoRA adapters, one folder per system; `models/README.md` says which is which and how to load them |
 | `data/source_and_licence.txt` | where every data file comes from, its licence, and how to get what is not included |
 
 Inside `code/`:
@@ -66,7 +67,7 @@ Then follow "Reproducing the results, 2." in `code/README.md` from the `build_du
 | Item | Size | Why left out | How to get it |
 |---|---|---|---|
 | Base models Qwen2.5-Coder-7B/14B-Instruct | 15 to 30 GB each | third-party weights, too large | Hugging Face `Qwen/Qwen2.5-Coder-7B-Instruct`, `-14B-Instruct`; Ollama `qwen2.5-coder:7b`, `:14b` |
-| Trained LoRA adapters and merged/quantised Ollama exports | hundreds of MB per adapter, tens of GB of exports | too large for upload | retrain with `code/scripts/train_lora.py` (5 to 9 hours on one RTX 5070 Ti), export with `export_ollama.py` |
+| Merged/quantised Ollama exports of the adapters | tens of GB | too large; rebuilt exactly from `models/lora/` | `code/scripts/export_ollama.py` (see `models/README.md`) |
 | BIRD train databases | several GB | too large; only needed to rebuild `training_data/` from scratch | `https://bird-bench.oss-cn-beijing.aliyuncs.com/train.zip` (see `data/source_and_licence.txt`) |
 | Other BIRD dev databases | about 1.4 GB | not used by the project | `code/scripts/download_bird.py` |
 | Generated DuckDB file, `node_modules/` | | rebuilt by the commands above | |
