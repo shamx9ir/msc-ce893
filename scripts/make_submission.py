@@ -7,6 +7,7 @@ Layout follows the module's "Project Deliverables" guide (see SUBMISSION.md):
     |-- report.pdf                 the final report (outline version = Shamir's text, or the full draft)
     |-- report-source/             LaTeX source that compiles report.pdf (main.tex, references.bib, figures/ ...)
     |-- code/                      snapshot of the repository's tracked code, notebooks and stored results
+    |-- models/lora/<adapter>/     trained LoRA adapters (lora/*/final), unless --no-weights
     `-- data/
         |-- original/bird/         BIRD dev files for the 5 databases used (questions, tables, SQLite + descriptions)
         |-- processed/             test/tuning question files, splits, LoRA train/validation files per adapter
@@ -19,6 +20,7 @@ Run it from anywhere; paths are resolved from the repository root:
     python scripts/make_submission.py --report full         # submit the full draft instead
     python scripts/make_submission.py --download-bird       # fetch BIRD dev first if data/bird is missing
     python scripts/make_submission.py --run-notebooks       # also execute both notebooks inside the staged copy
+    python scripts/make_submission.py --weights-zip         # adapters in a second ZIP if one file is too big
 
 The ZIP is written to dist/<REG>-project.zip (dist/ is git-ignored).
 """
@@ -241,6 +243,57 @@ def build_data(stage: Path, bird: Path | None, make_sft: bool) -> list[str]:
     return warnings
 
 
+# ---------------------------------------------------------------- model weights
+
+# Known adapter folders (lora/<name>/final, written by scripts/train_lora.py) and their names in the report.
+ADAPTER_NAMES = {
+    "qwen7b": "LoRA, full prompt (7B)", "qwen14b": "LoRA, full prompt (14B)",
+    "qwen7b-lean": "LoRA, lean prompt (7B)", "qwen14b-lean": "LoRA, lean prompt (14B)",
+    "qwen7b-noschema": "noschema LoRA (7B)", "qwen14b-noschema": "noschema LoRA (14B)",
+    "qwen7b-sv3": "lookup LoRA, full prompt (7B)", "qwen14b-sv3": "lookup LoRA, full prompt (14B)",
+    "qwen7b-lean-sv3": "lookup LoRA, lean prompt (7B)", "qwen14b-lean-sv3": "lookup LoRA, lean prompt (14B)",
+    "qwen7b-sv2": "search_values v2 retrain (7B, development only, not in the report)",
+}
+
+
+def build_weights(dest: Path, lora_dir: Path) -> list[str]:
+    """Copy every trained LoRA adapter (lora/<name>/final + train_info.json); checkpoints are left out."""
+    finals = sorted(p for p in lora_dir.glob("*/final") if p.is_dir()) if lora_dir.is_dir() else []
+    if not finals:
+        return [f"no LoRA adapters found in {lora_dir} (expected <name>/final from train_lora.py): "
+                "build the ZIP on the training PC or pass --lora-dir."]
+    rows, total = [], 0
+    for final in finals:
+        name = final.parent.name
+        out = dest / "lora" / name
+        shutil.copytree(final, out)
+        if (final.parent / "train_info.json").exists():
+            copy(final.parent / "train_info.json", out / "train_info.json")
+        size = sum(f.stat().st_size for f in out.rglob("*") if f.is_file())
+        total += size
+        rows.append(f"| `lora/{name}/` | {ADAPTER_NAMES.get(name, 'see code/docs/README_technical.md')} | {size / 1e6:.0f} MB |")
+        log(f"models/lora/{name}/: {size / 1e6:.0f} MB")
+    base = "Qwen/Qwen2.5-Coder-14B-Instruct or Qwen/Qwen2.5-Coder-7B-Instruct (matching the adapter's size)"
+    (dest / "README.md").write_text(
+        "# Trained LoRA adapters\n\n"
+        "PEFT adapters (rank 16, all attention and MLP projections) written by `code/scripts/train_lora.py`, one per\n"
+        f"system in the report. Each folder holds the adapter, the tokenizer and `train_info.json` (settings + loss log).\n"
+        "Adapters trained with `--train-tokens` also hold the learned `<tool_call>` token rows used by\n"
+        "`export_ollama.py`. The base models are not included (15 to 30 GB, Apache 2.0, on Hugging Face).\n\n"
+        "| Folder | System | Size |\n|---|---|---|\n" + "\n".join(rows) + "\n\n"
+        "Use with Hugging Face PEFT:\n\n```python\n"
+        "from transformers import AutoModelForCausalLM, AutoTokenizer\nfrom peft import PeftModel\n"
+        "base = AutoModelForCausalLM.from_pretrained(\"Qwen/Qwen2.5-Coder-7B-Instruct\", device_map=\"auto\")\n"
+        "model = PeftModel.from_pretrained(base, \"models/lora/qwen7b\")\n"
+        "tok = AutoTokenizer.from_pretrained(\"models/lora/qwen7b\")\n```\n\n"
+        "Or build the Ollama model the experiments used (merge, GGUF Q4_K_M):\n\n"
+        "```\npython code/scripts/export_ollama.py --base Qwen/Qwen2.5-Coder-7B-Instruct --adapter models/lora/qwen7b \\\n"
+        "    --llama-cpp ../llama.cpp --quantize ../llama.cpp/build/bin/llama-quantize --ollama-base qwen2.5-coder:7b --name qwen7b-cube-lora\n```\n"
+        f"\nBase model for each adapter: {base}.\n", encoding="utf-8")
+    log(f"models/: {len(finals)} adapters, {total / 1e9:.2f} GB")
+    return []
+
+
 # ---------------------------------------------------------------- checks
 
 def run_notebooks(stage: Path) -> list[str]:
@@ -271,6 +324,17 @@ def verify_zip(zpath: Path, top: str) -> list[str]:
     return problems
 
 
+def write_zip(zpath: Path, folder: Path, prefix: Path) -> None:
+    if zpath.exists():
+        zpath.unlink()
+    with zipfile.ZipFile(zpath, "w", zipfile.ZIP_DEFLATED, compresslevel=6, allowZip64=True) as z:
+        for p in sorted(folder.rglob("*")):
+            if p.is_file():
+                # safetensors barely compress; storing them is much faster
+                kind = zipfile.ZIP_STORED if p.suffix == ".safetensors" else zipfile.ZIP_DEFLATED
+                z.write(p, prefix / p.relative_to(folder), compress_type=kind)
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--reg", default="DIMAA21403", help="registration number used in the folder and ZIP name")
@@ -280,6 +344,10 @@ def main() -> None:
                     help="unpacked BIRD dev folder (has dev.json, dev_tables.json, dev_databases/)")
     ap.add_argument("--download-bird", action="store_true", help="run scripts/download_bird.py if --bird-dir is missing")
     ap.add_argument("--no-sft", action="store_true", help="skip generating the LoRA training/validation files")
+    ap.add_argument("--no-weights", action="store_true", help="leave the trained LoRA adapters out")
+    ap.add_argument("--lora-dir", type=Path, default=ROOT / "lora", help="folder with <name>/final adapters")
+    ap.add_argument("--weights-zip", action="store_true",
+                    help="put the adapters in a second ZIP (<REG>-project-weights.zip) instead of the main one")
     ap.add_argument("--run-notebooks", action="store_true", help="execute both notebooks inside the staged copy")
     ap.add_argument("--out", type=Path, default=ROOT / "dist")
     args = ap.parse_args()
@@ -307,6 +375,15 @@ def main() -> None:
     warnings += build_report(stage, args.report, files)
     build_code(stage, files)
     warnings += build_data(stage, bird, not args.no_sft)
+    if args.no_weights:
+        warnings.append("--no-weights: the trained LoRA adapters are not included.")
+    elif args.weights_zip:
+        wstage = args.out / f"{top}-weights"
+        if wstage.exists():
+            shutil.rmtree(wstage)
+        warnings += build_weights(wstage / f"{top}" / "models", args.lora_dir)
+    else:
+        warnings += build_weights(stage / "models", args.lora_dir)
 
     readme = (ROOT / "submission" / "README.md").read_text(encoding="utf-8")
     readme = readme.replace("{REG}", args.reg).replace("{COMMIT}", commit).replace(
@@ -318,13 +395,12 @@ def main() -> None:
     if args.run_notebooks:
         warnings += run_notebooks(stage)
 
-    if zpath.exists():
-        zpath.unlink()
-    with zipfile.ZipFile(zpath, "w", zipfile.ZIP_DEFLATED, compresslevel=9) as z:
-        for p in sorted(stage.rglob("*")):
-            if p.is_file():
-                z.write(p, Path(top) / p.relative_to(stage))
+    write_zip(zpath, stage, Path(top))
     warnings += verify_zip(zpath, top)
+    if args.weights_zip and not args.no_weights and (args.out / f"{top}-weights").exists():
+        wzip = args.out / f"{top}-weights.zip"
+        write_zip(wzip, args.out / f"{top}-weights", Path())
+        log(f"Wrote {wzip} ({wzip.stat().st_size / 1e6:.1f} MB): unzip it next to the main ZIP, it adds {top}/models/")
 
     size = zpath.stat().st_size / 1e6
     log(f"\nWrote {zpath} ({size:.1f} MB), staged copy in {stage}")
