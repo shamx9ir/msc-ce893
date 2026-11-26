@@ -83,7 +83,7 @@ DIMAA21403-project/
 
 | Guide requirement | Where | Status |
 |---|---|---|
-| Final report PDF | `report.pdf` | ⚠️ version to confirm (question 1) |
+| Final report PDF | `report.pdf` | ✅ outline version (decided) |
 | LaTeX source: .tex, figures, bibliography | `report-source/` | ✅ every `\input`, figure and `.bib` it references is included; compile once to confirm (check 4) |
 | Max 10 pages | both PDFs are **11 pages** (title page + 10) | ⚠️ question 2 |
 | Module LaTeX template | yes (`preamble.tex`, `ce893.bst`, logo, Archivo font) | ✅ |
@@ -112,8 +112,8 @@ DIMAA21403-project/
 
 ## Open questions for Shamir
 
-1. **Which report goes in?** The default is the outline version (`main_outline.pdf`, the one with your own text).
-   Use `--report full` for the full draft.
+1. ~~Which report goes in?~~ Decided 2026-11-26: the outline version (`main_outline.pdf`, your own text), the
+   script's default.
 2. **Page limit.** The guide says "The final PDF must be no longer than ten pages". Both PDFs are 11 pages
    (title page + 10). We assumed earlier that the title page does not count; the guide does not say so. Worth
    confirming with the lecturer, or cutting one page.
