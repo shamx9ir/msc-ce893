@@ -168,7 +168,6 @@ Directions for future work include:
 }
 
 
-# Placeholder text for Shamir to reword in his own words.
 AI_DECLARATION = r"""\smallskip\noindent{\footnotesize\textbf{Generative AI declaration.} I used Claude Code (Anthropic, Claude Opus models) to help write and debug the code (harness, data conversion, training, evaluation, demo app, figures) and to draft the report's structure. I reviewed all code, re-ran the evaluation from the stored runs, checked every number against the run files and wrote the final text myself.\par}
 """
 
