@@ -320,11 +320,11 @@ Directions for future work include:
 \end{itemize}
 
 
-\medskip\noindent{\footnotesize\textbf{Generative AI declaration.} I used Claude Code (Anthropic, Claude Opus models) to help write and debug the code (harness, data conversion, training, evaluation, demo app, figures) and to draft the report's structure. I reviewed all code, re-ran the evaluation from the stored runs, checked every number against the run files and wrote the final text myself.\par}
+\smallskip\noindent{\footnotesize\textbf{Generative AI declaration.} I used Claude Code (Anthropic, Claude Opus models) to help write and debug the code (harness, data conversion, training, evaluation, demo app, figures) and to draft the report's structure. I reviewed all code, re-ran the evaluation from the stored runs, checked every number against the run files and wrote the final text myself.\par}
 
 {\scriptsize
 \let\oldthebibliography\thebibliography
-\renewcommand\thebibliography[1]{\oldthebibliography{#1}\setlength{\itemsep}{0pt}\setlength{\parsep}{0pt}}
-\begin{multicols}{2}\setlength{\parskip}{0pt}\bibliographystyle{ce893}
+\renewcommand\thebibliography[1]{\oldthebibliography{#1}\setlength{\itemsep}{0pt}\setlength{\parsep}{0pt}\setlength{\parskip}{0pt}}
+\setlength{\multicolsep}{0pt}\begin{multicols}{2}[\oldsection*{References}]\renewcommand{\section}[2]{}\setlength{\parskip}{0pt}\bibliographystyle{ce893}
 \bibliography{references}\end{multicols}
 }

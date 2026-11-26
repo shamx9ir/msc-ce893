@@ -169,7 +169,7 @@ Directions for future work include:
 
 
 # Placeholder text for Shamir to reword in his own words.
-AI_DECLARATION = r"""\medskip\noindent{\footnotesize\textbf{Generative AI declaration.} I used Claude Code (Anthropic, Claude Opus models) to help write and debug the code (harness, data conversion, training, evaluation, demo app, figures) and to draft the report's structure. I reviewed all code, re-ran the evaluation from the stored runs, checked every number against the run files and wrote the final text myself.\par}
+AI_DECLARATION = r"""\smallskip\noindent{\footnotesize\textbf{Generative AI declaration.} I used Claude Code (Anthropic, Claude Opus models) to help write and debug the code (harness, data conversion, training, evaluation, demo app, figures) and to draft the report's structure. I reviewed all code, re-ran the evaluation from the stored runs, checked every number against the run files and wrote the final text myself.\par}
 """
 
 
@@ -221,9 +221,9 @@ def main():
     text = text.replace("{\\footnotesize\n\\bibliographystyle", "{\\footnotesize\n\\nocite{*}\n\\bibliographystyle")
     # outline only: slightly smaller reference list so the outline keeps title + 10 pages
     text = text.replace("{\\footnotesize\n\\let\\oldthebibliography", "{\\scriptsize\n\\let\\oldthebibliography", 1)
-    text = text.replace("\\setlength{\\itemsep}{0.1ex}}", "\\setlength{\\itemsep}{0pt}\\setlength{\\parsep}{0pt}}", 1)
+    text = text.replace("\\setlength{\\itemsep}{0.1ex}}", "\\setlength{\\itemsep}{0pt}\\setlength{\\parsep}{0pt}\\setlength{\\parskip}{0pt}}", 1)
     # outline only: references in two columns, so the AI declaration still fits in title + 10 pages
-    text = text.replace("\\bibliographystyle{ce893}\n\\bibliography{references}", "\\begin{multicols}{2}\\setlength{\\parskip}{0pt}\\bibliographystyle{ce893}\n\\bibliography{references}\\end{multicols}", 1)
+    text = text.replace("\\bibliographystyle{ce893}\n\\bibliography{references}", "\\setlength{\\multicolsep}{0pt}\\begin{multicols}{2}[\\oldsection*{References}]\\renewcommand{\\section}[2]{}\\setlength{\\parskip}{0pt}\\bibliographystyle{ce893}\n\\bibliography{references}\\end{multicols}", 1)
     # The outline's notes run longer than the prose in places, so a few figures are smaller here to keep 10 pages.
     for fig, (w_old, w_new) in {"fig04_harness_versions": ("0.8", "0.6"), "fig06_training": ("0.78", "0.58"), "fig08_offload": ("0.74", "0.58"), "fig07_main": ("0.68", "0.58"), "fig10_errors": ("0.62", "0.5"), "fig05_method": ("0.75", "0.55")}.items():
         text = text.replace(f"width={w_old}\\linewidth]{{figures/{fig}", f"width={w_new}\\linewidth]{{figures/{fig}")
