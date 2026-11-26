@@ -256,12 +256,17 @@ ADAPTER_NAMES = {
 }
 
 
-def build_weights(dest: Path, lora_dir: Path) -> list[str]:
-    """Copy every trained LoRA adapter (lora/<name>/final + train_info.json); checkpoints are left out."""
-    finals = sorted(p for p in lora_dir.glob("*/final") if p.is_dir()) if lora_dir.is_dir() else []
+def build_weights(dest: Path, lora_dirs: list[Path]) -> list[str]:
+    """Copy every trained LoRA adapter (<lora dir>/<name>/final + train_info.json); checkpoints are left out."""
+    finals = {}
+    for lora_dir in lora_dirs:
+        for p in sorted(lora_dir.glob("*/final")) if lora_dir.is_dir() else []:
+            if p.is_dir():
+                finals.setdefault(p.parent.name, p)  # first --lora-dir wins on a name clash
+    finals = [finals[k] for k in sorted(finals)]
     if not finals:
-        return [f"no LoRA adapters found in {lora_dir} (expected <name>/final from train_lora.py): "
-                "build the ZIP on the training PC or pass --lora-dir."]
+        return [f"no LoRA adapters found in {', '.join(map(str, lora_dirs))} (expected <name>/final from "
+                "train_lora.py): build the ZIP on the training PC or pass --lora-dir."]
     rows, total = [], 0
     for final in finals:
         name = final.parent.name
@@ -345,12 +350,16 @@ def main() -> None:
     ap.add_argument("--download-bird", action="store_true", help="run scripts/download_bird.py if --bird-dir is missing")
     ap.add_argument("--no-sft", action="store_true", help="skip generating the LoRA training/validation files")
     ap.add_argument("--no-weights", action="store_true", help="leave the trained LoRA adapters out")
-    ap.add_argument("--lora-dir", type=Path, default=ROOT / "lora", help="folder with <name>/final adapters")
+    ap.add_argument("--lora-dir", type=Path, action="append",
+                    help="folder with <name>/final adapters; repeat for several (default: lora/ and, if it exists, "
+                         "../msc-ce893-schema/lora/, where the lean and noschema adapters were trained)")
     ap.add_argument("--weights-zip", action="store_true",
                     help="put the adapters in a second ZIP (<REG>-project-weights.zip) instead of the main one")
     ap.add_argument("--run-notebooks", action="store_true", help="execute both notebooks inside the staged copy")
     ap.add_argument("--out", type=Path, default=ROOT / "dist")
     args = ap.parse_args()
+    if not args.lora_dir:
+        args.lora_dir = [d for d in (ROOT / "lora", ROOT.parent / "msc-ce893-schema" / "lora") if d.is_dir()] or [ROOT / "lora"]
 
     top = f"{args.reg}-project"
     stage = args.out / top

@@ -7,7 +7,7 @@ repository, and how to build the ZIP. Build it with:
 python scripts/make_submission.py
 ```
 
-It writes `dist/DIMAA21403-project.zip` (about 39 MB plus the LoRA adapters) plus an unzipped copy in `dist/DIMAA21403-project/`
+It writes `dist/DIMAA21403-project.zip` (about 2.4 GB with the LoRA adapters, 39 MB without) plus an unzipped copy in `dist/DIMAA21403-project/`
 to look through, and ends with a **CHECK BEFORE UPLOADING** list of anything that still needs attention.
 It uses only the Python standard library (plus `pypdf` for the page count, `jupyter` for `--run-notebooks`) and
 works the same on Windows. Run it on the experiment PC, where `data/bird` and `data/synth/synth.jsonl` already
@@ -20,7 +20,7 @@ exist; elsewhere add `--download-bird` (350 MB download).
 | `--download-bird` | downloads BIRD dev if `data/bird` is missing |
 | `--bird-dir PATH` | BIRD dev folder somewhere else |
 | `--no-sft` | leaves out the LoRA training files (smaller ZIP) |
-| `--lora-dir PATH` | where the trained adapters are (default `lora/`, each as `<name>/final`) |
+| `--lora-dir PATH` | where the trained adapters are, repeatable (default `lora/` plus `../msc-ce893-schema/lora/` on your PC, where the lean and noschema adapters live) |
 | `--weights-zip` | puts the adapters in a second ZIP, `DIMAA21403-project-weights.zip`, if one file is too big for FASER |
 | `--no-weights` | leaves the adapters out |
 | `--reg` | registration number in the folder name (default `DIMAA21403`) |
@@ -124,10 +124,10 @@ DIMAA21403-project/
    (title page + 10). We assumed earlier that the title page does not count; the guide does not say so. Worth
    confirming with the lecturer, or cutting one page.
 3. ~~LoRA adapters~~ Decided 2026-11-26: include them (`models/lora/`). The base models and the merged/Ollama
-   exports stay out (15 to 30 GB each, rebuildable). Adapter sizes are only known on the PC; if the ZIP gets too
-   big for FASER, use `--weights-zip` to split them into a second file.
+   exports stay out (15 to 30 GB each, rebuildable). Your PC has 11 adapters, 2.4 GB in total (7B: 170 MB,
+   14B: 278 MB each; 7 in `msc-ce893/lora/`, the 4 lean/noschema ones in `msc-ce893-schema/lora/`); the script
+   picks up both folders. If FASER refuses a 2.4 GB file, `--weights-zip` puts them in a second ZIP.
 4. **noschema adapter training file** (`data/synth/synth.jsonl`) only exists on your PC, so build the final ZIP
    there to include it.
 5. **FASER upload limit.** The guide gives none. Without weights the ZIP is about 39 MB (14 MB BIRD databases,
-   13 MB LoRA training files); the adapters add roughly 100 to 300 MB each (estimate, rank 16). The script prints
-   each adapter's size.
+   13 MB LoRA training files); the adapters add 2.4 GB (safetensors barely compress).
