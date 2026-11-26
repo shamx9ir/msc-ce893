@@ -119,7 +119,7 @@ Both experimental setups employ the Qwen2.5-Coder-7B-Instruct and -14B-Instruct 
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=0.74\linewidth]{figures/fig04_harness_versions.pdf}
+\includegraphics[width=0.6\linewidth]{figures/fig04_harness_versions.pdf}
 \caption{Prompt-engineering progress for the 7B baseline (development runs, with BIRD's hint). (a) The three versions that were also run on the test set: strict accuracy doubled from v1 to v4.2. (b) The development loop used only tuning databases; on all 363 tuning questions v4.2 beat v3 (32.0\% vs 26.2\%, McNemar $p{=}0.011$), and the 14B model reached 38.8\%.}
 \label{fig:versions}
 \end{figure}
@@ -131,13 +131,13 @@ Fine-tuning is conducted via QLoRA~\cite{dettmers2023qlora} utilising PEFT~\cite
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=0.75\linewidth]{figures/fig05_method.pdf}
+\includegraphics[width=0.55\linewidth]{figures/fig05_method.pdf}
 \caption{Fine-tuning pipeline (top) and the three prompt profiles (bottom). Only the adapter and the prompt profile change between arms.}
 \label{fig:method}
 \end{figure}
 
 \subsection{Implementation details}
-Table~\ref{tab:settings} lists the settings needed to reproduce the method. The code has four parts: the harness (ADK agent, tools and evaluator), the data-preparation and training scripts, the stored runs with the analysis notebook that recomputes every number and figure, and a working demo app in which the same agent answers questions as Highcharts charts and tables on an A2UI surface, beside the Cube query and tool trace. The README gives the run instructions and pinned package versions.
+Table~\ref{tab:settings} lists the settings. The code covers the harness, data preparation and training, the stored runs with a notebook that recomputes every number and figure, and a working demo app showing the agent's answers as Highcharts charts on an A2UI surface; the README gives run instructions and pinned versions.
 
 \begin{table}[!htbp]
 \centering
@@ -159,7 +159,7 @@ Hardware & one RTX 5070 Ti (16\,GB), 32\,GB RAM, Windows; training 5.3\,h (7B) a
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=0.72\linewidth]{figures/fig06_training.pdf}
+\includegraphics[width=0.58\linewidth]{figures/fig06_training.pdf}
 \caption{Training progress for all six adapters. The loss drops within the first quarter epoch and then stays flat; validation loss on the three held-out databases follows it, so the adapters did not overfit. Lean and noschema adapters start higher because the model has never seen those short prompts.}
 \label{fig:training}
 \end{figure}
@@ -169,14 +169,14 @@ Hardware & one RTX 5070 Ti (16\,GB), 32\,GB RAM, Windows; training 5.3\,h (7B) a
 \subsection{Compared systems}
 \begin{enumerate}[nosep,leftmargin=1.5em]
   \item \textbf{Harness only (baseline):} base Qwen2.5-Coder 7B/14B, harness v4.2, full prompt; the prompt-engineering reference.
-  \item \textbf{LoRA, full prompt (proposed):} same model plus the LoRA adapter. Tests whether training on verified transcripts beats prompting alone (first part of the RQ). All arms share the harness.
-  \item \textbf{Prompt offloading:} \emph{LoRA, lean prompt}; \emph{noschema LoRA, no schema / lean prompt}; control: full-prompt LoRA on the lean prompt. Tests how much of the prompt the adapter can absorb (second part of the RQ); the control tests whether an adapter works with a prompt it was not trained on.
-  \item \textbf{Extra arms:} \emph{lookup LoRA, full / lean prompt}, retrained to look up filter values (Section~\ref{sec:tooluse}). Tests whether the adapters' main weakness, skipped value lookups, can be fixed through the training data.
+  \item \textbf{LoRA, full prompt (proposed):} same model plus the LoRA adapter. Tests training against prompting alone (RQ, part 1). All arms share the harness.
+  \item \textbf{Prompt offloading:} \emph{LoRA, lean prompt}; \emph{noschema LoRA, no schema / lean prompt}; control: full-prompt LoRA on the lean prompt. Tests how much prompt the adapter absorbs (RQ, part 2); the control, whether an adapter works with a prompt it was not trained on.
+  \item \textbf{Extra arms:} \emph{lookup LoRA, full / lean prompt}, retrained to look up filter values (Section~\ref{sec:tooluse}). Tests whether skipped lookups can be fixed through the training data.
 \end{enumerate}
 
 
 \subsection{Evaluation data and measures}
-332 test questions from two databases unseen in training and tuning (218 simple, 91 moderate, 23 challenging; 77\% need a join). The model sees only the question, without BIRD's hint. Strict execution accuracy is the primary measure because a correct Cube query can look nothing like the gold SQL, so only the returned rows can be compared fairly; relaxed accuracy separates answers that are right apart from extra columns, and tokens, steps and latency measure the cost side of the second part of the RQ (Table~\ref{tab:measures}).
+332 test questions from two databases unseen in training and tuning (218 simple, 91 moderate, 23 challenging; 77\% need a join). The model sees only the question, without BIRD's hint. Strict execution accuracy is primary because a correct Cube query can look nothing like the gold SQL, so rows are compared; tokens, steps and latency measure the cost side of the RQ (Table~\ref{tab:measures}).
 
 
 \begin{table}[!htbp]
@@ -199,7 +199,7 @@ Significance & Exact McNemar test on paired per-question outcomes (strict)\\
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=0.62\linewidth]{figures/fig07_main.pdf}
+\includegraphics[width=0.58\linewidth]{figures/fig07_main.pdf}
 \caption{Before and after fine-tuning (higher is better). (a) The LoRA adds 13--15 points of strict accuracy at both sizes, more than doubling the model size does. (b) The gain holds on both databases. At 7B it is similar with and without joins (20\% to 35\%, 27\% to 43\%); at 14B it comes from join questions (23\% to 41\%), while questions without a join stay at about 41--43\%.}
 \label{fig:main}
 \end{figure}
@@ -247,7 +247,7 @@ Addressing the second component of the Research Question, Fig.~\ref{fig:offload}
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=0.68\linewidth]{figures/fig08_offload.pdf}
+\includegraphics[width=0.58\linewidth]{figures/fig08_offload.pdf}
 \caption{Accuracy against prompt cost (up and left is better). The lean-prompt LoRAs (green) match the full-prompt LoRA's accuracy at 40\% of its prompt tokens; dropping the schema altogether (triangles) saves more tokens but loses 16--19 points. Crosses: lookup LoRAs.}
 \label{fig:offload}
 \end{figure}
@@ -288,8 +288,8 @@ Training took 5.3\,h (7B) and 9.0\,h (14B) on one 16\,GB GPU (2--3\,h for the le
 \section{Discussion}\label{sec:discussion}
 
 \begin{figure}[!htbp]
-\begin{minipage}[c]{0.6\linewidth}\includegraphics[width=\linewidth]{figures/fig09_outputs_wide.pdf}\end{minipage}\hfill
-\begin{minipage}[c]{0.38\linewidth}\small\raggedright \caption{Real tool traces from the test runs (\texttt{>} model call, \texttt{<} tool reply; shortened to fit, full traces in the saved runs). A: the baseline groups by circuit and returns three rows, the LoRA asks for the single count. B: the LoRA skips the value lookup, filters on a value that does not exist and submits an empty result. C: without a schema the model invents \texttt{student.phone\_number} and repeats it; the lean adapter writes \texttt{member.phone} (here as text, which the harness parses).}\label{fig:outputs}\end{minipage}
+\begin{minipage}[c]{0.55\linewidth}\includegraphics[width=\linewidth]{figures/fig09_outputs_wide.pdf}\end{minipage}\hfill
+\begin{minipage}[c]{0.43\linewidth}\small\raggedright \caption{Real tool traces from the test runs (\texttt{>} model call, \texttt{<} tool reply; shortened to fit, full traces in the saved runs). A: the baseline groups by circuit and returns three rows, the LoRA asks for the single count. B: the LoRA skips the value lookup, filters on a value that does not exist and submits an empty result. C: without a schema the model invents \texttt{student.phone\_number} and repeats it; the lean adapter writes \texttt{member.phone} (here as text, which the harness parses).}\label{fig:outputs}\end{minipage}
 \end{figure}
 
 \subsection{Interpretation and error analysis}
@@ -298,13 +298,13 @@ As shown in Fig.~\ref{fig:outputs}A, the baseline follows its rules by looking u
 
 \begin{figure}[!htbp]
 \centering
-\includegraphics[width=0.56\linewidth]{figures/fig10_errors.pdf}
+\includegraphics[width=0.5\linewidth]{figures/fig10_errors.pdf}
 \caption{Wrong answers by category (rules applied in order). The LoRA mainly removes failed runs, wrong filters and extra columns; about 55 per arm need SQL Cube cannot express.}
 \label{fig:errors}
 \end{figure}
 
 \subsection{Limitations and responsible use}
-Questions are answered as Cube queries from the question text alone, so the numbers are not comparable with the BIRD leaderboard. The translation pipeline keeps only queries Cube can express, and the no-schema adapter is tied to the databases it was trained on. The base model's \texttt{<tool\_call>} token was never trained, so whether an adapter produces it is fragile at both sizes: the original 14B adapter wrote a stray token instead on every call, the 7B one almost never. Our harness parsed these text calls, but other clients would fail; retraining fixed it. Each arm was trained and run once on two databases, so differences that are not significant (e.g.\ 7B vs 14B LoRA, lean vs full prompt) should not be read as real gaps. BIRD is public and contains no sensitive personal data.
+Questions are answered as Cube queries from the question text alone, so the numbers are not comparable with the BIRD leaderboard. The translation pipeline keeps only queries Cube can express, and the no-schema adapter is tied to the databases it was trained on. The base model's \texttt{<tool\_call>} token was never trained, so whether an adapter produces it is fragile at both sizes: the original 14B adapter wrote a stray token instead on every call, the 7B one almost never. Our harness parsed these text calls, but other clients would fail; retraining fixed it. Each arm was trained and run once on two databases, so non-significant differences (e.g.\ 7B vs 14B LoRA) should not be read as real gaps. BIRD is public and contains no sensitive personal data.
 
 
 \section{Conclusion}
@@ -320,12 +320,11 @@ Directions for future work include:
 \end{itemize}
 
 
-\section*{Generative AI declaration}
-I used Claude Code (Anthropic, Claude Opus models) to help write and debug the harness, data-conversion, training and evaluation scripts, the demo app and the figure scripts, and to draft parts of this report's structure. I reviewed all code, re-ran the evaluation from the stored runs, checked every reported number against the run files, and wrote the final text myself.
+\medskip\noindent{\footnotesize\textbf{Generative AI declaration.} I used Claude Code (Anthropic, Claude Opus models) to help write and debug the code (harness, data conversion, training, evaluation, demo app, figures) and to draft the report's structure. I reviewed all code, re-ran the evaluation from the stored runs, checked every number against the run files and wrote the final text myself.\par}
 
 {\scriptsize
 \let\oldthebibliography\thebibliography
-\renewcommand\thebibliography[1]{\oldthebibliography{#1}\setlength{\itemsep}{0.1ex}}
-\bibliographystyle{ce893}
-\bibliography{references}
+\renewcommand\thebibliography[1]{\oldthebibliography{#1}\setlength{\itemsep}{0pt}\setlength{\parsep}{0pt}}
+\begin{multicols}{2}\setlength{\parskip}{0pt}\bibliographystyle{ce893}
+\bibliography{references}\end{multicols}
 }
