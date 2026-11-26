@@ -1,11 +1,12 @@
-duckdb==1.5.*      # must match the DuckDB version bundled with Cube's duckdb driver
-pandas>=2.2
-pyyaml>=6.0
-requests>=2.31
+# Exact versions used for all reported runs (Python 3.11.8, Windows 11).
+duckdb==1.5.6      # must match the DuckDB version bundled with Cube's duckdb driver
+pandas==3.1.1
+pyyaml==6.0.3
+requests==2.34.2
 google-adk==2.14.0   # agent loop
-litellm>=1.109     # lets ADK call local models (Ollama, vLLM)
-pytest>=8.0
-sqlglot>=25          # SQL -> Cube translation for training data
-matplotlib>=3.8      # report figures and notebook
-scipy>=1.11          # McNemar tests (report/analysis.py)
-nbformat>=5.9        # notebook/build_notebook.py
+litellm==1.109.1     # lets ADK call local models (Ollama, vLLM)
+pytest==9.2.0
+sqlglot==30.31.0          # SQL -> Cube translation for training data
+matplotlib==3.11.2      # report figures and notebook
+scipy==1.17.1          # McNemar tests (report/analysis.py)
+nbformat==5.11.1        # notebook/build_notebook.py

@@ -1,9 +1,12 @@
 """End-to-end check of harness + evaluator with a scripted stand-in for the LLM.
 
-Needs Cube running on localhost:4000 with the generated model. Run: python -m pytest tests -q
+Tests marked needs_cube need Cube on localhost:4000 with the generated model; without it they are skipped. Run: python -m pytest tests -q
 """
 import json
 from pathlib import Path
+
+import pytest
+import requests
 
 from google.adk.models.base_llm import BaseLlm
 from google.adk.models.llm_response import LlmResponse
@@ -15,6 +18,18 @@ from harness.evaluate import cube_rows, results_match, run_gold
 
 BIRD = Path("data/bird")
 DB = "student_club"
+
+
+def _cube_up():
+    try:
+        requests.get("http://localhost:4000/readyz", timeout=2)
+        return BIRD.exists()
+    except requests.RequestException:
+        return False
+
+
+# Tests that run real Cube queries are skipped (not failed) when Cube or the BIRD data is not set up.
+needs_cube = pytest.mark.skipif(not _cube_up(), reason="needs Cube on localhost:4000 and data/bird (see README)")
 
 
 def call(name, **args):
@@ -42,6 +57,7 @@ def gold(qid):
     return run_gold(BIRD / "dev_databases" / DB / f"{DB}.sqlite", q["SQL"])
 
 
+@needs_cube
 def test_tool_loop_with_retry_matches_gold():
     bad = {"measures": ["members.count"]}  # typo: harness should reject it with a hint
     good = {"measures": ["member.count"],
@@ -62,12 +78,14 @@ def test_tool_loop_with_retry_matches_gold():
     assert results_match(cube_rows(h.cube.load(good)), gold(1313))
 
 
+@needs_cube
 def test_column_order_and_set_semantics():
     q = {"dimensions": ["member.last_name", "member.first_name"],
          "filters": [{"member": "major.department", "operator": "equals", "values": ["Art and Design Department"]}]}
     assert results_match(cube_rows(CubeClient().load(q)), gold(1314))
 
 
+@needs_cube
 def test_wrong_answer_is_scored_wrong():
     q = {"measures": ["member.count"]}
     assert not results_match(cube_rows(CubeClient().load(q)), gold(1313))
@@ -78,6 +96,7 @@ def test_single_mode_parses_fenced_json():
     assert extract_json(reply) == {"measures": ["member.count"]}
 
 
+@needs_cube
 def test_text_answer_fallback_and_retry():
     """A model that answers in prose with JSON (no tool call) still gets validated and retried."""
     llm = ScriptedLLM(replies=['Answer: {"measures": ["memb.count"]}', '{"measures": ["member.count"]}'])
@@ -85,6 +104,7 @@ def test_text_answer_fallback_and_retry():
     assert res.query == {"measures": ["member.count"]} and res.error is None and res.steps == 2
 
 
+@needs_cube
 def test_training_prompt_matches_what_adk_sends():
     """The LoRA training data must use exactly the system prompt ADK builds at run time."""
     from harness.agent import system_prompt
@@ -98,6 +118,7 @@ def test_training_prompt_matches_what_adk_sends():
     assert sent == user_prompt(q, hint, h.schema(DB)) and "member.zip" in sent
 
 
+@needs_cube
 def test_tool_schema_matches_litellm_request():
     """harness/tool_schema.json (used in training files) equals the tools LiteLLM sends."""
     import threading
@@ -133,6 +154,7 @@ def test_tool_schema_matches_litellm_request():
     assert captured["tools"] == expected
 
 
+@needs_cube
 def test_sql_to_cube_translation_verifies():
     from harness.sql2cube import Catalog, Translator
     c = CubeClient()
@@ -144,6 +166,7 @@ def test_sql_to_cube_translation_verifies():
     assert results_match(cube_rows(c.load(cq)), gold(1313))
 
 
+@needs_cube
 def test_dimension_used_as_measure_gets_a_hint():
     h = Harness(ScriptedLLM(replies=[]), CubeClient())
     err = h.validate(DB, {"measures": ["event.event_name"]})
@@ -152,6 +175,7 @@ def test_dimension_used_as_measure_gets_a_hint():
         DB, {"measures": ["member.count"], "filters": [{"dimension": "major.college", "value": "x"}]})
 
 
+@needs_cube
 def test_text_tool_calls_are_unwrapped_and_followed():
     """A model that writes run_query as text gets the result back and then submits."""
     q = {"measures": ["member.count"]}
@@ -165,6 +189,7 @@ def test_text_tool_calls_are_unwrapped_and_followed():
     assert extract_json('{"name": "submit_answer", "arguments": {"query": {"measures": ["a.b"]}}}') == {"measures": ["a.b"]}
 
 
+@needs_cube
 def test_column_check_warns_once_then_accepts():
     q = {"dimensions": ["event.event_name"], "measures": ["attendance.count"], "order": {"attendance.count": "desc"}, "limit": 1}
     good = {"dimensions": ["event.event_name"], "order": {"attendance.count": "desc"}, "limit": 1}
@@ -178,6 +203,7 @@ def test_column_check_warns_once_then_accepts():
     assert res.query == good and res.error is None
 
 
+@needs_cube
 def test_repeated_calls_and_numeric_search():
     llm = ScriptedLLM(replies=[call("search_values", dimension="member.zip", text="null"),
                                call("search_values", dimension="member.zip", text="null"),
@@ -187,6 +213,7 @@ def test_repeated_calls_and_numeric_search():
     assert "number dimension" in outs[0] and "already made this exact call" in outs[1]
 
 
+@needs_cube
 def test_filter_type_check_and_linking():
     from harness.linking import linked_fields
     h = Harness(ScriptedLLM(replies=[]), CubeClient())
@@ -199,6 +226,7 @@ def test_filter_type_check_and_linking():
     assert fields[0] == "member.first_name"
 
 
+@needs_cube
 def test_text_answer_gets_column_check():
     import json as _json
     q = {"dimensions": ["member.first_name", "member.position"],
@@ -209,6 +237,7 @@ def test_text_answer_gets_column_check():
     assert res.query["dimensions"] == ["member.first_name"]  # unchanged resubmit gets trimmed
 
 
+@needs_cube
 def test_time_dimension_must_be_time():
     h = Harness(ScriptedLLM(replies=[]), CubeClient())
     err = h.validate(DB, {"measures": ["member.count"],

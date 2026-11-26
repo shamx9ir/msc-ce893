@@ -143,7 +143,13 @@ Both notebooks are committed with their outputs, so it can be read on GitHub wit
 ### 2. Running the systems again (needs a GPU)
 
 Needs Python 3.11+, Node.js 20+, [Ollama](https://ollama.com) and, for training, a 16 GB NVIDIA GPU
-(we used an RTX 5070 Ti). One 332-question evaluation takes 10 to 25 minutes; training takes about 5 hours (7B)
+(we used an RTX 5070 Ti).
+
+**Versions used for every reported run:** Python 3.11.8 on Windows; the exact package versions are pinned in
+`requirements.txt` (agent, evaluation, figures) and `requirements-train.txt` (training: PyTorch 2.11.0 with CUDA 12.8,
+transformers 4.57.6, PEFT 0.21.3, bitsandbytes 0.50.2); Cube 1.8.22 (`cube/package.json`). Models: Hugging Face
+`Qwen/Qwen2.5-Coder-7B-Instruct` and `-14B-Instruct` for training, Ollama `qwen2.5-coder:7b` / `:14b` (Q4_K_M) for
+evaluation. One 332-question evaluation takes 10 to 25 minutes; training takes about 5 hours (7B)
 or 9 hours (14B).
 
 ```bash
@@ -158,7 +164,7 @@ In a second terminal, the baseline (harness only, 7B):
 
 ```bash
 ollama pull qwen2.5-coder:7b
-python -m pytest tests -q                                              # sanity check
+python -m pytest tests -q                                              # sanity check (Cube tests skip if Cube is down)
 python -m harness.evaluate --db formula_1 --db student_club --ids-file splits/test_ids.json --no-evidence \
     --model ollama_chat/qwen2.5-coder:7b --setup harness-v4.2-7b-nohint --out runs/test_nohint_harness_7b.jsonl
 ```
