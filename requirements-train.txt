@@ -1,9 +1,9 @@
 # LoRA training (RTX 50-series needs a CUDA 12.8 build of PyTorch):
-#   pip install torch --index-url https://download.pytorch.org/whl/cu128
+#   pip install torch==2.11.0 --index-url https://download.pytorch.org/whl/cu128
 #   pip install -r requirements-train.txt
-transformers>=4.56,<5
-peft>=0.17
-accelerate>=1.10
-bitsandbytes>=0.47
-datasets
-sentencepiece
+transformers==4.57.6
+peft==0.21.3
+accelerate==1.15.0
+bitsandbytes==0.50.2
+datasets==4.8.5
+sentencepiece==0.2.3

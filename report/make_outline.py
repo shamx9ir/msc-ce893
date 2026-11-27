@@ -109,7 +109,7 @@ Current industry practice is to build a harness around the model. LLM harness is
 
 To demonstrate this, we focus on a common business scenario involving data analysis on domain-specific datasets. Analysts submit questions to the LLM, which then query the underlying data source. Our implementation leverages a semantic layer powered by Cube~\cite{cube} to serve as the backend language in contrast to direct SQL. To guide the LLM in answering data-related queries, we will construct a prompt equipped with tools.
 """,
-    "Research question and contribution": r"""A key feature of this experiment is that the evaluation harness remains strictly fixed while only model weights are varied. Every test arm utilises the identical 4-bit model file hosted in Ollama, alongside identical prompts and available tools, ensuring that any performance variations stem directly from the LoRA adapter. Departing from traditional text-to-SQL paradigms, the model generates queries targeted at a semantic-layer API. Furthermore, we evaluate the extent to which the adapter can absorb components of the harness prompt, including the query guide, tool definitions, and schema details. All assessments are conducted across two unseen databases using realistic, analyst-style questions.
+    "Research question and contribution": r"""A key feature of this experiment is that the evaluation harness remains strictly fixed while only model weights are varied. Within each model size, every arm uses the same base model, 4-bit quantisation, harness and tools, and the main comparison also keeps the prompt identical, ensuring that any performance variations stem directly from the LoRA adapter. Departing from traditional text-to-SQL paradigms, the model generates queries targeted at a semantic-layer API. Furthermore, we evaluate the extent to which the adapter can absorb components of the harness prompt, including the query guide, tool definitions, and schema details. All assessments are conducted across two unseen databases using realistic, analyst-style questions.
 """,
     "Problem definition": r"""As outlined in Table~\ref{tab:task}, the objective is to take an analyst's natural-language query regarding an unfamiliar database and translate it into a single Cube query yielding output rows identical to BIRD's gold SQL reference, all executed using a local model on a single 16\,GB GPU.
 """,
@@ -126,13 +126,13 @@ To demonstrate this, we focus on a common business scenario involving data analy
     "Chosen method": r"""Fine-tuning is conducted via QLoRA~\cite{dettmers2023qlora} utilising PEFT~\cite{peft}, where rank-16 adapters are attached to all attention and MLP layers while the underlying base model remains frozen in 4-bit NF4 (Fig.~\ref{fig:method}). Upon completion of training, each adapter is merged with the base model, converted into GGUF format via llama.cpp~\cite{llamacpp}, and quantised to Q4\_K\_M to match the base setup. By preserving the base model's original chat template, the evaluation strictly isolates the influence of the adapter. To evaluate how effectively model weights can internalise prompt instructions, two additional adapter variants were trained per model size using reduced prompts: the lean variant strips out the query guide, worked examples, and tool JSON schemas, while offering an abbreviated schema; the noschema variant omits schema definitions entirely. Because operating without a schema requires prior exposure to target structures, the noschema training set was augmented with roughly 1,300 synthetic template questions covering the two evaluation databases, explicitly avoiding any BIRD dev questions or SQL.
 """,
     "Compared systems": r"""\begin{enumerate}[nosep,leftmargin=1.5em]
-  \item \textbf{Harness only (baseline):} base Qwen2.5-Coder 7B/14B, harness v4.2, full prompt.
-  \item \textbf{LoRA, full prompt (proposed):} same model plus the LoRA adapter. All arms share the harness.
-  \item \textbf{Prompt offloading:} \emph{LoRA, lean prompt}; \emph{noschema LoRA, no schema / lean prompt}; control: full-prompt LoRA on the lean prompt.
-  \item \textbf{Extra arms:} \emph{lookup LoRA, full / lean prompt}, retrained to look up filter values (Section~\ref{sec:tooluse}).
+  \item \textbf{Harness only (baseline):} base Qwen2.5-Coder 7B/14B, harness v4.2, full prompt; the prompt-engineering reference.
+  \item \textbf{LoRA, full prompt (proposed):} same model plus the LoRA adapter. Tests training against prompting alone (RQ, part 1). All arms share the harness.
+  \item \textbf{Prompt offloading:} \emph{LoRA, lean prompt}; \emph{noschema LoRA, no schema / lean prompt}; control: full-prompt LoRA on the lean prompt. Tests how much prompt the adapter absorbs (RQ, part 2); the control, whether an adapter works with a prompt it was not trained on.
+  \item \textbf{Extra arms:} \emph{lookup LoRA, full / lean prompt}, retrained to look up filter values (Section~\ref{sec:tooluse}). Tests whether skipped lookups can be fixed through the training data.
 \end{enumerate}
 """,
-    "Evaluation data and measures": r"""332 test questions from two databases unseen in training and tuning (218 simple, 91 moderate, 23 challenging; 77\% need a join). The model sees only the question.
+    "Evaluation data and measures": r"""332 test questions from two databases unseen in training and tuning (218 simple, 91 moderate, 23 challenging; 77\% need a join). The model sees only the question, without BIRD's hint. Strict execution accuracy is primary because a correct Cube query can look nothing like the gold SQL, so rows are compared; tokens, steps and latency measure the cost side of the RQ (Table~\ref{tab:measures}).
 """,
     "Experimental procedure": r"""The test split and scoring were frozen first, and the harness was tuned on tuning databases only and frozen at v4.2. Each adapter was trained once (fixed seed) and each arm run once; within a size, arms share model file, quantisation, context, temperature, step limit and Cube models.
 """,
@@ -144,7 +144,7 @@ Addressing the second component of the Research Question, Fig.~\ref{fig:offload}
 """,
     "Interpretation and error analysis": r"""As shown in Fig.~\ref{fig:outputs}A, the baseline follows its rules by looking up ``Italy'', but then adds a grouping the question did not ask for, returning three rows rather than one. Fig.~\ref{fig:errors} sorts each wrong answer into one category by fixed rules. The adapter sharply reduced failed runs (invalid queries fell from 45 to 4 at 7B) and cut wrong filter values from 64 to 50 at 7B and from 48 to 39 at 14B. However, about 55 questions per arm need SQL operations that Cube cannot express, which sets the upper limit of this approach. Value lookup remains the main weakness: since only 22\% of training transcripts call \texttt{search\_values}, the adapter learned to guess spellings (case B), though the retrained arm (Section~\ref{sec:tooluse}) largely fixes this.
 """,
-    "Limitations and responsible use": r"""Questions are answered as Cube queries from the question text alone, so the numbers are not comparable with the BIRD leaderboard. The translation pipeline keeps only queries Cube can express, and the no-schema adapter is tied to the databases it was trained on. The base model's \texttt{<tool\_call>} token was never trained, so whether an adapter produces it is fragile at both sizes: the original 14B adapter wrote a stray token instead on every call, the 7B one almost never. Our harness parsed these text calls, but other clients would fail; retraining fixed it. BIRD is public and contains no sensitive personal data.
+    "Limitations and responsible use": r"""Questions are answered as Cube queries from the question text alone, so the numbers are not comparable with the BIRD leaderboard. The translation pipeline keeps only queries Cube can express, and the no-schema adapter is tied to the databases it was trained on. The base model's \texttt{<tool\_call>} token was never trained, so whether an adapter produces it is fragile at both sizes: the original 14B adapter wrote a stray token instead on every call, the 7B one almost never. Our harness parsed these text calls, but other clients would fail; retraining fixed it. Each arm was trained and run once on two databases, so non-significant differences (e.g.\ 7B vs 14B LoRA) should not be read as real gaps. BIRD is public and contains no sensitive personal data.
 """,
     "Conclusion": r"""Integrating a LoRA adapter trained on the 3,273-transcript, execution-verified training split while keeping the agent harness fixed yielded substantial performance gains. On unseen databases, strict accuracy rose from 21.4\% to 36.7\% for the 7B model and from 27.4\% to 40.7\% for the 14B model. Furthermore, this approach halved (7B) or cut by a third (14B) the number of model calls required per question, allowing the fine-tuned 7B model to outperform the 14B baseline.
 
@@ -161,9 +161,15 @@ Directions for future work include:
 
 \textbf{Retraining for lookups (extra arm).} Only 22\% of training transcripts looked a value up, and Qwen2.5-Coder-Instruct's \texttt{<tool\_call>} tokens are untrained, so producing them is fragile at both sizes; the original 14B adapter emitted a stray token before every call and fell back to text. \emph{Lookup LoRA, full prompt} adds a lookup before every text filter plus recovery examples, trains those tokens' embedding and output rows, and lists the tool schemas in the Ollama template. It looks values up on about 70\% of questions, makes no text calls and cuts empty answers to 4.5\% (7B) and 3.9\% (14B), raising accuracy by 5.2 points at 7B ($p{=}0.019$ against the original LoRA) and 4.2 at 14B ($p{=}0.020$). The tool schemas in the template cost extra steps and prompt tokens, and since data and template changed as well as the weights, this is a separate arm. \emph{Lookup LoRA, lean prompt} gave the best 14B result (46.1\%; $p{=}0.0008$ against \emph{LoRA, lean prompt}) but no gain at 7B (33.4\%, lookup loops).
 """,
+    "Implementation details": r"""Table~\ref{tab:settings} lists the settings. The code covers the harness, data preparation and training, the stored runs with a notebook that recomputes every number and figure, and a working demo app showing the agent's answers as Highcharts charts on an A2UI surface; the README gives run instructions and pinned versions.
+""",
     "Related work": r"""The evaluation of text-to-SQL tasks has progressed from Spider~\cite{yu2018spider} to BIRD~\cite{li2023bird}, a benchmark that incorporates substantial real-world databases, dirty values, and question-level ``evidence'' annotations to assess execution accuracy. In prompt-driven approaches, frameworks like DIN-SQL~\cite{pourreza2023din} implement task decomposition and self-correction, whereas ReAct~\cite{yao2023react} style agent loops enable models to evaluate queries dynamically prior to final response generation, an approach adopted by our harness. For open-weights architectures, specialised fine-tuned models such as CodeS~\cite{li2024codes} achieve competitive performance on BIRD even at smaller parameter scales, while Gorilla~\cite{patil2023gorilla} demonstrates that targeted fine-tuning outperforms pure prompting for accurate API invocation. Parameter-efficient methods like LoRA~\cite{hu2021lora} and QLoRA~\cite{dettmers2023qlora} facilitate this fine-tuning process on single consumer-grade GPUs. Lastly, context distillation~\cite{askell2021general,snell2022distilling} techniques enable models to emulate the behaviour of extensive system prompts, providing the foundational concept behind moving the harness prompt into the LoRA weights.
 """,
 }
+
+
+AI_DECLARATION = r"""\smallskip\noindent{\footnotesize\textbf{Generative AI declaration.} I used Claude Code (Anthropic, Claude Opus 5.5) to help write and debug the code (harness, data conversion, training, evaluation, demo app, figures) and to draft the bullet pointed report's structure. I reviewed all code, re-ran the evaluation from the stored runs, checked every number against the run files and wrote the final text myself.\par}
+"""
 
 
 def esc(t):
@@ -214,15 +220,18 @@ def main():
     text = text.replace("{\\footnotesize\n\\bibliographystyle", "{\\footnotesize\n\\nocite{*}\n\\bibliographystyle")
     # outline only: slightly smaller reference list so the outline keeps title + 10 pages
     text = text.replace("{\\footnotesize\n\\let\\oldthebibliography", "{\\scriptsize\n\\let\\oldthebibliography", 1)
+    text = text.replace("\\setlength{\\itemsep}{0.1ex}}", "\\setlength{\\itemsep}{0pt}\\setlength{\\parsep}{0pt}\\setlength{\\parskip}{0pt}}", 1)
+    # outline only: references in two columns, so the AI declaration still fits in title + 10 pages
+    text = text.replace("\\bibliographystyle{ce893}\n\\bibliography{references}", "\\setlength{\\multicolsep}{0pt}\\begin{multicols}{2}[\\oldsection*{References}]\\renewcommand{\\section}[2]{}\\setlength{\\parskip}{0pt}\\bibliographystyle{ce893}\n\\bibliography{references}\\end{multicols}", 1)
     # The outline's notes run longer than the prose in places, so a few figures are smaller here to keep 10 pages.
-    for fig, (w_old, w_new) in {"fig04_harness_versions": ("0.8", "0.74"), "fig06_training": ("0.78", "0.72"), "fig08_offload": ("0.74", "0.68"), "fig07_main": ("0.68", "0.62"), "fig10_errors": ("0.62", "0.56")}.items():
+    for fig, (w_old, w_new) in {"fig04_harness_versions": ("0.8", "0.6"), "fig06_training": ("0.78", "0.58"), "fig08_offload": ("0.74", "0.58"), "fig07_main": ("0.68", "0.58"), "fig10_errors": ("0.62", "0.5"), "fig05_method": ("0.75", "0.55")}.items():
         text = text.replace(f"width={w_old}\\linewidth]{{figures/{fig}", f"width={w_new}\\linewidth]{{figures/{fig}")
     # Shamir: Fig. 9 in the outline uses the wider two-column layout (shorter traces, larger text).
     text = text.replace("{figures/fig09_outputs.pdf}", "{figures/fig09_outputs_wide.pdf}", 1)
     # Shamir: Fig. 9 caption beside the figure (outline only), to avoid white space at the sides.
     text = re.sub(r"\\centering\n\\includegraphics\[width=[0-9.]+\\linewidth\]\{figures/fig09_outputs_wide\.pdf\}\n(\\caption\{.*?\})\n(\\label\{fig:outputs\})",
-                  lambda m: "\\begin{minipage}[c]{0.6\\linewidth}\\includegraphics[width=\\linewidth]{figures/fig09_outputs_wide.pdf}\\end{minipage}\\hfill\n"
-                            "\\begin{minipage}[c]{0.38\\linewidth}\\small\\raggedright " + m.group(1) + m.group(2) + "\\end{minipage}", text, count=1, flags=re.S)
+                  lambda m: "\\begin{minipage}[c]{0.55\\linewidth}\\includegraphics[width=\\linewidth]{figures/fig09_outputs_wide.pdf}\\end{minipage}\\hfill\n"
+                            "\\begin{minipage}[c]{0.43\\linewidth}\\small\\raggedright " + m.group(1) + m.group(2) + "\\end{minipage}", text, count=1, flags=re.S)
     # Shamir: explain why the funnel's 59 databases become 58 in the splits (outline only).
     text = text.replace(r"\texttt{<} tool reply; long lines cut)", r"\texttt{<} tool reply; shortened to fit, full traces in the saved runs)", 1)
     text = text.replace("790 gave different or empty results.", "790 gave different or empty results; one database (craftbeer) yielded no verified pairs, so the splits cover 58.", 1)
@@ -237,7 +246,10 @@ def main():
     if m:
         fig = m.group(0)
         text = text.replace(fig, "", 1).replace("\\subsection{Proposed solution}", fig + "\\subsection{Proposed solution}", 1)
-    text = text.replace("% Full draft.", "% OUTLINE version, generated by make_outline.py from report.tex.")
+    text = text.replace("\\caption{Settings needed to reproduce the method.}", "\\caption{Settings needed to reproduce the method.}\\label{tab:settings}", 1)
+    text = text.replace("\\caption{Evaluation measures.}", "\\caption{Evaluation measures.}\\label{tab:measures}", 1)
+    # Generative AI declaration required by the marking criteria, at the end of the report (outline only).
+    text = text.replace("{\\scriptsize\n\\let\\oldthebibliography", AI_DECLARATION + "\n{\\scriptsize\n\\let\\oldthebibliography", 1)
     # sections whose only prose came after the floats still need notes
     for sec, own in OWN_TEXT.items():
         if sec not in emitted:
@@ -247,7 +259,7 @@ def main():
         if sec != "TITLE" and sec not in emitted:
             text = re.sub(r"(\\(?:sub)?section\{" + re.escape(sec) + r"\}[^\n]*\n)", lambda m: m.group(1) + bullets(items), text, count=1)
     (HERE / "report_outline.tex").write_text(text)
-    (HERE / "main_outline.tex").write_text((HERE / "main.tex").read_text().replace("\\input{report}", "\\input{report_outline}"))
+    (HERE / "main_outline.tex").write_text((HERE / "main.tex").read_text().replace("\\input{report}", "\\input{report_outline}").replace("\\usepackage{float}", "\\usepackage{float}\n\\usepackage{multicol}", 1))
 
 
 if __name__ == "__main__":
