@@ -147,7 +147,7 @@ Needs Python 3.11+, Node.js 20+, [Ollama](https://ollama.com) and, for training,
 
 **Versions used for every reported run:** Python 3.11.8 on Windows; the exact package versions are pinned in
 `requirements.txt` (agent, evaluation, figures) and `requirements-train.txt` (training: PyTorch 2.11.0 with CUDA 12.8,
-transformers 4.57.6, PEFT 0.21.3, bitsandbytes 0.50.2); Cube 1.8.22 (`cube/package.json`). Models: Hugging Face
+transformers 4.57.6, PEFT 0.21.3, bitsandbytes 0.50.2); Cube 1.8.22 (`cube/package.json`); Ollama 0.40.18. Models: Hugging Face
 `Qwen/Qwen2.5-Coder-7B-Instruct` and `-14B-Instruct` for training, Ollama `qwen2.5-coder:7b` / `:14b` (Q4_K_M) for
 evaluation. One 332-question evaluation takes 10 to 25 minutes; training takes about 5 hours (7B)
 or 9 hours (14B).
