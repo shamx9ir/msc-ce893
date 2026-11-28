@@ -145,10 +145,17 @@ def build_report(stage: Path, version: str, files: list[str]) -> list[str]:
 
 # ---------------------------------------------------------------- code
 
+def is_git_file(path: str | Path) -> bool:
+    """True for anything belonging to git: .git/, .gitignore, .gitattributes, .gitmodules, .github/ ..."""
+    return any(part.startswith(".git") for part in Path(path).parts)
+
+
 def build_code(stage: Path, files: list[str]) -> int:
     n = 0
     for f in files:
         if f.startswith(CODE_EXCLUDE_PREFIXES) and not f.startswith(CODE_KEEP_FROM_REPORT):
+            continue
+        if is_git_file(f):  # no git files in the submission
             continue
         p = ROOT / f
         if p.is_file():
@@ -325,6 +332,9 @@ def verify_zip(zpath: Path, top: str) -> list[str]:
     problems = [f"missing in ZIP: {n}" for n in need if f"{top}/{n}" not in names]
     if bad:
         problems.append(f"corrupt entry in ZIP: {bad}")
+    git_files = sorted(n for n in names if is_git_file(n))
+    if git_files:
+        problems.append(f"git files in ZIP: {', '.join(git_files[:5])}")
     return problems
 
 
@@ -333,7 +343,7 @@ def write_zip(zpath: Path, folder: Path, prefix: Path) -> None:
         zpath.unlink()
     with zipfile.ZipFile(zpath, "w", zipfile.ZIP_DEFLATED, compresslevel=6, allowZip64=True) as z:
         for p in sorted(folder.rglob("*")):
-            if p.is_file():
+            if p.is_file() and not is_git_file(p.relative_to(folder)):
                 # safetensors barely compress; storing them is much faster
                 kind = zipfile.ZIP_STORED if p.suffix == ".safetensors" else zipfile.ZIP_DEFLATED
                 z.write(p, prefix / p.relative_to(folder), compress_type=kind)
