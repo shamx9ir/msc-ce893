@@ -370,7 +370,7 @@ def main() -> None:
     files = tracked_files()
     commit = git("rev-parse", "--short", "HEAD").strip()
     warnings = []
-    dirty = [l for l in git("status", "--porcelain").splitlines() if l and not l[3:].startswith("dist/")]
+    dirty = [l for l in git("status", "--porcelain", "--untracked-files=no").splitlines() if l and not l[3:].startswith("dist/")]
     if dirty:
         warnings.append(f"{len(dirty)} uncommitted change(s) in the working tree are included as they are on disk "
                         f"(commit them so the ZIP matches GitHub {commit}).")
