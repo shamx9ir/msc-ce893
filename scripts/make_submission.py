@@ -48,8 +48,9 @@ REPORT_VERSIONS = {
 }
 # The notebooks import report/analysis.py and draw into report/figures, so code/ keeps these parts of report/.
 CODE_KEEP_FROM_REPORT = ("report/analysis.py", "report/make_figures.py", "report/figures/")
-# Tracked paths left out of code/ (the report has its own folder; the proposal is not a deliverable).
-CODE_EXCLUDE_PREFIXES = ("report/", "proposal/")
+# Tracked paths left out of code/ (the report has its own folder; the proposal is not a deliverable; the
+# submission checklist and templates are packing notes, and their content is already the ZIP README and licence file).
+CODE_EXCLUDE_PREFIXES = ("report/", "proposal/", "SUBMISSION.md", "submission/")
 
 # LoRA training/validation files, one set per adapter family in the report (make_sft.py is deterministic, seed 13).
 SFT_SETS = [

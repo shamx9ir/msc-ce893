@@ -114,6 +114,7 @@ DIMAA21403-project/
 | The other 6 BIRD dev databases | not used | `scripts/download_bird.py` |
 | `data/bird.duckdb`, `node_modules/`, raw `runs/` | generated / reinstallable; gzipped copies of all reported runs are in `results/runs/` | commands in the README |
 | `proposal/` | not one of the three deliverables | GitHub repository |
+| `SUBMISSION.md`, `submission/` | packing notes; their content is already the ZIP README and `data/source_and_licence.txt` | GitHub repository |
 | Git files (`.git/`, `.gitignore` files) | not part of the project; the script skips them and fails its check if any slip in | GitHub repository |
 | `report/main.pdf` + `report.tex` (outline submission) or the outline files (full submission) | only the submitted version's source goes in `report-source/` | GitHub repository |
 
