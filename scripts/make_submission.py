@@ -38,6 +38,7 @@ ROOT = Path(__file__).resolve().parent.parent
 TEST_DBS = ["formula_1", "student_club"]
 TUNE_DBS = ["superhero", "toxicology", "california_schools"]
 USED_DEV_DBS = TEST_DBS + TUNE_DBS
+FASER_LIMIT_MB = 50  # FASER's maximum upload size per file
 PAGE_LIMIT = 11  # 10 pages + title page (confirmed with the module 2026-11-26)
 
 # Report files per version: (file in report/, name inside report-source/)
@@ -365,6 +366,8 @@ def main() -> None:
     ap.add_argument("--lora-dir", type=Path, action="append",
                     help="folder with <name>/final adapters; repeat for several (default: lora/ and, if it exists, "
                          "../msc-ce893-schema/lora/, where the lean and noschema adapters were trained)")
+    ap.add_argument("--weights-url", default="",
+                    help="link where the separate weights ZIP is hosted; written into the README (use with --weights-zip)")
     ap.add_argument("--weights-zip", action="store_true",
                     help="put the adapters in a second ZIP (<REG>-project-weights.zip) instead of the main one")
     ap.add_argument("--run-notebooks", action="store_true", help="execute both notebooks inside the staged copy")
@@ -411,6 +414,18 @@ def main() -> None:
         "{REPORT}", "outline version (`main_outline.tex`, renamed `main.tex`)" if args.report == "outline"
         else "full version (`main.tex`)").replace(
         "{DATE}", datetime.now(timezone.utc).strftime("%Y-%m-%d"))
+    if args.no_weights or args.weights_zip:
+        where = (f"download it from {args.weights_url}" if args.weights_url
+                 else "ask the author for the link (WEIGHTS LINK MISSING: re-run with --weights-url)")
+        models_row = (f"| `models/` (separate download) | the 11 trained LoRA adapters (2.5 GB) are not in this ZIP because FASER "
+                      f"accepts at most {FASER_LIMIT_MB} MB per file: {where} (`{top}-weights.zip`) and unzip it next to this "
+                      "folder, which adds `models/`; its `README.md` says which adapter is which and how to load them |")
+        if not args.weights_url:
+            warnings.append("no --weights-url: the README has no link to the LoRA adapters.")
+    else:
+        models_row = ("| `models/` | the trained LoRA adapters, one folder per system; `models/README.md` says which is which "
+                      "and how to load them |")
+    readme = readme.replace("{MODELS_ROW}", models_row)
     (stage / "README.md").write_text(readme, encoding="utf-8")
 
     if args.run_notebooks:
@@ -424,6 +439,9 @@ def main() -> None:
         log(f"Wrote {wzip} ({wzip.stat().st_size / 1e6:.1f} MB): unzip it next to the main ZIP, it adds {top}/models/")
 
     size = zpath.stat().st_size / 1e6
+    if size > FASER_LIMIT_MB:
+        warnings.append(f"the ZIP is {size:.0f} MB, above FASER's {FASER_LIMIT_MB} MB limit: use --weights-zip "
+                        "(and host the weights ZIP elsewhere with --weights-url), or --no-sft.")
     log(f"\nWrote {zpath} ({size:.1f} MB), staged copy in {stage}")
     if warnings:
         log("\nCHECK BEFORE UPLOADING:")
