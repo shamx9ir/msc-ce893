@@ -253,6 +253,11 @@ def main():
     if m:
         tab = m.group(0).replace("\\begin{table}[!htbp]", "\\begin{table}[H]", 1)
         text = text.replace(m.group(0), "", 1).replace("\\subsection{Evaluation data and measures}", tab + "\\subsection{Evaluation data and measures}", 1)
+    # Shamir: Fig. 6 (training curves) follows Table 3, also just before 5.2.
+    m = re.search(r"\\begin\{figure\}\[!htbp\]\n(?:(?!\\end\{figure\}).)*fig06_training.*?\\end\{figure\}\n\n?", text, flags=re.S)
+    if m:
+        fig = m.group(0).replace("\\begin{figure}[!htbp]", "\\begin{figure}[H]", 1)
+        text = text.replace(m.group(0), "", 1).replace("\\subsection{Evaluation data and measures}", fig + "\\subsection{Evaluation data and measures}", 1)
     # Generative AI declaration required by the marking criteria, at the end of the report (outline only).
     text = text.replace("{\\scriptsize\n\\let\\oldthebibliography", AI_DECLARATION + "\n{\\scriptsize\n\\let\\oldthebibliography", 1)
     # sections whose only prose came after the floats still need notes

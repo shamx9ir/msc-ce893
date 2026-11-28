@@ -138,13 +138,6 @@ Fine-tuning is conducted via QLoRA~\cite{dettmers2023qlora} utilising PEFT~\cite
 \subsection{Implementation details}
 Table~\ref{tab:settings} lists the settings. The code covers the harness, data preparation and training, the stored runs with a notebook that recomputes every number and figure, and a working demo app showing the agent's answers as Highcharts charts on an A2UI surface; the README gives run instructions and pinned versions.
 
-\begin{figure}[!htbp]
-\centering
-\includegraphics[width=0.58\linewidth]{figures/fig06_training.pdf}
-\caption{Training progress for all six adapters. The loss drops within the first quarter epoch and then stays flat; validation loss on the three held-out databases follows it, so the adapters did not overfit. Lean and noschema adapters start higher because the model has never seen those short prompts.}
-\label{fig:training}
-\end{figure}
-
 \section{Experiments}
 
 \subsection{Compared systems}
@@ -173,6 +166,13 @@ Hardware & one RTX 5070 Ti (16\,GB), 32\,GB RAM, Windows; training 5.3\,h (7B) a
 \bottomrule
 \end{tabularx}
 \end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.58\linewidth]{figures/fig06_training.pdf}
+\caption{Training progress for all six adapters. The loss drops within the first quarter epoch and then stays flat; validation loss on the three held-out databases follows it, so the adapters did not overfit. Lean and noschema adapters start higher because the model has never seen those short prompts.}
+\label{fig:training}
+\end{figure}
 
 \subsection{Evaluation data and measures}
 332 test questions from two databases unseen in training and tuning (218 simple, 91 moderate, 23 challenging; 77\% need a join). The model sees only the question, without BIRD's hint. Strict execution accuracy is primary because a correct Cube query can look nothing like the gold SQL, so rows are compared; tokens, steps and latency measure the cost side of the RQ (Table~\ref{tab:measures}).
