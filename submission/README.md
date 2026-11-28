@@ -36,6 +36,21 @@ Inside `code/`:
 | `tests/` | end-to-end tests with a scripted stand-in for the model |
 | `README.md`, `docs/README_technical.md` | the repository README and the detailed technical notes |
 
+## Names used in file and folder names
+
+The report calls the systems by what they do; some files use short development names:
+
+| Name | Meaning |
+|---|---|
+| `sv` | **search_values**, the harness tool that looks up the exact values stored in the database (for example "Lewis Hamilton"). The sv retrains exist because the original adapters almost stopped calling it (7B: 1 of 332 test questions, 14B: none). There is no "sv1" |
+| no suffix (`training_data/`, `lora/qwen7b`, `qwen14b`, `-lean`, `-noschema`) | the original training data and adapters: 769 of the 3,531 training examples contain a search_values step. Report names: "LoRA, full prompt", "LoRA, lean prompt", "noschema LoRA" |
+| `sv2` (`training_data_sv2/`, `qwen7b-sv2`) | second version of the lookup data: a search_values step before every text filter (2,386 of 3,531 examples) plus 312 recovery examples (misspelled value, empty result, search, retry). Trained for 7B only; no gain, because the adapter broke its tool-call format. Development only, **not in the report** |
+| `sv3` (`training_data_sv3/`, `qwen7b-sv3`, `qwen14b-sv3`, `*-lean-sv3`) | sv2 plus 202 examples where the empty result comes from a second filter value, trained with the `<tool_call>` tokens unfrozen (`train_lora.py --train-tokens`). Report name: **"lookup LoRA"** (full or lean prompt) |
+| `lean`, `noschema` | prompt profiles: lean = no query guide, no tool schemas, compact schema; noschema = no schema at all (adapter also trained on synthetic questions about the two test databases) |
+| `nohint` (run files) | BIRD's evidence hint hidden from the model. All results in the report are `test_nohint_*` runs |
+| `nt` (run files, Ollama models) | an Ollama chat template that writes the tool schemas into the prompt literally, exactly as in training (`scripts/make_literal_tools_modelfile.py`); used for the sv3 adapters and, for a fair comparison, once for the original LoRA (`lora_nt`) |
+| `pf` (run files) | a development check that pre-fills `<tool_call>` in the template; not in the report |
+
 ## Reproducing the results
 
 **From the stored results (no GPU, about a minute).** Python 3.11+:

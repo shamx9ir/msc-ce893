@@ -292,6 +292,8 @@ def build_weights(dest: Path, lora_dirs: list[Path]) -> list[str]:
         f"system in the report. Each folder holds the adapter, the tokenizer and `train_info.json` (settings + loss log).\n"
         "Adapters trained with `--train-tokens` also hold the learned `<tool_call>` token rows used by\n"
         "`export_ollama.py`. The base models are not included (15 to 30 GB, Apache 2.0, on Hugging Face).\n\n"
+        "Folder names: `sv2`/`sv3` = search_values retrains (sv3 = \"lookup LoRA\" in the report; sv2 is development only),\n"
+        "`lean`/`noschema` = prompt profile; see \"Names used in file and folder names\" in the top-level README.md.\n\n"
         "| Folder | System | Size |\n|---|---|---|\n" + "\n".join(rows) + "\n\n"
         "Use with Hugging Face PEFT:\n\n```python\n"
         "from transformers import AutoModelForCausalLM, AutoTokenizer\nfrom peft import PeftModel\n"
