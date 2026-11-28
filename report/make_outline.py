@@ -248,6 +248,11 @@ def main():
         text = text.replace(fig, "", 1).replace("\\subsection{Proposed solution}", fig + "\\subsection{Proposed solution}", 1)
     text = text.replace("\\caption{Settings needed to reproduce the method.}", "\\caption{Settings needed to reproduce the method.}\\label{tab:settings}", 1)
     text = text.replace("\\caption{Evaluation measures.}", "\\caption{Evaluation measures.}\\label{tab:measures}", 1)
+    # Shamir: in the outline, Table 3 (settings) sits just before 5.2.
+    m = re.search(r"\\begin\{table\}\[!htbp\]\n(?:(?!\\end\{table\}).)*Settings needed to reproduce.*?\\end\{table\}\n\n?", text, flags=re.S)
+    if m:
+        tab = m.group(0).replace("\\begin{table}[!htbp]", "\\begin{table}[H]", 1)
+        text = text.replace(m.group(0), "", 1).replace("\\subsection{Evaluation data and measures}", tab + "\\subsection{Evaluation data and measures}", 1)
     # Generative AI declaration required by the marking criteria, at the end of the report (outline only).
     text = text.replace("{\\scriptsize\n\\let\\oldthebibliography", AI_DECLARATION + "\n{\\scriptsize\n\\let\\oldthebibliography", 1)
     # sections whose only prose came after the floats still need notes

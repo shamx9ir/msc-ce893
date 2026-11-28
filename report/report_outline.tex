@@ -138,24 +138,6 @@ Fine-tuning is conducted via QLoRA~\cite{dettmers2023qlora} utilising PEFT~\cite
 \subsection{Implementation details}
 Table~\ref{tab:settings} lists the settings. The code covers the harness, data preparation and training, the stored runs with a notebook that recomputes every number and figure, and a working demo app showing the agent's answers as Highcharts charts on an A2UI surface; the README gives run instructions and pinned versions.
 
-\begin{table}[!htbp]
-\centering
-\small
-\caption{Settings needed to reproduce the method.}\label{tab:settings}
-\begin{tabularx}{0.95\linewidth}{@{}lX@{}}
-\toprule
-\textbf{Setting} & \textbf{Value}\\
-\midrule
-Models & Qwen/Qwen2.5-Coder-7B-Instruct and -14B-Instruct (Hugging Face); Ollama \texttt{qwen2.5-coder:7b/14b} Q4\_K\_M\\
-Agent & Google ADK 2.14 \texttt{LlmAgent} via LiteLLM~\cite{adk}; Cube on DuckDB; harness v4.2\\
-LoRA & r=16, $\alpha$=32, dropout 0.05, q/k/v/o/gate/up/down projections, 4-bit NF4 base\\
-Training & 2 epochs, lr $2\times10^{-4}$ cosine, warm-up 3\%, batch 1 $\times$ 16 accumulation, max.\ 8,192 tokens (7B) / 4,096 (14B, memory limit), seed 7\\
-Generation & temperature 0, context 16,384 tokens, at most 8 model calls per question\\
-Hardware & one RTX 5070 Ti (16\,GB), 32\,GB RAM, Windows; training 5.3\,h (7B) and 9.0\,h (14B)\\
-\bottomrule
-\end{tabularx}
-\end{table}
-
 \begin{figure}[!htbp]
 \centering
 \includegraphics[width=0.58\linewidth]{figures/fig06_training.pdf}
@@ -173,6 +155,24 @@ Hardware & one RTX 5070 Ti (16\,GB), 32\,GB RAM, Windows; training 5.3\,h (7B) a
   \item \textbf{Extra arms:} \emph{lookup LoRA, full / lean prompt}, retrained to look up filter values (Section~\ref{sec:tooluse}). Tests whether skipped lookups can be fixed through the training data.
 \end{enumerate}
 
+
+\begin{table}[H]
+\centering
+\small
+\caption{Settings needed to reproduce the method.}\label{tab:settings}
+\begin{tabularx}{0.95\linewidth}{@{}lX@{}}
+\toprule
+\textbf{Setting} & \textbf{Value}\\
+\midrule
+Models & Qwen/Qwen2.5-Coder-7B-Instruct and -14B-Instruct (Hugging Face); Ollama \texttt{qwen2.5-coder:7b/14b} Q4\_K\_M\\
+Agent & Google ADK 2.14 \texttt{LlmAgent} via LiteLLM~\cite{adk}; Cube on DuckDB; harness v4.2\\
+LoRA & r=16, $\alpha$=32, dropout 0.05, q/k/v/o/gate/up/down projections, 4-bit NF4 base\\
+Training & 2 epochs, lr $2\times10^{-4}$ cosine, warm-up 3\%, batch 1 $\times$ 16 accumulation, max.\ 8,192 tokens (7B) / 4,096 (14B, memory limit), seed 7\\
+Generation & temperature 0, context 16,384 tokens, at most 8 model calls per question\\
+Hardware & one RTX 5070 Ti (16\,GB), 32\,GB RAM, Windows; training 5.3\,h (7B) and 9.0\,h (14B)\\
+\bottomrule
+\end{tabularx}
+\end{table}
 
 \subsection{Evaluation data and measures}
 332 test questions from two databases unseen in training and tuning (218 simple, 91 moderate, 23 challenging; 77\% need a join). The model sees only the question, without BIRD's hint. Strict execution accuracy is primary because a correct Cube query can look nothing like the gold SQL, so rows are compared; tokens, steps and latency measure the cost side of the RQ (Table~\ref{tab:measures}).
