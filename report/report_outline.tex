@@ -31,7 +31,7 @@ The evaluation of text-to-SQL tasks has progressed from Spider~\cite{yu2018spide
 \subsection{Research question and contribution}
 \resultplaceholder{With the agent harness held constant, to what extent can training a LoRA adapter on verified tool-use transcripts boost execution accuracy on unfamiliar databases? How much of the prompt, comprising the query guide, tool definitions, and database schema, can be offloaded into the LoRA adapter without compromising performance in terms of accuracy, saved tokens, and generation speed?}
 
-A key feature of this experiment is that the evaluation harness remains strictly fixed while only model weights are varied. Within each model size, every arm uses the same base model, 4-bit quantisation, harness and tools, and the main comparison also keeps the prompt identical, ensuring that any performance variations stem directly from the LoRA adapter. Departing from traditional text-to-SQL paradigms, the model generates queries targeted at a semantic-layer API. Furthermore, we evaluate the extent to which the adapter can absorb components of the harness prompt, including the query guide, tool definitions, and schema details. All assessments are conducted across two unseen databases using realistic, analyst-style questions.
+A key feature of this experiment is that the evaluation harness was fixed while the training of the model weights was varied. Within each model size, every arm uses the same base model, 4-bit quantisation, harness and tools, and the main comparison also keeps the prompt identical, ensuring that any performance variations stem directly from the LoRA adapter. Departing from traditional text-to-SQL paradigms, the model generates queries targeted at a semantic-layer API. Furthermore, we evaluate the extent to which the adapter can absorb components of the harness prompt, including the query guide, tool definitions, and schema details. All assessments are conducted across two unseen databases using realistic, analyst-style questions.
 
 
 \begin{figure}[!htbp]
@@ -71,7 +71,7 @@ Constraints & Local model on a 16\,GB GPU; at most 8 model calls per question; o
 \end{figure}
 
 \subsection{Proposed solution}
-The baseline architecture relies on a prompt-engineering framework consisting of a system prompt with a Cube query guide, operational rules, four worked examples, a question-linked database schema, and three dedicated tools (Fig.~\ref{fig:pipeline}). The proposed approach integrates a LoRA adapter fine-tuned on verified interaction transcripts using the identical prompt and toolset. Fine-tuning is particularly effective here because the task requires producing strict JSON with precise field names, whereas baseline failures primarily stem from formatting and protocol errors rather than missing domain knowledge. By training the model to internalise both the query language and tool protocol directly from examples, portions of the prompt can be systematically removed. To evaluate the adapter's capacity to absorb these instructions, we also train variants using abbreviated prompts: a ``lean'' configuration that omits the query guide and tool definitions, and a ``no schema'' setup that provides only the database name.
+The baseline architecture relies on a prompt-engineering framework consisting of a system prompt with a Cube query guide, operational rules, four worked examples, a question-linked database schema, and three dedicated tools (Fig.~\ref{fig:pipeline}). The proposed approach integrates a LoRA adapter fine-tuned on verified interaction transcripts using the identical prompt and toolset. Fine-tuning suits this task because the model must produce strict JSON with exact field names, and most baseline failures are formatting and protocol errors rather than gaps in domain knowledge. By training the model to internalise both the query language and tool protocol directly from examples, portions of the prompt can be systematically removed. To evaluate the adapter's capacity to absorb these instructions, we also train variants using abbreviated prompts: a ``lean'' configuration that omits the query guide and tool definitions, and a ``no schema'' setup that provides only the database name.
 
 
 \subsection{Expected improvement}
@@ -138,7 +138,18 @@ Fine-tuning is conducted via QLoRA~\cite{dettmers2023qlora} utilising PEFT~\cite
 \subsection{Implementation details}
 Table~\ref{tab:settings} lists the settings. The code covers the harness, data preparation and training, the stored runs with a notebook that recomputes every number and figure, and a working demo app showing the agent's answers as Highcharts charts on an A2UI surface; the README gives run instructions and pinned versions.
 
-\begin{table}[!htbp]
+\section{Experiments}
+
+\subsection{Compared systems}
+\begin{enumerate}[nosep,leftmargin=1.5em]
+  \item \textbf{Harness only (baseline):} base Qwen2.5-Coder 7B/14B, harness v4.2, full prompt; the prompt-engineering reference.
+  \item \textbf{LoRA, full prompt (proposed):} same model plus the LoRA adapter. Tests training against prompting alone (RQ, part 1). All arms share the harness.
+  \item \textbf{Prompt offloading:} \emph{LoRA, lean prompt}; \emph{noschema LoRA, no schema / lean prompt}; control: full-prompt LoRA on the lean prompt. Tests how much prompt the adapter absorbs (RQ, part 2); the control, whether an adapter works with a prompt it was not trained on.
+  \item \textbf{Extra arms:} \emph{lookup LoRA, full / lean prompt}, retrained to look up filter values (Section~\ref{sec:tooluse}). Tests whether skipped lookups can be fixed through the training data.
+\end{enumerate}
+
+
+\begin{table}[H]
 \centering
 \small
 \caption{Settings needed to reproduce the method.}\label{tab:settings}
@@ -156,23 +167,12 @@ Hardware & one RTX 5070 Ti (16\,GB), 32\,GB RAM, Windows; training 5.3\,h (7B) a
 \end{tabularx}
 \end{table}
 
-\begin{figure}[!htbp]
+\begin{figure}[H]
 \centering
 \includegraphics[width=0.58\linewidth]{figures/fig06_training.pdf}
 \caption{Training progress for all six adapters. The loss drops within the first quarter epoch and then stays flat; validation loss on the three held-out databases follows it, so the adapters did not overfit. Lean and noschema adapters start higher because the model has never seen those short prompts.}
 \label{fig:training}
 \end{figure}
-
-\section{Experiments}
-
-\subsection{Compared systems}
-\begin{enumerate}[nosep,leftmargin=1.5em]
-  \item \textbf{Harness only (baseline):} base Qwen2.5-Coder 7B/14B, harness v4.2, full prompt; the prompt-engineering reference.
-  \item \textbf{LoRA, full prompt (proposed):} same model plus the LoRA adapter. Tests training against prompting alone (RQ, part 1). All arms share the harness.
-  \item \textbf{Prompt offloading:} \emph{LoRA, lean prompt}; \emph{noschema LoRA, no schema / lean prompt}; control: full-prompt LoRA on the lean prompt. Tests how much prompt the adapter absorbs (RQ, part 2); the control, whether an adapter works with a prompt it was not trained on.
-  \item \textbf{Extra arms:} \emph{lookup LoRA, full / lean prompt}, retrained to look up filter values (Section~\ref{sec:tooluse}). Tests whether skipped lookups can be fixed through the training data.
-\end{enumerate}
-
 
 \subsection{Evaluation data and measures}
 332 test questions from two databases unseen in training and tuning (218 simple, 91 moderate, 23 challenging; 77\% need a join). The model sees only the question, without BIRD's hint. Strict execution accuracy is primary because a correct Cube query can look nothing like the gold SQL, so rows are compared; tokens, steps and latency measure the cost side of the RQ (Table~\ref{tab:measures}).
