@@ -129,5 +129,7 @@ DIMAA21403-project/
    picks up both folders. If FASER refuses a 2.4 GB file, `--weights-zip` puts them in a second ZIP.
 4. **noschema adapter training file** (`data/synth/synth.jsonl`) only exists on your PC, so build the final ZIP
    there to include it.
-5. **FASER upload limit.** The guide gives none. Without weights the ZIP is about 39 MB (14 MB BIRD databases,
-   13 MB LoRA training files); the adapters add 2.4 GB (safetensors barely compress).
+5. ~~FASER upload limit~~ FASER takes at most **50 MB per file** (Shamir, 2026-11-28). Build with
+   `--weights-zip --weights-url <link>`: the FASER ZIP (about 40 MB) holds report, code and data, and the
+   adapters (2.5 GB) go into `DIMAA21403-project-weights.zip`, hosted elsewhere, with the link in the ZIP README.
+   The script warns if the main ZIP is over 50 MB.

@@ -16,7 +16,7 @@ Snapshot of GitHub repository `shamx9ir/msc-ce893`, commit `{COMMIT}`, packed on
 | `code/` | all code, in the repository's own layout so every relative path works (see the table below) |
 | `data/original/bird/` | the BIRD dev files of the five databases used for testing (formula_1, student_club) and harness tuning (superhero, toxicology, california_schools): `dev.json` (their questions, hints and gold SQL), `dev_tables.json`, and `dev_databases/<db>/` (SQLite file + BIRD's column descriptions). The 58 BIRD train databases behind the LoRA training data are not included, because they are several GB and were only needed once to build the 3,531 verified training pairs, which are included (`code/training_data*/`, `data/processed/lora_training/`); `data/source_and_licence.txt` gives the download link and the command to rebuild them |
 | `data/processed/` | `test_questions.jsonl` (332 frozen test questions with gold SQL), `tune_questions.jsonl` (all 363 questions of the three harness-development databases; `splits/tune_ids.json` marks the 120-question subset used early on), `splits/`, and `lora_training/<adapter>/sft_tools_{train,val}.jsonl` (the exact LoRA training and validation files, with `split.json`) |
-| `models/` | the trained LoRA adapters, one folder per system; `models/README.md` says which is which and how to load them |
+{MODELS_ROW}
 | `data/source_and_licence.txt` | where every data file comes from, its licence, and how to get what is not included |
 
 Inside `code/`:
